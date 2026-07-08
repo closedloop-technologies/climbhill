@@ -72,3 +72,17 @@ def test_ci_workflow_runs_release_gates() -> None:
     assert "python .github/scripts/validate_plugin.py ." in commands
     assert "python .github/scripts/validate_plugin.py plugin/climbhill-ai" in commands
     assert any("climbhill --help" in command for command in commands)
+
+
+def test_pages_workflow_can_enable_pages() -> None:
+    workflow = yaml.safe_load((ROOT / ".github" / "workflows" / "pages.yml").read_text())
+    build_steps = workflow["jobs"]["build"]["steps"]
+
+    configure_pages = next(
+        step for step in build_steps if step.get("uses") == "actions/configure-pages@v5"
+    )
+    assert configure_pages["with"]["enablement"] is True
+
+    stage_site = next(step for step in build_steps if step.get("name") == "Stage static site")
+    assert "cp CNAME _site/" in stage_site["run"]
+    assert "cp .nojekyll _site/" in stage_site["run"]
