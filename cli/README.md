@@ -2,7 +2,7 @@
 
 This directory is reserved for the ClimbHill CLI package layout described in the project goal.
 
-Current local MVP command implementation lives in `awesome_deep_research/cli.py` and exposes:
+Current local MVP command implementation lives in `climbhill/cli.py` and exposes:
 
 - `climbhill init`
 - `climbhill inspect`

@@ -914,7 +914,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     legacy_run_parser.add_argument("--skill", required=True, help="Skill name under .claude/skills to activate.")
     prompt_group = legacy_run_parser.add_mutually_exclusive_group(required=True)
-    prompt_group.add_argument("--prompt-id", help="Identifier from 'adr list-prompts'.")
+    prompt_group.add_argument("--prompt-id", help="Identifier from 'climbhill list-prompts'.")
     prompt_group.add_argument("--prompt-text", help="Freeform research prompt text.")
     legacy_run_parser.add_argument("--model", help="Optional Claude model alias (passed through to claude CLI).")
     legacy_run_parser.add_argument(

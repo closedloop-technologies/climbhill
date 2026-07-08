@@ -78,24 +78,23 @@ all = [
 [project.urls]
 Homepage = "https://climbhill.ai"
 Documentation = "https://climbhill.ai"
-Repository = "https://github.com/closedloop-technologies/awesome-deep-researchers"
-Issues = "https://github.com/closedloop-technologies/awesome-deep-researchers/issues"
+Repository = "https://github.com/closedloop-technologies/climbhill"
+Issues = "https://github.com/closedloop-technologies/climbhill/issues"
 
 [project.scripts]
-adr = "awesome_deep_research.cli:main"
-climbhill = "awesome_deep_research.cli:main"
-adr-audit = "awesome_deep_research.audit:main"
-adr-op-check = "awesome_deep_research.op_env:main"
-adr-live-smoke = "benchmark.live_smoke:main"
-adr-source-check = "awesome_deep_research.source_refresh:main"
-adr-mcp = "awesome_deep_research.mcp_server:main"
-adr-mcp-smoke = "awesome_deep_research.mcp_server:smoke_main"
+climbhill = "climbhill.cli:main"
+climbhill-audit = "climbhill.audit:main"
+climbhill-op-check = "climbhill.op_env:main"
+climbhill-live-smoke = "benchmark.live_smoke:main"
+climbhill-source-check = "climbhill.source_refresh:main"
+climbhill-mcp = "climbhill.mcp_server:main"
+climbhill-mcp-smoke = "climbhill.mcp_server:smoke_main"
 
 [tool.setuptools]
-packages = ["awesome_deep_research", "benchmark"]
+packages = ["climbhill", "benchmark"]
 
 [tool.setuptools.package-data]
-awesome_deep_research = ["py.typed"]
+climbhill = ["py.typed"]
 
 [tool.black]
 line-length = 100
@@ -153,7 +152,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["awesome_deep_research"]
+source = ["climbhill"]
 omit = [
     "*/tests/*",
     "*/test_*.py",

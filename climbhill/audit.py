@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List
 
-from awesome_deep_research import source_refresh
+from climbhill import source_refresh
 from benchmark import utils as benchmark_utils
 
 
@@ -97,7 +97,7 @@ def check_plugin_manifest() -> AuditResult:
         data = json.loads(read_text(path))
     except json.JSONDecodeError as exc:
         return AuditResult("codex plugin manifest", False, f"invalid JSON: {exc}")
-    ok = data.get("name") == "awesome-deep-researchers" and data.get("skills") == "./skills/"
+    ok = data.get("name") == "climbhill" and data.get("skills") == "./skills/"
     return AuditResult("codex plugin manifest", ok, "name and skills path")
 
 
@@ -404,7 +404,7 @@ def check_mirrored_provider_source_indexes() -> AuditResult:
 
 
 def check_source_refresh_checker() -> AuditResult:
-    path = REPO_ROOT / "awesome_deep_research" / "source_refresh.py"
+    path = REPO_ROOT / "climbhill" / "source_refresh.py"
     if not path.exists():
         return AuditResult("source refresh checker", False, "missing source_refresh.py")
     results = source_refresh.check_source_index(max_age_days=30)
@@ -420,7 +420,7 @@ def check_readme_drift_controls() -> AuditResult:
     text = read_text(REPO_ROOT / "README.md")
     required = [
         "Pricing and model availability change frequently",
-        "awesome_deep_research.source_refresh --check-links",
+        "climbhill.source_refresh --check-links",
         "Under-$1 Benchmark Stance",
     ]
     missing = [snippet for snippet in required if snippet not in text]
@@ -485,7 +485,7 @@ def check_api_key_signup_checklist() -> AuditResult:
         return AuditResult("API key signup checklist", False, "missing docs/api-key-signup-checklist.md")
     text = read_text(path)
     required = [
-        "op vault create awesome-deep-researchers",
+        "op vault create climbhill",
         "OPENAI_API_KEY",
         "GOOGLE_API_KEY",
         "YOU_API_KEY",

@@ -4,15 +4,15 @@ from pathlib import Path
 
 import pytest
 
-from awesome_deep_research.alignment import inspect_repo
+from climbhill.alignment import inspect_repo
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from awesome_deep_research import cli
-from awesome_deep_research.cli import PromptExample
-from awesome_deep_research.policy import check_paths, load_policy
-from awesome_deep_research.policy import paths_from_patch
-from awesome_deep_research.registry import Registry
-from awesome_deep_research.resources import add_resource, search_resources
+from climbhill import cli
+from climbhill.cli import PromptExample
+from climbhill.policy import check_paths, load_policy
+from climbhill.policy import paths_from_patch
+from climbhill.registry import Registry
+from climbhill.resources import add_resource, search_resources
 
 
 def test_load_prompt_examples_contains_expected_ids():
@@ -440,7 +440,7 @@ def test_registry_records_decisions_and_issue_proposals(tmp_path: Path):
 def test_mcp_tool_surface_when_sdk_is_available():
     pytest.importorskip("mcp")
     import anyio
-    import awesome_deep_research.mcp_server as server
+    import climbhill.mcp_server as server
 
     async def check_tools():
         tools = await server.mcp.list_tools()

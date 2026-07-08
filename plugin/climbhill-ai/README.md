@@ -7,7 +7,7 @@ Current status: local MVP. The manifest, skill path, MCP config path, and Python
 ## Provides
 
 - Plugin metadata for Codex.
-- MCP configuration at `.mcp.json` that launches `python -m awesome_deep_research.mcp_server`.
+- MCP configuration at `.mcp.json` that launches `python -m climbhill.mcp_server`.
 - A `skills/` directory for plugin-distributed agent procedures.
 
 ## Intended Workflows

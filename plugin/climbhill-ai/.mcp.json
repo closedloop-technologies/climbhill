@@ -4,7 +4,7 @@
       "command": "python",
       "args": [
         "-m",
-        "awesome_deep_research.mcp_server"
+        "climbhill.mcp_server"
       ]
     }
   }

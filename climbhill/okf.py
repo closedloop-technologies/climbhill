@@ -118,7 +118,7 @@ def write_provider_okf_bundle(
             f"- Provider: `{provider_id}`\n"
             f"- Prompt: {question}\n"
             f"- Raw Provider Output: `{relative_raw_path}`\n"
-            "- Normalizer: `awesome_deep_research.okf.write_provider_okf_bundle`\n\n"
+            "- Normalizer: `climbhill.okf.write_provider_okf_bundle`\n\n"
             "## Provider-Specific Metadata\n\n"
             "```json\n"
             + json.dumps(metadata, indent=2, sort_keys=True)

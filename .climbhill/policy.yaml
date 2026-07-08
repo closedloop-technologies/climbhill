@@ -18,7 +18,7 @@ edit_policy:
     - "examples/**"
     - "index.html"
     - "assets/**"
-    - "awesome_deep_research/**"
+    - "climbhill/**"
     - "pyproject.toml"
     - "setup.py"
     - "TESTING.md"

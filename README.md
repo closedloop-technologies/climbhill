@@ -94,24 +94,24 @@ ClimbHill should inspect a target repo, identify missing alignment pieces, and p
 
 ```bash
 # Create conservative alignment files and a local SQLite registry
-python -m awesome_deep_research.cli init --repo /path/to/repo
+python -m climbhill.cli init --repo /path/to/repo
 
 # Inspect alignment status
-python -m awesome_deep_research.cli inspect --repo /path/to/repo
+python -m climbhill.cli inspect --repo /path/to/repo
 
 # Classify paths against .climbhill/policy.yaml
-python -m awesome_deep_research.cli policy check src/app.py tests/test_app.py .env --repo /path/to/repo
+python -m climbhill.cli policy check src/app.py tests/test_app.py .env --repo /path/to/repo
 
 # Create a run, record evidence, compare candidates, and report
-python -m awesome_deep_research.cli run --repo /path/to/repo --goal "Improve setup docs" --candidates 2
-python -m awesome_deep_research.cli registry --repo /path/to/repo record-evaluation --candidate-id 1 --type test --status passed --command "pytest"
-python -m awesome_deep_research.cli compare --repo /path/to/repo --run-id 1
-python -m awesome_deep_research.cli decision --repo /path/to/repo --run-id 1 --candidate-id 1 --type promote --rationale "Best passing candidate"
-python -m awesome_deep_research.cli report --repo /path/to/repo --run-id 1
-python -m awesome_deep_research.cli reflect --repo /path/to/repo --run-id 1
+python -m climbhill.cli run --repo /path/to/repo --goal "Improve setup docs" --candidates 2
+python -m climbhill.cli registry --repo /path/to/repo record-evaluation --candidate-id 1 --type test --status passed --command "pytest"
+python -m climbhill.cli compare --repo /path/to/repo --run-id 1
+python -m climbhill.cli decision --repo /path/to/repo --run-id 1 --candidate-id 1 --type promote --rationale "Best passing candidate"
+python -m climbhill.cli report --repo /path/to/repo --run-id 1
+python -m climbhill.cli reflect --repo /path/to/repo --run-id 1
 ```
 
-The installed console script is `climbhill`; `adr` remains as a transitional compatibility alias.
+The installed console script is `climbhill`.
 
 ## MCP Servers
 
@@ -119,12 +119,12 @@ The primary MCP server is ClimbHill-focused:
 
 ```bash
 pip install "climbhill-ai[mcp]"
-adr-mcp
+climbhill-mcp
 ```
 
 It exposes tools for repo inspection, alignment, policy checks, resource search, run creation, candidate registration, evaluation recording, comparison, history sampling, report generation, decisions, costs, lineage, and issue proposals.
 
-The upstream deep-research provider fan-out MCP implementation is preserved in `awesome_deep_research.deep_research_mcp_server` for compatibility with the earlier repository direction.
+The upstream deep-research provider fan-out MCP implementation is preserved in `climbhill.deep_research_mcp_server` for compatibility with the earlier repository direction.
 
 ## GitHub Pages Deployment
 
@@ -140,16 +140,16 @@ Configure the repository name and Pages custom domain to match `climbhill.ai`.
 
 ## Legacy Deep-Research Assets
 
-The upstream merge preserved the earlier deep-research skills, benchmark helpers, provider docs, audit tools, and OKF normalization assets under `.agents/skills/`, `skills/`, `benchmark/`, `docs/`, and `awesome_deep_research/`. They remain useful as research resources and compatibility tooling, but ClimbHill.ai is now the product direction.
+The upstream merge preserved the earlier deep-research skills, benchmark helpers, provider docs, audit tools, and OKF normalization assets under `.agents/skills/`, `skills/`, `benchmark/`, `docs/`, and `climbhill/`. They remain useful as research resources and compatibility tooling, but ClimbHill.ai is now the product direction.
 
-Pricing and model availability change frequently. Use `skills/provider-source-index.md` and `python -m awesome_deep_research.source_refresh --check-links` before refreshing pricing or model guidance. The old provider tables used an "Under-$1 Benchmark Stance" column to keep live smoke tests bounded; keep that cost-control discipline when reusing those assets.
+Pricing and model availability change frequently. Use `skills/provider-source-index.md` and `python -m climbhill.source_refresh --check-links` before refreshing pricing or model guidance. The old provider tables used an "Under-$1 Benchmark Stance" column to keep live smoke tests bounded; keep that cost-control discipline when reusing those assets.
 
 Run the offline repository and environment checks before spending API credits:
 
 ```bash
-python -m awesome_deep_research.audit
-python -m awesome_deep_research.op_env --template
-python -m awesome_deep_research.source_refresh
+python -m climbhill.audit
+python -m climbhill.op_env --template
+python -m climbhill.source_refresh
 ```
 
 ## Status

@@ -7,9 +7,9 @@ from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import awesome_deep_research.providers as providers_module
-from awesome_deep_research.mcp_app import DeepResearchService
-from awesome_deep_research.providers import (
+import climbhill.providers as providers_module
+from climbhill.mcp_app import DeepResearchService
+from climbhill.providers import (
     ExaAdapter,
     GeminiAdapter,
     JinaAdapter,

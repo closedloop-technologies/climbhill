@@ -41,7 +41,7 @@
       "source_type": "s3",
       "title": "Live Benchmark Results",
       "citation_anchor": "S3 bucket, key, and ETag",
-      "bucket": "awesome-deep-researchers",
+      "bucket": "climbhill",
       "key": "benchmarks/live/latest.json",
       "etag": "example-etag"
     },

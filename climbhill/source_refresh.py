@@ -589,7 +589,7 @@ def check_link(entry: SourceEntry, repo_root: Path = REPO_ROOT, timeout: float =
                 entry.source,
                 timeout=timeout,
                 allow_redirects=True,
-                headers={"User-Agent": "awesome-deep-researchers-source-check/0.1"},
+                headers={"User-Agent": "climbhill-source-check/0.1"},
             )
         except requests.RequestException as exc:
             return CheckResult(False, f"{entry.skill}: {entry.source} failed: {exc}")

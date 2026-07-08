@@ -3,7 +3,7 @@
 *.pyo
 *.pyd
 __pycache__
-awesome_deep_research.egg-info
+climbhill.egg-info
 .pytest_cache/
 *.egg-info/
 dist/

@@ -10,7 +10,7 @@ This is a repository-local plugin package.
 The plugin MCP config launches:
 
 ```bash
-python -m awesome_deep_research.mcp_server
+python -m climbhill.mcp_server
 ```
 
 The MCP server requires the stable v1 Python MCP SDK dependency declared by this package: `mcp[cli]>=1.27,<2`.

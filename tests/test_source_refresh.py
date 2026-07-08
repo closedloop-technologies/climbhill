@@ -3,7 +3,7 @@ from math import inf
 
 import pytest
 
-from awesome_deep_research import source_refresh
+from climbhill import source_refresh
 
 
 def test_parse_source_entries_reads_skill_rows():

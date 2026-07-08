@@ -1,4 +1,4 @@
-# Awesome Deep Researchers
+# ClimbHill
 
 This context defines the language for the repository's deep research orchestration
 application: turning a human research question into traceable Open Knowledge

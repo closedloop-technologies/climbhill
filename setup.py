@@ -68,10 +68,9 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "adr=awesome_deep_research.cli:main",
-            "climbhill=awesome_deep_research.cli:main",
-            "adr-mcp=awesome_deep_research.mcp_server:main",
-            "adr-mcp-smoke=awesome_deep_research.mcp_server:smoke_main",
+            "climbhill=climbhill.cli:main",
+            "climbhill-mcp=climbhill.mcp_server:main",
+            "climbhill-mcp-smoke=climbhill.mcp_server:smoke_main",
         ],
     },
     include_package_data=True,
@@ -91,8 +90,8 @@ setup(
         "automation",
     ],
     project_urls={
-        "Bug Reports": "https://github.com/closedloop-technologies/awesome-deep-researchers/issues",
-        "Source": "https://github.com/closedloop-technologies/awesome-deep-researchers",
+        "Bug Reports": "https://github.com/closedloop-technologies/climbhill/issues",
+        "Source": "https://github.com/closedloop-technologies/climbhill",
         "Documentation": "https://climbhill.ai",
     },
 )

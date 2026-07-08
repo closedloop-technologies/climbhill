@@ -17,7 +17,7 @@ from .audit import REQUIRED_ENV_NAMES, REPO_ROOT
 
 DEFAULT_ENV_FILE = REPO_ROOT / ".env.adr"
 DEFAULT_TEMPLATE_FILE = REPO_ROOT / ".env.adr.example"
-DEFAULT_OP_VAULT = "awesome-deep-researchers"
+DEFAULT_OP_VAULT = "climbhill"
 DEFAULT_OP_ITEM = "api-keys"
 OP_REF_RE = re.compile(r"^op://[^\s/]+/[^\s/]+/[^\s/]+$")
 ENV_NAME_RE = re.compile(r"^[A-Z][A-Z0-9_]*$")

@@ -7,7 +7,7 @@ It should be usable by Codex and other MCP-capable coding agents.
 The current local entrypoint is:
 
 ```bash
-python -m awesome_deep_research.mcp_server
+python -m climbhill.mcp_server
 ```
 
 ## Responsibilities

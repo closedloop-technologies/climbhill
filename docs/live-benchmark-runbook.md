@@ -8,13 +8,13 @@ budget.
 ## Preflight
 
 ```bash
-python -m awesome_deep_research.audit
-python -m awesome_deep_research.op_env --env-file .env.adr --scope commercial
-python -m awesome_deep_research.op_env --op-scaffold --scope commercial
-op run --env-file .env.adr -- python -m awesome_deep_research.op_env --live --scope commercial
+python -m climbhill.audit
+python -m climbhill.op_env --env-file .env.adr --scope commercial
+python -m climbhill.op_env --op-scaffold --scope commercial
+op run --env-file .env.adr -- python -m climbhill.op_env --live --scope commercial
 ```
 
-If `op run` reports that `awesome-deep-researchers` is not a vault in this
+If `op run` reports that `climbhill` is not a vault in this
 account, run the 1Password setup in `docs/api-key-signup-checklist.md` before
 retrying. That error means the live provider benchmark has not reached API-key
 validation yet.
