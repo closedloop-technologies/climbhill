@@ -1,5 +1,5 @@
 """
-Setup configuration for awesome_deep_research package.
+Setup configuration for the ClimbHill.ai package.
 """
 
 from setuptools import setup, find_packages
@@ -10,14 +10,14 @@ this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
 setup(
-    name="awesome-deep-research",
+    name="climbhill-ai",
     version="0.1.0",
-    author="Awesome Deep Researchers Contributors",
+    author="ClimbHill.ai Contributors",
     author_email="",
-    description="A Python library for working with deep research AI agents",
+    description="Local-first tooling for controlled recursive repository improvement with coding agents",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/closedloop-technologies/awesome-deep-researchers",
+    url="https://climbhill.ai",
     packages=find_packages(exclude=["tests", "tests.*", "docs", "research"]),
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -25,15 +25,13 @@ setup(
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     install_requires=[
         "requests>=2.31.0",
         "pydantic>=2.0.0",
@@ -41,6 +39,8 @@ setup(
         "markdown>=3.5.0",
         "python-dateutil>=2.8.0",
         "typing-extensions>=4.8.0",
+        "PyYAML>=6.0",
+        "mcp[cli]>=1.27,<2",
     ],
     extras_require={
         "dev": [
@@ -65,25 +65,28 @@ setup(
     entry_points={
         "console_scripts": [
             "adr=awesome_deep_research.cli:main",
+            "climbhill=awesome_deep_research.cli:main",
         ],
     },
     include_package_data=True,
     zip_safe=False,
     keywords=[
         "ai",
-        "research",
-        "deep-research",
+        "self-improvement",
+        "coding-agents",
+        "mcp",
+        "codex",
+        "repository",
         "agents",
         "llm",
-        "chatgpt",
-        "gemini",
-        "perplexity",
-        "citations",
+        "evaluation",
+        "policy",
+        "sqlite",
         "automation",
     ],
     project_urls={
         "Bug Reports": "https://github.com/closedloop-technologies/awesome-deep-researchers/issues",
         "Source": "https://github.com/closedloop-technologies/awesome-deep-researchers",
-        "Documentation": "https://github.com/closedloop-technologies/awesome-deep-researchers#readme",
+        "Documentation": "https://climbhill.ai",
     },
 )

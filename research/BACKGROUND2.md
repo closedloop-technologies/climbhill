@@ -16,6 +16,8 @@ Deep Research agents, conversely, are designed for autonomy and persistence. The
 - **Agentic Frameworks**: Orchestration layers that allow models to call tools (search, scraping, code execution) in multi-step loops, maintaining state across iterations (e.g., Perplexity's Sonar, LangGraph, Smolagents).
 - **Strategic Planning**: The ability to decompose a vague user query into a research plan, dynamically revise it based on intermediate findings, and synthesize a coherent answer grounded in citations.
 
+Lilian Weng's 2026 harness-engineering analysis sharpens this distinction: the competitive unit is not only the base model, but the full runtime around it. A research harness decides how the model plans, calls tools, manages context, stores artifacts, spawns subagents, and evaluates its own work. For deep research systems, this means persistent filesystem memory, explicit job orchestration, compact context construction, and regression-tested workflow changes are first-class architecture choices rather than implementation details.
+
 The economic and technical implications of this shift are profound, as we will explore in the following sections.
 
 ## 2. The Proprietary Ecosystem: API Leaders and Their Architectures
@@ -222,7 +224,19 @@ For organizations opting for the self-hosted route, the architecture of late 202
 
 **Memory**: ChromaDB or Redis for storing the "Research State"—the intermediate findings, visited URLs, and discarded hypotheses.
 
-### 7.2 Challenges of Self-Hosting
+### 7.2 Harness Design Patterns for Deep Research
+
+Recent harness-engineering work suggests several practical design constraints for deep research builders:
+
+- **Treat the filesystem as durable memory**: Long-horizon research produces more material than can fit in context. Store search logs, source excerpts, extracted datasets, failed hypotheses, drafts, and citation maps as files so the agent can recover, audit, and selectively re-read its own history.
+- **Make workflow loops explicit**: A robust research agent should expose a plan-execute-observe-improve loop, with clear checkpoints for source coverage, contradiction handling, and synthesis quality instead of relying on a single prompt template.
+- **Use inspectable parallelism**: Subagents and backend jobs are useful for source discovery, perspective generation, and independent verification, but their outputs should land in durable logs or artifacts rather than transient chat context.
+- **Engineer context, not just prompts**: Context construction should select, compress, and structure relevant evidence. The useful optimization target shifts from prompt wording to retrieval, filtering, formatting, and state-management code.
+- **Gate self-improvement with evaluation**: Harness changes should be proposed from recurring verifier-grounded failure patterns, then accepted only after held-in and held-out regression checks preserve known good behavior.
+
+These patterns are especially relevant to self-hosted systems because the harness is the part teams can actually modify. The model supplies reasoning ability, but the harness determines whether that ability is connected to the right tools, evidence, memory, and feedback loop.
+
+### 7.3 Challenges of Self-Hosting
 
 **Web Fragility**: The web is hostile to bots. Custom agents require constant maintenance to update scrapers as websites change their DOM structures or anti-bot protections (Cloudflare).
 
@@ -288,5 +302,5 @@ The Deep Research ecosystem of 2025 is a diverse and maturing landscape. For pur
 - [LLM Leaderboard 2025 - Vellum AI](https://www.vellum.ai/llm-leaderboard)
 - [Deep Research model achieves 26.6% on Humanity's Last Exam! - Reddit](https://www.reddit.com/r/singularity/comments/1igbvp7/deep_research_model_achieves_266_on_humanitys/)
 - [Ultimate Guide - The Best Open Source LLM for Deep Research in 2025 - SiliconFlow](https://www.siliconflow.com/articles/en/best-open-source-LLM-for-deep-research)
-
+- [Harness Engineering for Self-Improvement - Lilian Weng](https://lilianweng.github.io/posts/2026-07-04-harness/)
 

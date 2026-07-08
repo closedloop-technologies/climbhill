@@ -1,0 +1,55 @@
+version: 1
+
+repo:
+  name: climbhill.ai
+  default_branch: main
+
+edit_policy:
+  allow:
+    - "README.md"
+    - "goal.md"
+    - "docs/**"
+    - "resources/**"
+    - ".agent/skills/**"
+    - ".climbhill/**"
+    - "plugin/**"
+    - "server/**"
+    - "cli/**"
+    - "examples/**"
+    - "index.html"
+    - "assets/**"
+    - "awesome_deep_research/**"
+    - "pyproject.toml"
+    - "setup.py"
+    - "TESTING.md"
+    - "EVALS.md"
+  deny:
+    - ".env"
+    - ".env.*"
+    - "**/*.sqlite"
+    - "**/*.db"
+    - "**/*.snap"
+    - "package-lock.json"
+    - "pnpm-lock.yaml"
+  require_human_approval:
+    - "tests/**"
+    - ".github/workflows/**"
+    - "migrations/**"
+    - "infra/**"
+    - "security/**"
+    - "LICENSE"
+
+commands:
+  test: "pytest tests/test_cli.py"
+  static_check: "git diff --check"
+
+budgets:
+  max_parallel_candidates: 5
+  max_usd_per_run: 20
+  max_minutes_per_candidate: 45
+
+promotion:
+  require_tests_pass: true
+  require_policy_pass: true
+  require_human_approval: true
+  create_pr_by_default: true

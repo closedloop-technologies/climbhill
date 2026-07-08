@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ClimbHill.ai | Recursive repository improvement</title>
+    <meta
+      name="description"
+      content="ClimbHill.ai helps coding agents run controlled, measurable recursive self-improvement loops on Git repositories with policy gates, durable memory, evaluation, and human promotion paths."
+    >
+    <meta property="og:title" content="ClimbHill.ai">
+    <meta
+      property="og:description"
+      content="A repo-local self-improvement substrate for coding agents: policy, registry, skills, reports, and human gates."
+    >
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://climbhill.ai/">
+    <meta property="og:image" content="https://climbhill.ai/assets/hero-research-harness.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #101414;
+        --muted: #54615e;
+        --line: #d7dfdc;
+        --panel: #ffffff;
+        --wash: #f4f7f5;
+        --green: #0e7c59;
+        --green-dark: #07523b;
+        --amber: #bd7418;
+        --charcoal: #18211f;
+        --shadow: 0 24px 80px rgba(17, 25, 23, 0.16);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--wash);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .hero {
+        position: relative;
+        min-height: 88vh;
+        display: flex;
+        align-items: stretch;
+        overflow: hidden;
+        background: var(--charcoal);
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, rgba(244, 247, 245, 0.98) 0%, rgba(244, 247, 245, 0.93) 38%, rgba(244, 247, 245, 0.56) 64%, rgba(244, 247, 245, 0.12) 100%),
+          linear-gradient(180deg, rgba(244, 247, 245, 0.1) 0%, rgba(244, 247, 245, 0.9) 100%),
+          url("assets/hero-research-harness.png") center / cover no-repeat;
+      }
+
+      .hero-inner,
+      .section,
+      .footer-inner {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .hero-inner {
+        position: relative;
+        padding: 28px 0 76px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .nav {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1rem;
+        font-weight: 780;
+        text-decoration: none;
+      }
+
+      .mark {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(14, 124, 89, 0.22);
+        border-radius: 8px;
+        background: #ffffff;
+        box-shadow: 0 8px 24px rgba(14, 124, 89, 0.16);
+      }
+
+      .mark svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        color: #25302d;
+        font-size: 0.92rem;
+        font-weight: 680;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+      }
+
+      .hero-copy {
+        max-width: 760px;
+        margin-top: auto;
+        padding-top: 106px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 18px;
+        color: var(--green-dark);
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 28px;
+        height: 2px;
+        background: var(--green);
+      }
+
+      h1 {
+        max-width: 760px;
+        margin: 0;
+        font-size: clamp(3rem, 7.8vw, 6.4rem);
+        line-height: 0.93;
+        letter-spacing: 0;
+      }
+
+      .dek {
+        max-width: 660px;
+        margin: 24px 0 0;
+        color: #25312e;
+        font-size: clamp(1.05rem, 1.6vw, 1.28rem);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 32px;
+      }
+
+      .button {
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 18px;
+        border: 1px solid var(--green-dark);
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 760;
+      }
+
+      .button.primary {
+        color: #ffffff;
+        background: var(--green-dark);
+        box-shadow: 0 16px 34px rgba(7, 82, 59, 0.24);
+      }
+
+      .button.secondary {
+        color: var(--green-dark);
+        background: rgba(255, 255, 255, 0.84);
+      }
+
+      .quick-stats {
+        width: min(1180px, calc(100% - 40px));
+        margin: -44px auto 0;
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .stat {
+        min-height: 124px;
+        padding: 24px;
+        border-right: 1px solid var(--line);
+      }
+
+      .stat:last-child {
+        border-right: 0;
+      }
+
+      .stat strong {
+        display: block;
+        color: var(--green-dark);
+        font-size: 1.7rem;
+        line-height: 1;
+      }
+
+      .stat span {
+        display: block;
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      main {
+        background: #ffffff;
+      }
+
+      .section {
+        padding: 92px 0;
+      }
+
+      .section-header {
+        max-width: 780px;
+      }
+
+      .section-kicker {
+        margin: 0 0 12px;
+        color: var(--amber);
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(2rem, 4.2vw, 3.35rem);
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .section-header p {
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 1.08rem;
+      }
+
+      .capabilities {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1px;
+        margin-top: 38px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--line);
+        overflow: hidden;
+      }
+
+      .capability {
+        min-height: 238px;
+        padding: 24px;
+        background: #ffffff;
+      }
+
+      .icon {
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        border-radius: 8px;
+        color: var(--green-dark);
+        background: #e6f1ec;
+      }
+
+      .icon svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      .capability h3 {
+        margin: 24px 0 10px;
+        font-size: 1.1rem;
+      }
+
+      .capability p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.96rem;
+      }
+
+      .band {
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        background: #f1f5f3;
+      }
+
+      .workflow {
+        display: grid;
+        grid-template-columns: 0.86fr 1.14fr;
+        gap: 54px;
+        align-items: start;
+      }
+
+      .steps {
+        display: grid;
+        gap: 14px;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 38px 1fr;
+        gap: 16px;
+        padding: 20px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .step-number {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 8px;
+        color: #ffffff;
+        background: var(--green-dark);
+        font-weight: 780;
+      }
+
+      .step h3 {
+        margin: 0 0 6px;
+        font-size: 1.04rem;
+      }
+
+      .step p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.96rem;
+      }
+
+      .cta {
+        color: #ffffff;
+        background: #18211f;
+      }
+
+      .cta .section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 36px;
+        padding: 66px 0;
+      }
+
+      .cta h2 {
+        max-width: 720px;
+      }
+
+      .cta p {
+        max-width: 640px;
+        margin: 18px 0 0;
+        color: #c5d0cc;
+      }
+
+      .cta .button {
+        flex: 0 0 auto;
+        border-color: #c9e5d8;
+        color: #10201a;
+        background: #e7f5ee;
+      }
+
+      footer {
+        background: #101414;
+        color: #bfc8c4;
+      }
+
+      .footer-inner {
+        padding: 26px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        font-size: 0.92rem;
+      }
+
+      .footer-inner a {
+        color: #e6f1ec;
+      }
+
+      @media (max-width: 900px) {
+        .hero {
+          min-height: 760px;
+        }
+
+        .hero::before {
+          background:
+            linear-gradient(180deg, rgba(244, 247, 245, 0.99) 0%, rgba(244, 247, 245, 0.95) 56%, rgba(244, 247, 245, 0.38) 100%),
+            url("assets/hero-research-harness.png") 66% bottom / cover no-repeat;
+        }
+
+        .nav {
+          align-items: flex-start;
+        }
+
+        .nav-links {
+          gap: 14px;
+          font-size: 0.88rem;
+        }
+
+        .hero-copy {
+          padding-top: 72px;
+        }
+
+        .quick-stats,
+        .capabilities,
+        .workflow {
+          grid-template-columns: 1fr;
+        }
+
+        .quick-stats {
+          width: 100%;
+          margin-top: 0;
+          border-radius: 0;
+          box-shadow: none;
+        }
+
+        .stat {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .stat:last-child {
+          border-bottom: 0;
+        }
+
+        .cta .section,
+        .footer-inner {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .hero-inner,
+        .section,
+        .footer-inner {
+          width: min(100% - 28px, 1180px);
+        }
+
+        .nav-links {
+          display: none;
+        }
+
+        .hero {
+          min-height: 720px;
+        }
+
+        h1 {
+          font-size: clamp(2.45rem, 14vw, 4.1rem);
+        }
+
+        .dek {
+          font-size: 1rem;
+        }
+
+        .actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .button {
+          width: 100%;
+        }
+
+        .section {
+          padding: 68px 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <nav class="nav" aria-label="Primary navigation">
+          <a class="brand" href="/">
+            <span class="mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 19h18"></path>
+                <path d="m5 17 5-8 4 5 3-4 2 7"></path>
+                <path d="M9 17h10"></path>
+              </svg>
+            </span>
+            <span>ClimbHill.ai</span>
+          </a>
+          <div class="nav-links">
+            <a href="#system">System</a>
+            <a href="#loop">Loop</a>
+            <a href="https://github.com/closedloop-technologies/awesome-deep-researchers">GitHub</a>
+          </div>
+        </nav>
+
+        <div class="hero-copy">
+          <p class="eyebrow">Repo-local self-improvement</p>
+          <h1>Controlled loops for coding agents.</h1>
+          <p class="dek">
+            ClimbHill.ai helps agents improve a Git repository through bounded candidate runs,
+            policy gates, durable experiment memory, evaluation, reports, and human promotion paths.
+          </p>
+          <div class="actions">
+            <a class="button primary" href="https://github.com/closedloop-technologies/awesome-deep-researchers">
+              View repository
+            </a>
+            <a class="button secondary" href="#loop">See the loop</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <aside class="quick-stats" aria-label="Project highlights">
+      <div class="stat">
+        <strong>Policy</strong>
+        <span>allowed, denied, and approval-required edit surfaces before agents change code</span>
+      </div>
+      <div class="stat">
+        <strong>Registry</strong>
+        <span>runs, candidates, patches, evaluations, costs, lineage, and decisions in durable state</span>
+      </div>
+      <div class="stat">
+        <strong>Reports</strong>
+        <span>Markdown summaries that tell humans what happened, what passed, and what to promote</span>
+      </div>
+    </aside>
+
+    <main>
+      <section class="section" id="system">
+        <div class="section-header">
+          <p class="section-kicker">What ClimbHill provides</p>
+          <h2>A substrate for repeated improvement attempts, not a one-off agent.</h2>
+          <p>
+            The project defines the repo alignment files, Codex plugin, MCP server, skills,
+            resources, registry, policy checks, evaluation records, and reporting needed for safe
+            recursive improvement.
+          </p>
+        </div>
+
+        <div class="capabilities">
+          <article class="capability">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path>
+                <path d="m9 12 2 2 4-5"></path>
+              </svg>
+            </div>
+            <h3>Policy gates</h3>
+            <p>Protect tests, evals, workflows, lockfiles, migrations, infra, and security-sensitive code by default.</p>
+          </article>
+          <article class="capability">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16v16H4z"></path>
+                <path d="M8 8h8"></path>
+                <path d="M8 12h8"></path>
+                <path d="M8 16h5"></path>
+              </svg>
+            </div>
+            <h3>Experiment memory</h3>
+            <p>Record every candidate, patch, branch, commit, evaluation, cost, failure, and human decision.</p>
+          </article>
+          <article class="capability">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 3v18"></path>
+                <path d="M18 3v18"></path>
+                <path d="M6 8h12"></path>
+                <path d="M6 16h12"></path>
+              </svg>
+            </div>
+            <h3>Candidate evolution</h3>
+            <p>Compare parallel attempts, sample historical failures, recombine promising ideas, and track lineage.</p>
+          </article>
+          <article class="capability">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19V5"></path>
+                <path d="M4 19h16"></path>
+                <path d="M8 16v-4"></path>
+                <path d="M12 16V8"></path>
+                <path d="M16 16v-6"></path>
+              </svg>
+            </div>
+            <h3>Reviewable reports</h3>
+            <p>Generate concise reports with goal, repo state, policy, candidates, tests, costs, risks, and next actions.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="band" id="loop">
+        <div class="section workflow">
+          <div class="section-header">
+            <p class="section-kicker">Core loop</p>
+            <h2>Agents climb by preserving what every attempt teaches.</h2>
+            <p>
+              ClimbHill starts when a repo needs safe agentic improvement and ends when candidates
+              are evaluated, recorded, reported, and promoted into a PR-ready branch, issue, plan,
+              or next loop.
+            </p>
+          </div>
+          <div class="steps">
+            <article class="step">
+              <div class="step-number">1</div>
+              <div>
+                <h3>Align the repository</h3>
+                <p>Create goal, architecture, testing, eval, resource, skill, and policy files without overwriting existing guidance.</p>
+              </div>
+            </article>
+            <article class="step">
+              <div class="step-number">2</div>
+              <div>
+                <h3>Run bounded candidates</h3>
+                <p>Use MCP tools to create runs, register candidates, attach patches, enforce policy, and record evaluations.</p>
+              </div>
+            </article>
+            <article class="step">
+              <div class="step-number">3</div>
+              <div>
+                <h3>Compare and decide</h3>
+                <p>Recommend the strongest candidate, record human decisions, and preserve rejected attempts as future evidence.</p>
+              </div>
+            </article>
+            <article class="step">
+              <div class="step-number">4</div>
+              <div>
+                <h3>Reflect into issues</h3>
+                <p>Analyze the experiment tree to propose missing docs, weak tests, stricter policies, better skills, and next runs.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta">
+        <div class="section">
+          <div>
+            <h2>Make improvement attempts auditable, comparable, and reusable.</h2>
+            <p>
+              The MVP is local-first: Codex plugin, MCP server, SQLite registry, files, Git,
+              Markdown reports, conservative policies, and human-controlled promotion.
+            </p>
+          </div>
+          <a class="button" href="https://github.com/closedloop-technologies/awesome-deep-researchers">
+            Open repository
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <span>ClimbHill.ai</span>
+        <a href="https://github.com/closedloop-technologies/awesome-deep-researchers">GitHub repository</a>
+      </div>
+    </footer>
+  </body>
+</html>
