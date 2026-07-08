@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import tomllib
 from pathlib import Path
 
 import awesome_deep_research
@@ -20,3 +21,11 @@ def test_package_version_matches_project_metadata() -> None:
     assert setup_version is not None
     assert awesome_deep_research.__version__ == pyproject_version.group(1)
     assert awesome_deep_research.__version__ == setup_version.group(1)
+
+
+def test_climbhill_console_script_is_primary_entry_point() -> None:
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    setup_py = (ROOT / "setup.py").read_text(encoding="utf-8")
+
+    assert pyproject["project"]["scripts"]["climbhill"] == "awesome_deep_research.cli:main"
+    assert '"climbhill=awesome_deep_research.cli:main"' in setup_py
