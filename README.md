@@ -138,6 +138,17 @@ This repo includes a zero-build landing page for `https://climbhill.ai/`:
 
 Configure the repository name and Pages custom domain to match `climbhill.ai`.
 
+## Release
+
+The PyPI package name is `climbhill-ai`; the import package and CLI are both `climbhill`.
+
+```bash
+python -m pip install climbhill-ai
+climbhill --help
+```
+
+Publishing is handled by GitHub Trusted Publishing in `.github/workflows/publish.yml`. Create a GitHub release from a version tag to build, check, and upload the package to PyPI. See [docs/release.md](docs/release.md) for DNS, PyPI, Codex plugin, and skills publishing steps.
+
 ## Legacy Deep-Research Assets
 
 The upstream merge preserved the earlier deep-research skills, benchmark helpers, provider docs, audit tools, and OKF normalization assets under `.agents/skills/`, `skills/`, `benchmark/`, `docs/`, and `climbhill/`. They remain useful as research resources and compatibility tooling, but ClimbHill.ai is now the product direction.
