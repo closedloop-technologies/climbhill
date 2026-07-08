@@ -196,6 +196,12 @@ Each example below maps to a mode in the taxonomy, illustrating the demands of r
 * “Summarize current cybersecurity threats affecting critical infrastructure.”
 * “Outline macro forces influencing global food prices in the coming decade.”
 
+### **3.11 Repository Refresh & Meta Research**
+
+* “Deepresearch the deepresearchers: identify current deep research APIs, open-source frameworks, cost controls, and citation behavior.”
+* “Compare current AI-for-science research agents or systems and identify where they are actually useful.”
+* “For one named provider, find pricing controls that keep a deep research call under $1.”
+
 ---
 
 ## **4. Putting It All Together**

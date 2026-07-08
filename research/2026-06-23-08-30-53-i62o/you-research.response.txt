@@ -1,0 +1,18 @@
+# You.com Research Result
+
+In 2026, deep research agents have shifted from simple summarization to autonomous, multi-step investigation protocols.
+
+### **Top Models & Frameworks**
+*   **Frontier Leaders:** GLM-5.1, Qwen 3.7, and DeepSeek V4 Pro lead on reasoning and coding benchmarks [[1]].
+*   **Frameworks:** JAX (high-performance research), PyTorch, and TensorFlow remain standards, while MCP (Model Context Protocol) is the essential standard for connecting agents to internal data and tools [[2]].
+
+### **Actionable Best Practices**
+1.  **Iterative Planning:** Edit research plans before execution—define constraints, specific trusted sources, and target angles to prevent scope creep.
+2.  **Protocol:** Adopt an **Expansion-Recursion-Synthesis** pattern: broaden search, dive into anomalies/contradictions, and synthesize into executive summaries with high/low confidence ratings.
+3.  **Human-in-the-Loop:** Use agents for rapid contextualization (first-pass data gathering) but maintain human oversight for final synthesis and interpretation.
+4.  **Tools:** Pair **Perplexity** (web discovery) with **Elicit/Consensus** (academic rigor) and **ChatGPT Deep Research** (complex agentic workflows).
+
+# Citations
+
+[1] [Best Open-Source LLMs 2026 | Qwen, GLM, DeepSeek & Llama Compared](https://www.buildfastwithai.com/blogs/collection/open-source-llms)
+[2] [Top 10 Deep Learning Frameworks: 2026 Guide](https://www.esparkinfo.com/blog/deep-learning-frameworks)

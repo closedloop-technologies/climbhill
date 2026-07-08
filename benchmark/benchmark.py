@@ -1,5 +1,6 @@
 """Main benchmark runner for evaluating deep research skills."""
 import argparse
+import importlib.util
 import subprocess
 import sys
 from pathlib import Path
@@ -7,7 +8,7 @@ from typing import List, Dict, Optional
 import json
 from datetime import datetime
 
-from .config import RESULTS_DIR, SKILL_TIMEOUT
+from .config import MAX_BENCHMARK_COST_USD, RESULTS_DIR, SKILL_TIMEOUT
 from .utils import (
     discover_skills,
     parse_taxonomy_questions,
@@ -18,13 +19,36 @@ from .utils import (
 from .tracker import BenchmarkTracker, BenchmarkMetrics
 
 
+OKF_SKILL_DIR = Path(__file__).parent.parent / ".agents" / "skills" / "deep-research-okf-normalize"
+OKF_SCRIPTS_DIR = OKF_SKILL_DIR / "scripts"
+
+
+def _load_okf_module(module_name: str, filename: str):
+    spec = importlib.util.spec_from_file_location(module_name, OKF_SCRIPTS_DIR / filename)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Could not load OKF helper module: {filename}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+normalize_to_okf = _load_okf_module("adr_normalize_to_okf", "normalize_to_okf.py")
+validate_okf = _load_okf_module("adr_validate_okf", "validate_okf.py")
+
+
 class BenchmarkRunner:
     """Run benchmarks across skills and questions."""
     
-    def __init__(self, output_dir: Optional[Path] = None, verbose: bool = False):
+    def __init__(
+        self,
+        output_dir: Optional[Path] = None,
+        verbose: bool = False,
+        enforce_cost_budget: bool = True,
+    ):
         self.output_dir = output_dir or RESULTS_DIR
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.verbose = verbose
+        self.enforce_cost_budget = enforce_cost_budget
         self.tracker = BenchmarkTracker()
     
     def log(self, message: str, level: str = "INFO") -> None:
@@ -58,8 +82,15 @@ class BenchmarkRunner:
         metrics.start()
         
         try:
-            # Get command info for this skill
-            cmd_info = get_skill_command_info(skill['name'])
+            # Get command info for this skill. Tests and one-off local probes may
+            # pass an explicit command, but discovered skills must be registered.
+            if skill.get("command"):
+                cmd_info = {
+                    "command": skill["command"],
+                    "supports_query": skill.get("supports_query", True),
+                }
+            else:
+                cmd_info = get_skill_command_info(skill['name'])
             
             # Check for special requirements
             if cmd_info.get('requires_server'):
@@ -71,7 +102,11 @@ class BenchmarkRunner:
             # Build command
             command = cmd_info['command'].format(
                 script=skill['script_path'],
-                question=f'"{question}"'
+                question=f'"{question}"',
+                question_slug=sanitize_filename(question, max_length=80),
+                category_slug=sanitize_filename(category, max_length=80),
+                skill_name=skill['name'],
+                output_dir=str(self.output_dir),
             )
             
             if self.verbose:
@@ -100,6 +135,22 @@ class BenchmarkRunner:
                 metrics.add_metadata("provider", model_info["provider"])
                 metrics.add_metadata("model", model_info["model"])
                 metrics.calculate_cost(model_info["model"], model_info["provider"])
+                metrics.apply_actual_cost_if_present(output, result.stderr)
+                metrics.add_metadata("max_cost_usd", MAX_BENCHMARK_COST_USD)
+                metrics.add_metadata(
+                    "within_cost_budget",
+                    metrics.estimated_cost_usd <= MAX_BENCHMARK_COST_USD,
+                )
+                if metrics.estimated_cost_usd > MAX_BENCHMARK_COST_USD:
+                    message = (
+                        f"Cost budget exceeded: "
+                        f"${metrics.estimated_cost_usd:.4f} > ${MAX_BENCHMARK_COST_USD:.2f}"
+                    )
+                    if self.enforce_cost_budget:
+                        metrics.set_error(message)
+                        self.log(f"❌ {skill['name']} {message}", "ERROR")
+                    else:
+                        self.log(f"⚠️  {skill['name']} {message}", "WARN")
                 
                 # Extract API calls
                 api_calls = BenchmarkMetrics.extract_api_calls_from_output(output)
@@ -151,6 +202,52 @@ class BenchmarkRunner:
                 f.write(f"Tokens: {metrics.total_tokens}\n")
                 f.write(f"\n{'='*80}\n\n")
                 f.write(metrics.output)
+
+            okf_bundle_dir = self.normalize_result_to_okf(
+                metrics=metrics,
+                output_file=output_file,
+                skill_name=skill_name,
+                category=category,
+                question_idx=question_idx,
+            )
+            okf_errors = validate_okf.validate_bundle(okf_bundle_dir)
+            metrics.add_metadata("okf_bundle_dir", str(okf_bundle_dir))
+            metrics.add_metadata("okf_valid", not okf_errors)
+            if okf_errors:
+                metrics.set_error("OKF validation failed: " + "; ".join(okf_errors))
+                self.log(f"❌ {skill_name} OKF validation failed", "ERROR")
+
+            # Save metrics again after adding OKF metadata.
+            with open(metrics_file, 'w') as f:
+                json.dump(metrics.to_dict(), f, indent=2)
+
+    def normalize_result_to_okf(
+        self,
+        metrics: BenchmarkMetrics,
+        output_file: Path,
+        skill_name: str,
+        category: str,
+        question_idx: int,
+    ) -> Path:
+        """Normalize a successful benchmark output into an OKF bundle."""
+        category_slug = sanitize_filename(category, max_length=80)
+        question_slug = sanitize_filename(metrics.question, max_length=80)
+        bundle_dir = (
+            self.output_dir
+            / "okf"
+            / skill_name
+            / category_slug
+            / f"q{question_idx + 1}_{question_slug}"
+        )
+        args = argparse.Namespace(
+            input=str(output_file),
+            text=None,
+            bundle_dir=str(bundle_dir),
+            title=metrics.question,
+            provider=skill_name,
+            prompt=metrics.question,
+        )
+        return normalize_to_okf.normalize(args)
     
     def run_benchmark(
         self,
@@ -323,12 +420,18 @@ def main():
         action="store_true",
         help="Verbose output"
     )
+    parser.add_argument(
+        "--allow-over-budget",
+        action="store_true",
+        help="Record runs over the $1 benchmark budget without failing them"
+    )
     
     args = parser.parse_args()
     
     runner = BenchmarkRunner(
         output_dir=args.output_dir,
-        verbose=args.verbose
+        verbose=args.verbose,
+        enforce_cost_budget=not args.allow_over_budget,
     )
     
     try:

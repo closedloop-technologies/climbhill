@@ -1,0 +1,40 @@
+{
+  "answer": "In 2026, Valyu leads deep research APIs, with strong benchmarks, while open-source frameworks like those from Hugging Face also offer valuable tools. Prioritize official provider documentation and current benchmarks for the best practices.",
+  "results": [
+    {
+      "url": "https://www.firecrawl.dev/blog/best-deep-research-apis",
+      "title": "5 Best Deep Research APIs for Agentic Workflows in 2026 - Firecrawl",
+      "content": "Compare the top deep research APIs for building AI agents and agentic workflows. From autonomous web research to structured extraction,",
+      "score": 0.67911536,
+      "raw_content": null
+    },
+    {
+      "url": "https://medium.com/@unicodeveloper/ai-deepresearch-apis-in-2026-f6d89ca0c17d",
+      "title": "AI DeepResearch APIs in 2026 - Medium",
+      "content": "The evaluation of deepresearch APIs according to DRACO benchmarks in 2026. Valyu leads, ahead of Parallel, Perplexity and Exa.",
+      "score": 0.65887916,
+      "raw_content": null
+    },
+    {
+      "url": "https://github.com/DavidZWZ/Awesome-Deep-Research",
+      "title": "Awesome Agentic Deep Research Resources - GitHub",
+      "content": "Welcome to Awesome-Deep-Research! This repository serves as your comprehensive guide to the cutting-edge world of Agentic Deep Research.",
+      "score": 0.6213807,
+      "raw_content": null
+    },
+    {
+      "url": "https://rephrase-it.com/blog/ai-deep-research-tools-compared-for-2026",
+      "title": "AI Deep Research Tools Compared for 2026 - Rephrase",
+      "content": "Learn how to use AI for deep research in 2026 with ChatGPT, Claude, Gemini, and Perplexity. Compare strengths and workflows. Try free.",
+      "score": 0.45871297,
+      "raw_content": null
+    },
+    {
+      "url": "https://huggingface.co/blog/open-deep-research",
+      "title": "Open-source DeepResearch \u2013 Freeing our search agents",
+      "content": "OpenAI released Deep Research, a system that browses the web to summarize content and answer questions based on the summary.",
+      "score": 0.3370513,
+      "raw_content": null
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "corpus_id": "custom-data-demo",
+  "research_question": "What does this mixed custom corpus say about current deep research agents?",
+  "allowed_sources": [
+    "gdoc-architecture-notes",
+    "youtube-provider-demo",
+    "local-pricing-export",
+    "s3-benchmark-results",
+    "arxiv-agent-paper"
+  ],
+  "sources": [
+    {
+      "source_id": "gdoc-architecture-notes",
+      "source_type": "google_drive",
+      "title": "Deep Research Architecture Notes",
+      "citation_anchor": "Google Drive file ID plus heading",
+      "file_id": "1exampleGoogleDocId",
+      "web_url": "https://docs.google.com/document/d/1exampleGoogleDocId",
+      "modified_time": "2026-06-23T00:00:00Z"
+    },
+    {
+      "source_id": "youtube-provider-demo",
+      "source_type": "youtube",
+      "title": "Provider Demo Walkthrough",
+      "citation_anchor": "YouTube video ID plus timestamp",
+      "video_id": "example12345",
+      "url": "https://www.youtube.com/watch?v=example12345",
+      "published_at": "2026-06-01"
+    },
+    {
+      "source_id": "local-pricing-export",
+      "source_type": "local_file",
+      "title": "Provider Pricing Export",
+      "citation_anchor": "local path plus row or section",
+      "path": "data/provider-pricing.csv",
+      "sha256": "9e107d9d372bb6826bd81d3542a419d6",
+      "modified_time": "2026-06-23T00:00:00Z"
+    },
+    {
+      "source_id": "s3-benchmark-results",
+      "source_type": "s3",
+      "title": "Live Benchmark Results",
+      "citation_anchor": "S3 bucket, key, and ETag",
+      "bucket": "awesome-deep-researchers",
+      "key": "benchmarks/live/latest.json",
+      "etag": "example-etag"
+    },
+    {
+      "source_id": "arxiv-agent-paper",
+      "source_type": "arxiv",
+      "title": "Agentic Research Systems",
+      "citation_anchor": "arXiv ID, version, and page",
+      "arxiv_id": "2401.01234",
+      "version": "v2",
+      "pdf_url": "https://arxiv.org/pdf/2401.01234v2"
+    }
+  ]
+}

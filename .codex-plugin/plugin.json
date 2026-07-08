@@ -1,0 +1,39 @@
+{
+  "name": "awesome-deep-researchers",
+  "version": "0.1.0+codex.20260626135956",
+  "description": "Codex skills and benchmark guidance for evaluating deep research agents and normalizing their outputs.",
+  "author": {
+    "name": "Awesome Deep Researchers Contributors",
+    "url": "https://github.com/closedloop-technologies/awesome-deep-researchers"
+  },
+  "homepage": "https://github.com/closedloop-technologies/awesome-deep-researchers",
+  "repository": "https://github.com/closedloop-technologies/awesome-deep-researchers",
+  "license": "MIT",
+  "keywords": [
+    "deep-research",
+    "agents",
+    "benchmark",
+    "okf",
+    "codex-skills"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Awesome Deep Researchers",
+    "shortDescription": "Run and evaluate deep research agents.",
+    "longDescription": "Skills and benchmark guidance for calling third-party deep research APIs, comparing under-$1 research tasks, and normalizing outputs to Open Knowledge Format bundles.",
+    "developerName": "Awesome Deep Researchers Contributors",
+    "category": "Productivity",
+    "capabilities": [
+      "Write",
+      "Automation"
+    ],
+    "websiteURL": "https://github.com/closedloop-technologies/awesome-deep-researchers",
+    "defaultPrompt": [
+      "Run an under-$1 deep research benchmark.",
+      "Normalize this research report to OKF.",
+      "Compare deep research API call patterns."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

@@ -66,7 +66,7 @@ def test_discovery():
     print("="*60)
     print("\nNext steps:")
     print("  1. Set your API keys (export OPENAI_API_KEY=...)")
-    print("  2. Run a quick test: python run_benchmark.py --max-questions 1 --skills tavily-search -v")
+    print("  2. Run a quick test: python run_benchmark.py --max-questions 1 --skills deep-research-tavily -v")
     print("  3. View QUICKSTART.md for more options")
     
     return True

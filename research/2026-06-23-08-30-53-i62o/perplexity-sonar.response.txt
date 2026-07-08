@@ -1,0 +1,328 @@
+Below is a structured, reference‑oriented deep‑research overview of the 2026 deep‑research API and tooling landscape, with active links to primary sources, benchmark signals, and practical guidance you can port into an `awesome‑deep‑researchers` repository.
+
+---
+
+### 1. **Top deep‑research APIs and providers (2026)**
+
+Prioritize provider docs, pricing tiers, and supported patterns (agentic, multi‑step, structured output, file‑search, etc.).
+
+#### 1.1 **Google Gemini Deep Research (Interactions API)**
+
+- **Type:** Agentic, multi‑step researcher with reasoning, planning, iteration, and citation.
+- **Docs:**
+  - Overview: [Gemini Deep Research Agent](https://ai.google.dev/gemini-api/docs/interactions/deep-research) (Google AI for Developers)
+  - Deep Research preview: [Deep Research preview](https://ai.google.dev/gemini-api/docs/models/deep-research-preview-04-2026)
+- **Key features:**
+  - End‑to‑end autonomous research: plan → search → read → iterate → output.
+  - Multi‑file input and file search (your own docs, sheets, PDFs).
+  - Visualization support (charts, graphs alongside reports).
+  - Integration with MCP servers and external tools.
+  - Two modes: “Deep Research” (fast) and “Deep Research Max” (maximum comprehensiveness).
+- **Delivery:**
+  - Via Google AI Studio (free tier) and Vertex AI (paid).
+  - Enterprise access via Google Cloud partners.
+- **Use cases:**
+  - Market analysis, due diligence, competitive landscaping, literature reviews, long‑form reports.
+- **Benchmark angle:**
+  - Official blog: [Deep Research Max: a step change for autonomous research agents](https://blog.google/innovation-and-ai/models-and-research/gemini-models/next-generation-gemini-deep-research/)
+- **Actionable for repo:**
+  - Add a “Gemini Deep Research” section with `docs`, `quickstart`, `parameter tuning`, and `file‑search patterns`.
+  - Include a minimal “research plan → report” template using Interactions API.
+
+#### 1.2 **OpenAI Deep Research (ChatGPT Deep Research agent)**
+
+- **Type:** Agentic, multi‑step web‑based researcher bundled into ChatGPT.
+- **Docs:**
+  - Announce + conceptual overview: [Introducing deep research – OpenAI](https://openai.com/index/introducing-deep-research/)
+- **Key features:**
+  - Accepts prompts and runs multi‑step web research, analysis, synthesis, and pivoting.
+  - Supports file attachments (spreadsheets, PDFs) for context.
+  - Auto‑generates step‑by‑step work logs and cites sources.
+  - Engineered around a version of the upcoming `o3` model optimized for web browsing and data analysis.
+- **Current access:**
+  - Pro tier (100 queries/month starting point), followed by Plus/Team and Enterprise.
+  - Delivered via ChatGPT web; mobile/desktop rollout “within the month” as of Feb 2026.
+- **Emerging pattern:**
+  - Connects to MCPs and “trusted‑site‑restricted” web scopes for enterprise use.
+- **Actionable for repo:**
+  - Create an “OpenAI Deep Research” pattern folder with:
+    - `cost‑per‑query` estimates,
+    - `query‑structs` (e.g., “compare X vs Y vs Z, output comparison table”),
+    - `citation‑handling` and `evidence‑grading` macros.
+
+#### 1.3 **Perplexity Sonar API (Deep Research Experience)**
+
+- **Type:** Conversational, citation‑heavy deep research.
+- **Docs / Info:**
+  - Official API: via [Perplexity platform](https://www.perplexity.ai/); developer docs under API portal (requires account).
+  - Product‑level context: [Perplexity as AI‑powered deep research](https://www.firecrawl.dev/blog/best-deep-research-apis) (Firecrawl blog, but cites Perplexity’s positioning).
+- **Capabilities:**
+  - Conversational synthesis from multiple web sources, with inline citations.
+  - Used heavily for “scouting” and quick‑turn report‑style summaries.
+- **Patterns:**
+  - Great for “discovery first, verify later” pipelines.
+- **Use in repo:**
+  - Add a “Perplexity‑driven discovery” pattern, emphasizing:
+    - prompt shapes for “generate source‑rich overview”,
+    - post‑process citation‑filtering and reliability‑grading via a verifier model.
+
+---
+
+### 2. **Web‑focused and “deep‑crawl” research APIs**
+
+These are not “fully agentic” researchers, but form the backbone of custom deep‑research stacks (scraping, search, content‑extraction).
+
+#### 2.1 **Firecrawl**
+
+- **Docs:**
+  - Product + API: [Firecrawl](https://www.firecrawl.dev/)
+  - Deep‑research API comparison: [Best Deep Research APIs for Agentic Workflows in 2026](https://www.firecrawl.dev/blog/best-deep-research-apis)
+- **Capabilities:**
+  - Autonomous web research via Agent endpoint.
+  - Native Pydantic/Zod schema‑based extraction from crawled pages.
+  - Flat‑rate (credit‑based) pricing; good for pipelines and RAG.
+- **Positioning:**
+  - Best when you want structured output, budget control, and autonomous research.
+- **Actionable for repo:**
+  - Pattern: “Firecrawl + OpenAI/Gemini” – scrape → extract → reason → synthesize.
+  - Example: extract competitor landing pages → normalize into schema → run competitive memo.
+
+#### 2.2 **Tavily**
+
+- **Docs:**
+  - API: [Tavily](https://tavily.com/)
+  - Comparison: [Firecrawl blog on Tavily](https://www.firecrawl.dev/blog/best-deep-research-apis)
+- **Capabilities:**
+  - Query → JSON response with search results and snippets.
+  - Fast, AI‑ready output; not an autonomous agent per se.
+- **Best for:**
+  - Search grounding in existing LLM apps (LangChain, LlamaIndex plugins).
+- **Actionable for repo:**
+  - Add a “Tavily ground‑then‑think” pattern: use Tavily to fetch raw snippets, then dispatch to a reasoning model for summarization.
+
+#### 2.3 **Exa**
+
+- **Docs:**
+  - API: [Exa](https://exa.ai/)
+  - Evaluation: [Firecrawl blog on Exa](https://www.firecrawl.dev/blog/best-deep-research-apis)
+- **Capabilities:**
+  - Neural‑semantic search and “Find Similar” for content.
+  - Basic JSON result structures.
+  - Great for semantic discovery, topic‑space exploration, and knowledge graphs.
+- **Pattern:**
+  - Pair with Firecrawl (discovery + extraction) for comprehensive research pipelines.
+
+#### 2.4 **Brave Search**
+
+- **Docs:**
+  - API: [Brave Search API](https://brave.com/search/api/)
+  - Comparison: [Firecrawl blog on Brave Search](https://www.firecrawl.dev/blog/best-deep-research-apis)
+- **Capabilities:**
+  - Privacy‑first, independent index.
+  - Structured snippets and SERP data.
+- **Use:**
+  - High‑volume search, privacy‑sensitive apps, or index‑diversity‑driven research.
+
+---
+
+### 3. **Industrial‑grade / niche research APIs**
+
+#### 3.1 **Coresignal – B2B / corporate data**
+
+- **Docs:**
+  - Agentic Search API: [Coresignal – Agentic Search API](https://coresignal.com/)
+  - Review: [Best Deep Research APIs for Autonomous AI Agents – Coresignal blog](https://coresignal.com/blog/deep-research-apis/)
+- **Capabilities:**
+  - Structured B2B / people / company data.
+  - Natural‑language to structured pipeline for lead gen, candidate sourcing, etc.
+- **Pattern:**
+  - B2B deep research: “profile 100 target companies”, “generate talent shortlists”, “investment‑due‑diligence‑style info‑packages”.
+
+#### 3.2 **Valyu DeepResearch API**
+
+- **Docs:**
+  - [Valyu DeepResearch API](https://valyu.ai/) (platform)
+  - Review: [Coresignal blog on Valyu](https://coresignal.com/blog/deep-research-apis/)
+- **Capabilities:**
+  - Access to 36+ proprietary data sources.
+  - Suitable for academic, financial, and compliance‑heavy research.
+- **Use:**
+  - Financial due diligence, market intelligence, expert‑review‑style synthesis.
+
+#### 3.3 **Bright Data & SERP‑focused APIs**
+
+- **Docs:**
+  - [Bright Data](https://brightdata.com/)
+  - [Best Research APIs in 2026 – Bright Data blog](https://brightdata.com/blog/web-data/best-research-apis)
+- **Capabilities:**
+  - Full‑stack web‑data platform: proxies, SERP APIs, e‑commerce extraction, scraping.
+- **SERP‑API players mentioned:**
+  - **Serper** – Google‑only, fast, cheap.
+  - **SearchAPI** – multi‑engine, budget‑friendly.
+- **Pattern:**
+  - Use SERP APIs to construct “source sets”, then feed to deep‑research agents for synthesis.
+
+---
+
+### 4. **Open‑source / framework‑level tooling**
+
+While not “deep‑research APIs” per se, these are the building blocks for custom agents.
+
+#### 4.1 **Open‑source research agent frameworks**
+
+- **LangChain / LlamaIndex**
+  - Position: glue between search APIs (Tavily, Serper, Exa, etc.) and LLMs.
+  - Pattern:
+    - Search → fetch → summarize → refine → finalize.
+  - Example: a “Tavily + LangChain research agent” that iteratively expands queries.
+
+- **Custom MCP‑style orchestrators**
+  - OpenAI’s “deep research” now supports MCPs; you can build your own MCP‑compatible controllers that route to multiple APIs, files, and external tools.
+
+#### 4.2 **AnyCap Deep Research (agent‑side CLI)**
+
+- **Info:**
+  - Article: [Deep Research APIs Compared 2026 – AnyCap](https://anycap.ai/page/en-US/ai/deep-research-apis-compared-2026)
+- **How it works:**
+  - CLI command: `anycap research --query "..."`
+  - Decomposes query → runs multi‑round web search → crawls top sources → synthesizes structured Markdown with citations.
+- **Use:**
+  - Agent‑first research that fits into existing shell‑based pipelines.
+
+---
+
+### 5. **User‑facing “deep‑research” tools (Architectural patterns, not APIs)**
+
+Even if API access is limited, their architectures provide patterns you can replicate.
+
+#### 5.1 **ChatGPT Deep Research**
+
+- **Docs:**
+  - [OpenAI – Introducing deep research](https://openai.com/index/introducing-deep-research/)
+- **Patterns:**
+  - Multi‑step web browsing, pivoting, file‑search, and citation‑aware synthesis.
+- **Architecture takeaway:**
+  - Emulate:
+    1. plan production,
+    2. query + pivot loop,
+    3. evidence‑collection + citation‑tagging,
+    4. final report with structured sections.
+
+#### 5.2 **Perplexity / ChatGPT / Gemini / Claude – “Stack” pattern**
+
+- **Docs / Review:**
+  - [AI Deep Research Tools Compared for 2026 – Rephrase](https://rephrase-it.com/blog/ai-deep-research-tools-compared-for-2026)
+- **Emerging pattern:**
+  1. **Discovery:** Perplexity → fast source‑rich overview and links.
+  2. **Synthesis:** ChatGPT / Claude for deeper analysis, comparative tables, and structured outputs.
+  3. **Rewrite / polish:** Claude or ChatGPT for audience‑tailored prose.
+- **For your repo:**
+  - Create a “tool‑stack blueprint” that maps:
+    - discovery tools,
+    - reasoning/backbone models,
+    - fact‑check/rewrite tools.
+
+---
+
+### 6. **Benchmark signals, leaderboards, and measurement**
+
+As of 2026, there is **no single unified “deep‑research API leaderboard”** comparable to image‑generation or code‑model leaderboards, but several signals exist:
+
+- **OpenAI / Google / Perplexity self‑reports:**
+  - OpenAI: [Introducing deep research](https://openai.com/index/introducing-deep-research/) highlights “analyst‑level” quality and “hundreds of sources”.
+  - Google: [Deep Research Max](https://blog.google/innovation-and-ai/models-and-research/gemini-models/next-generation-gemini-deep-research/) emphasizes “maximum comprehensiveness” and robustness on complex tasks.
+- **Third‑party comparisons (qualitative):**
+  - [Firecrawl – Best Deep Research APIs](https://www.firecrawl.dev/blog/best-deep-research-apis)
+  - [Coresignal – 7 Best Deep Research APIs](https://coresignal.com/blog/deep-research-apis/)
+  - [AnyCap – Deep Research APIs Compared 2026](https://anycap.ai/page/en-US/ai/deep-research-apis-compared-2026) – includes **pricing, latency, and API‑style tables** as informal benchmarks.
+- **Actionable for repo:**
+  - Maintain a `benchmarks/` folder with:
+    - Task‑templates (e.g., “competitive analysis”, “literature review”),
+    - Run‑scripts for each API,
+    - Evaluation rubrics (factual accuracy, coverage, citation quality, time‑to‑report).
+
+---
+
+### 7. **Emerging patterns and best practices (2026)**
+
+#### 7.1 **Architectural patterns**
+
+- **Agentic planning + execution:**
+  - Use Gemini Deep Research or custom agents to plan multi‑step research before executing.
+- **Multi‑tool pipelines:**
+  - Example:
+    Tavily/Exa → Firecrawl → Gemini → human review.
+- **File‑search + web search:**
+  - Gemini and OpenAI both support “search my files + web” for hybrid‑source research.
+
+#### 7.2 **Skills and “research‑move” taxonomies**
+
+- **Move 1 – Scoping:**
+  - Translate ambiguous questions into research questions.
+- **Move 2 – Query decomposition:**
+  - Break “What should we do about X?” into smaller sub‑questions.
+- **Move 3 – Iterative probing:**
+  - Use synthesizers to generate follow‑up questions.
+- **Move 4 – Evidence‑grading:**
+  - Assign reliability scores to sources and flag weak evidence.
+- **Move 5 – Contrastive synthesis:**
+  - “Here are 3 conflicting views; reconcile them.”
+
+#### 7.3 **Best practices**
+
+- **For API design:**
+  - Return citations with link, domain, date, and a short reason‑tag.
+  - Support schema‑driven outputs for downstream pipelines.
+- **For prompts:**
+  - Force structure: “sections: background, competitors, risks, recommendations”.
+  - Request “limitations” and “what’s missing” explicitly.
+- **For reliability:**
+  - Cross‑check high‑impact claims against at least two independent sources.
+  - Track “claims → sources → confidence level” in a structured log.
+
+---
+
+### 8. **Actionable recommendations for the `awesome‑deep‑researchers` repo**
+
+#### 8.1 **Directory structure ideas**
+
+- `/providers/`
+  - `gemini/` – Deep Research Interactions API, Deep Research Max.
+  - `openai/` – Deep Research agent, MCP integration.
+  - `perplexity/` – Sonar API + consumer patterns.
+  - `firecrawl/`, `tavily/`, `exa/`, `brave/`, `coresignal/`, `valyu/`, etc.
+
+- `/frameworks/`
+  - `langchain/`
+  - `llama_index/`
+  - `custom_mcp/`
+
+- `/patterns/`
+  - `discovery_first/` – Perplexity, Exa, Tavily.
+  - `synthesize_then_polish/` – ChatGPT/Claude + Gemini.
+  - `web_and_private_files/` – Gemini + OpenAI file‑search.
+  - `b2b_research/` – Coresignal + Gemini.
+
+- `/benchmarks/`
+  - Task templates, run scripts, evaluation rubrics, and leaderboards (start as markdown tables).
+
+- `/skills/`
+  - Move taxonomies, prompt templates, and “research checklists”.
+
+- `/tools/`
+  - CLI‑based research (e.g., AnyCap).
+  - Browser‑based tools (Perplexity, ChatGPT, Gemini web) with workflow diagrams.
+
+#### 8.2 **Executable parts**
+
+- Include ready‑to‑run `curl` / SDK snippets for:
+  - Gemini Deep Research Interactions.
+  - OpenAI Deep Research (via ChatGPT Pro API).
+  - Tavily / Exa / Firecrawl.
+- Example workflows:
+  - “From raw query to structured Markdown report” templates.
+  - “Compare API X vs API Y on task Z” script‑templates.
+
+---
+
+This structure gives you a **provider‑centric, pattern‑oriented, benchmark‑aware** skeleton for `awesome‑deep‑researchers`. By anchoring each section to **primary docs** and **2026‑specific articles**, you keep the repo grounded in current reality while leaving room for evolving leaderboards and frameworks.

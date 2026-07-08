@@ -5,19 +5,22 @@ Comprehensive benchmarking framework for evaluating deep research skills across 
 ## Overview
 
 This benchmark system:
-- ✅ **Dynamically discovers** all skills in `.claude/skills/`
-- ✅ **Extracts questions** from the research taxonomy document
-- ✅ **Runs each skill** on each question category
-- ✅ **Tracks metrics**: duration, cost, tokens, API calls
-- ✅ **Saves detailed results** for analysis
-- ✅ **Generates reports** in JSON and Markdown formats
+- **Dynamically discovers** runnable skills in `.agents/skills/`
+- **Extracts questions** from the research taxonomy document
+- **Runs each skill** on each question category
+- **Tracks metrics**: duration, cost, tokens, API calls
+- **Saves detailed results** for analysis
+- **Generates reports** in JSON and Markdown formats
+- **Targets under-$1 calls** for live third-party deep research benchmarks
+- **Fails over-budget runs by default** unless `--allow-over-budget` is set
+- **Normalizes successful outputs** into OKF bundles under `results/okf/`
 
 ## Quick Start
 
 ### Install Dependencies
 
 ```bash
-pip install -r ../.claude/skills/test-requirements.txt
+pip install -r ../.agents/skills/test-requirements.txt
 ```
 
 ### Run Full Benchmark
@@ -29,7 +32,7 @@ python run_benchmark.py -v
 ### Run Specific Skills
 
 ```bash
-python run_benchmark.py --skills exa-research tavily-search -v
+python run_benchmark.py --skills deep-research-exa deep-research-tavily -v
 ```
 
 ### Run Specific Categories
@@ -73,7 +76,15 @@ Results are saved in the following structure:
 benchmark/results/
 ├── benchmark_summary.json          # Aggregated metrics across all runs
 ├── benchmark_report.md             # Human-readable report
-├── exa-research/
+├── okf/                            # OKF-normalized successful outputs
+│   └── <skill>/<category>/q1_<prompt_slug>/
+│       ├── index.md
+│       ├── report.md
+│       ├── findings.md
+│       ├── uncertainties.md
+│       ├── method.md
+│       └── log.md
+├── deep-research-exa/
 │   ├── source_retrieval/
 │   │   ├── q1_metrics.json
 │   │   ├── q1_output.txt
@@ -83,7 +94,7 @@ benchmark/results/
 │   │   └── q3_output.txt
 │   └── technical_decomposition/
 │       └── ...
-├── gpt-researcher/
+├── deep-research-gpt-researcher/
 │   └── ...
 └── ...
 ```
@@ -123,6 +134,10 @@ Edit `config.py` to customize:
 - **Excluded skills** (skills to skip)
 - **Default models** and providers
 
+See `docs/benchmark-tasks.md` for canonical under-$1 task definitions and
+required artifacts.
+Use `docs/onepassword-env.md` to configure provider API keys through 1Password.
+
 ## Taxonomy Categories
 
 The benchmark covers 10 research categories from `docs/taxonomy-and-examples.md`:
@@ -145,7 +160,7 @@ Each category has 3 example questions.
 ### Test a Single Skill on All Categories
 
 ```bash
-python run_benchmark.py --skills tavily-search -v
+python run_benchmark.py --skills deep-research-tavily -v
 ```
 
 ### Quick Smoke Test (1 question per category)
@@ -227,9 +242,11 @@ After collecting benchmark data, we will implement a scoring rubric that evaluat
 
 ### Add a New Skill
 
-1. Place skill code in `.claude/skills/{skill-name}/scripts/`
-2. Add `requirements.txt` with dependencies
-3. Skill will be auto-discovered
+1. Place Codex skill docs in `.agents/skills/{skill-name}/SKILL.md`
+2. Place runnable skill code in `.agents/skills/{skill-name}/scripts/`
+3. Add `requirements.txt` with dependencies
+4. Confirm command wiring in `benchmark/utils.py`
+5. Add a tox environment when the skill has tests or runtime dependencies
 
 ### Add New Questions
 
@@ -266,7 +283,7 @@ SKILL_TIMEOUT = 1200  # 20 minutes
 Install all skill dependencies:
 
 ```bash
-pip install -r ../.claude/skills/test-requirements.txt
+pip install -r ../.agents/skills/test-requirements.txt
 ```
 
 ### API Rate Limits
@@ -300,7 +317,7 @@ jobs:
         with:
           python-version: '3.10'
       - name: Install dependencies
-        run: pip install -r .claude/skills/test-requirements.txt
+        run: pip install -r .agents/skills/test-requirements.txt
       - name: Run benchmark
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

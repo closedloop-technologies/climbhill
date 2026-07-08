@@ -56,16 +56,22 @@ setup(
             "sphinx-rtd-theme>=1.3.0",
             "sphinx-autodoc-typehints>=1.24.0",
         ],
+        "mcp": [
+            "mcp>=1.0.0",
+        ],
         "all": [
             "openai>=1.0.0",
             "google-generativeai>=0.3.0",
             "anthropic>=0.7.0",
+            "mcp>=1.0.0",
         ],
     },
     entry_points={
         "console_scripts": [
             "adr=awesome_deep_research.cli:main",
             "climbhill=awesome_deep_research.cli:main",
+            "adr-mcp=awesome_deep_research.mcp_server:main",
+            "adr-mcp-smoke=awesome_deep_research.mcp_server:smoke_main",
         ],
     },
     include_package_data=True,

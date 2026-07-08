@@ -8,6 +8,7 @@ import textwrap
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
+from urllib.parse import unquote
 
 from .alignment import initialize_repo, inspect_repo
 from .policy import check_paths, load_policy, paths_from_patch, policy_allows_promotion
@@ -16,10 +17,12 @@ from .reports import generate_markdown_report
 from .resources import add_resource, search_resources
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SKILLS_ROOT = REPO_ROOT / ".claude" / "skills"
+SKILLS_ROOT = REPO_ROOT / ".agents" / "skills"
 PROMPT_FILE = REPO_ROOT / "docs" / "taxonomy-and-examples.md"
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "outputs"
 DEFAULT_REGISTRY = Path(".climbhill") / "registry.local.sqlite"
+ENCODED_PATH_SEPARATOR_RE = re.compile(r"%2f|%5c", re.IGNORECASE)
+MALFORMED_PERCENT_ENCODING_RE = re.compile(r"%(?![0-9A-Fa-f]{2})")
 
 
 @dataclass
@@ -29,19 +32,51 @@ class PromptExample:
     text: str
 
 
+@dataclass
+class SkillInfo:
+    name: str
+    path: Path
+    source: str
+    runnable: bool
+
+
+SKILL_ROOTS = [
+    ("agents", REPO_ROOT / ".agents" / "skills"),
+    ("plugin", REPO_ROOT / "skills"),
+]
+
+
 def slugify(value: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
     return slug or "prompt"
 
 
+def load_skill_infos(include_documentation: bool = True) -> Dict[str, SkillInfo]:
+    skills: Dict[str, SkillInfo] = {}
+    for source, root in SKILL_ROOTS:
+        if not root.exists():
+            continue
+        for path in sorted(root.iterdir()):
+            if not path.is_dir():
+                continue
+            scripts_dir = path / "scripts"
+            runnable = scripts_dir.exists() and any(scripts_dir.glob("*.py"))
+            if not include_documentation and not runnable:
+                continue
+            existing = skills.get(path.name)
+            if existing and existing.runnable:
+                continue
+            skills[path.name] = SkillInfo(
+                name=path.name,
+                path=path,
+                source=source,
+                runnable=runnable,
+            )
+    return skills
+
+
 def load_skills() -> Dict[str, Path]:
-    if not SKILLS_ROOT.exists():
-        return {}
-    return {
-        path.name: path
-        for path in sorted(SKILLS_ROOT.iterdir())
-        if path.is_dir()
-    }
+    return {name: info.path for name, info in load_skill_infos(include_documentation=False).items()}
 
 
 def parse_skill_description(skill_dir: Path) -> str:
@@ -68,17 +103,18 @@ def parse_skill_description(skill_dir: Path) -> str:
 
 
 def list_skills_command(_: argparse.Namespace) -> int:
-    skills = load_skills()
+    skills = load_skill_infos(include_documentation=True)
     if not skills:
-        print("No Claude Code skills found under .claude/skills/", file=sys.stderr)
+        print("No skills found under .agents/skills/ or skills/", file=sys.stderr)
         return 1
 
-    for name, path in skills.items():
-        description = parse_skill_description(path)
+    for name, skill in sorted(skills.items()):
+        description = parse_skill_description(skill.path)
+        runnable = "runnable" if skill.runnable else "docs"
         if description:
-            print(f"{name}\t{description}")
+            print(f"{name}\t{skill.source}\t{runnable}\t{description}")
         else:
-            print(f"{name}")
+            print(f"{name}\t{skill.source}\t{runnable}")
     return 0
 
 
@@ -156,8 +192,10 @@ def list_prompts_command(_: argparse.Namespace) -> int:
 
 
 def resolve_prompt_text(prompt_id: Optional[str], prompt_text: Optional[str]) -> PromptExample:
-    if prompt_text:
-        return PromptExample(identifier="custom", category="Custom", text=prompt_text)
+    if prompt_text is not None:
+        if not prompt_text.strip():
+            raise ValueError("--prompt-text must be a non-empty string.")
+        return PromptExample(identifier="custom", category="Custom", text=prompt_text.strip())
 
     if not prompt_id:
         raise ValueError("Either --prompt-id or --prompt-text must be provided.")
@@ -236,18 +274,46 @@ def build_user_prompt(prompt: PromptExample, extra: Optional[str]) -> str:
 
 
 def ensure_output_dir(path: Optional[str]) -> Path:
-    if path:
-        output_dir = Path(path)
-        if not output_dir.is_absolute():
-            output_dir = REPO_ROOT / output_dir
+    if path is not None:
+        if not path.strip():
+            raise ValueError("--output-dir must be a non-empty path.")
+        if path != path.strip():
+            raise ValueError("--output-dir must be trimmed.")
+        if MALFORMED_PERCENT_ENCODING_RE.search(path):
+            raise ValueError("--output-dir must not contain malformed percent encoding.")
+        if ENCODED_PATH_SEPARATOR_RE.search(path):
+            raise ValueError("--output-dir must not encode path separators.")
+        decoded_path = unquote(path)
+        if decoded_path != path:
+            raise ValueError("--output-dir must not contain percent-encoded aliases.")
+        if "\\" in path:
+            raise ValueError("--output-dir must use forward slashes.")
+        if any(ord(character) < 32 or ord(character) == 127 for character in path):
+            raise ValueError("--output-dir must not contain control characters.")
+        if any(part in {".", ".."} for part in path.split("/")):
+            raise ValueError("--output-dir must not contain dot path segments.")
+        requested_dir = Path(path)
+        output_dir = requested_dir if requested_dir.is_absolute() else REPO_ROOT / requested_dir
     else:
         output_dir = DEFAULT_OUTPUT_DIR
+    output_dir = output_dir.resolve()
+    try:
+        output_dir.relative_to(REPO_ROOT.resolve())
+    except ValueError as exc:
+        raise ValueError("--output-dir must stay within the repository root.") from exc
+    if output_dir.exists() and not output_dir.is_dir():
+        raise ValueError("--output-dir must be a directory.")
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
 
 
 def next_output_path(output_dir: Path, skill_name: str) -> Path:
+    if not isinstance(skill_name, str) or not skill_name.strip():
+        raise ValueError("skill_name must be a non-empty string.")
     token = re.sub(r"[^A-Z0-9]+", "-", skill_name.upper())
+    token = token.strip("-")
+    if not token:
+        raise ValueError("skill_name must contain at least one letter or number.")
     pattern = re.compile(rf"OUTPUT-{re.escape(token)}-(\d+)\.md$")
     max_index = 0
     for existing in output_dir.glob(f"OUTPUT-{token}-*.md"):
@@ -614,17 +680,22 @@ def history_command(args: argparse.Namespace) -> int:
 
 
 def legacy_run_command(args: argparse.Namespace) -> int:
-    skills = load_skills()
+    skills = load_skill_infos(include_documentation=False)
     if args.skill not in skills:
         available = ", ".join(skills.keys()) or "<none>"
-        print(f"Skill '{args.skill}' not found. Available skills: {available}", file=sys.stderr)
+        print(f"Runnable skill '{args.skill}' not found. Available runnable skills: {available}", file=sys.stderr)
         return 1
 
-    skill_dir = skills[args.skill]
+    skill_dir = skills[args.skill].path
 
     try:
         prompt = resolve_prompt_text(args.prompt_id, args.prompt_text)
     except (ValueError, KeyError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    try:
+        output_dir = ensure_output_dir(args.output_dir)
+    except ValueError as exc:
         print(str(exc), file=sys.stderr)
         return 1
 
@@ -658,7 +729,6 @@ def legacy_run_command(args: argparse.Namespace) -> int:
         print("Claude CLI returned empty output.", file=sys.stderr)
         return 1
 
-    output_dir = ensure_output_dir(args.output_dir)
     output_path = next_output_path(output_dir, args.skill)
     output_path.write_text(output_text + "\n", encoding="utf-8")
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -9,6 +10,12 @@ from .policy import check_paths, load_policy, policy_allows_promotion
 from .registry import Registry
 from .reports import generate_markdown_report
 from .resources import add_resource, search_resources
+from .deep_research_mcp_server import (
+    build_fastmcp_server,
+    deep_research,
+    forward_event_to_context,
+    list_providers,
+)
 
 try:
     from mcp.server.fastmcp import FastMCP
@@ -449,6 +456,12 @@ def issues_propose(
 
 def main() -> None:
     mcp.run()
+
+
+def smoke_main() -> int:
+    report = repo_inspect(".")
+    print(json.dumps(report, indent=2, sort_keys=True))
+    return 0
 
 
 if __name__ == "__main__":

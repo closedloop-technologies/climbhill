@@ -46,7 +46,7 @@ claude
 
 ### 2.3. Skill Setup and Dependencies
 
-The skills must be installed either globally (`~/.claude/skills/<skill-name>`) or locally in your project (`.claude/skills/<skill-name>`).
+The skills must be installed either globally (`~/.agents/skills/<skill-name>`) or locally in your project (`.agents/skills/<skill-name>`).
 
 Crucially, you must install the Python dependencies required by the skill scripts, regardless of the execution mode.
 
@@ -96,7 +96,7 @@ For reliable automation, your prompt must be explicit about which skill and scri
 #### Example 1: Real-Time Synthesis (Perplexity Sonar)
 
 ```bash
-claude -p "Use the perplexity-sonar skill. Execute the scripts/ask.py script with the prompt 'What are the latest developments in the EV market in Q4 2025?' and use the 'sonar-large-online' model." \
+claude -p "Use the deep-research-perplexity skill. Execute the scripts/ask.py script with the prompt 'What are the latest developments in the EV market in Q4 2025?' and use the 'sonar-large-online' model." \
   --model claude-3-5-sonnet-20240620 > ev_market_q4_2025.md
 ```
 
@@ -107,7 +107,7 @@ The CLI will output the agent's thought process to the terminal (stderr), while 
 *Note: Agents like GPT Researcher can take several minutes.*
 
 ```bash
-claude -p "Use the gpt-researcher skill. Execute the scripts/run_research.py script with the query 'The future of renewable energy sources' and the report type 'deep_research_report'." \
+claude -p "Use the deep-research-gpt-researcher skill. Execute the scripts/run_research.py script with the query 'The future of renewable energy sources' and the report type 'deep_research_report'." \
   --model claude-3-5-sonnet-20240620 > renewable_energy_report.md
 ```
 
@@ -116,7 +116,7 @@ claude -p "Use the gpt-researcher skill. Execute the scripts/run_research.py scr
 For robust programmatic parsing, use `--output-format json`. This wraps the result in a structured format, including metadata.
 
 ```bash
-claude -p "Use tavily-search (scripts/tavily_search.py) to find 'latest LLM benchmarks'." --output-format json
+claude -p "Use deep-research-tavily (scripts/tavily_search.py) to find 'latest LLM benchmarks'." --output-format json
 ```
 
 **Output Structure (JSON):**
@@ -150,12 +150,12 @@ python3 path/to/skill/scripts/<script_name.py> [arguments]
 
 ### 4.2. Examples
 
-Assuming skills are installed locally in `./.claude/skills/`.
+Assuming skills are installed locally in `./.agents/skills/`.
 
 #### Example 1: Tavily Search (Direct)
 
 ```bash
-python3 .claude/skills/tavily-search/scripts/tavily_search.py \
+python3 .agents/skills/deep-research-tavily/scripts/tavily_search.py \
   --query "LLM interpretability techniques" \
   --search-depth advanced > sources.json
 ```
@@ -164,7 +164,7 @@ python3 .claude/skills/tavily-search/scripts/tavily_search.py \
 
 ```bash
 # Ensure OPENAI_API_KEY and BING_SEARCH_API_KEY are set in .env
-python3 .claude/skills/stanford-storm/scripts/run_storm.py \
+python3 .agents/skills/deep-research-stanford-storm/scripts/run_storm.py \
   --topic "The History of Quantum Computing" \
   --strong-model gpt-4o \
   --rm-name bing > quantum_history_article.md
@@ -184,8 +184,8 @@ A key advantage of direct execution is the ability to chain skills together usin
 #!/bin/bash
 
 # Define script paths (assuming local installation)
-EXA_SCRIPT=".claude/skills/exa-research/scripts/exa_tools.py"
-JINA_SCRIPT=".claude/skills/jina-ai/scripts/jina_tools.py"
+EXA_SCRIPT=".agents/skills/deep-research-exa/scripts/exa_tools.py"
+JINA_SCRIPT=".agents/skills/deep-research-jina/scripts/jina_tools.py"
 QUERY="Best practices for securing Kubernetes clusters in production"
 
 # 1. Search using Exa. The exa_tools.py script outputs a JSON array.
@@ -230,14 +230,14 @@ The provided deep research skills adhere to these conventions to enable robust h
 
 ```bash
 # Example: Direct Execution Error Handling
-python3 .claude/skills/perplexity-sonar/scripts/ask.py ...
+python3 .agents/skills/deep-research-perplexity/scripts/ask.py ...
 if [ $? -ne 0 ]; then
     echo "Perplexity skill failed!"
     exit 1
 fi
 
 # Example: Agentic CLI Error Handling
-if ! claude -p "Use tavily-search to check the weather."; then
+if ! claude -p "Use deep-research-tavily to check the weather."; then
     echo "Claude Code execution failed."
     exit 1
 fi

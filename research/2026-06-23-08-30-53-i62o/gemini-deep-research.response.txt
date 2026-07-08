@@ -1,0 +1,189 @@
+# Gemini grounded Result
+
+This comprehensive technical brief covers the state of **Agentic Deep Research** in 2026. Deep research systems have shifted from basic, single-shot search-augmented retrieval (RAG) to autonomous, stateful, multi-step reasoning agents that write code, navigate secure browser environments, execute nested planning loops, and recursively self-correct.
+
+---
+
+## 1. Paradigm Shifts & Core Concepts in 2026
+
+Deep research in 2026 is defined by several core architectural shifts:
+
+*   **Search as Code (SaC):** Pioneered by Perplexity in mid-2026, SaC moves away from treating search as a basic black-box tool call. Instead, the agent autonomously writes and executes Python/JS code to interact directly with search engine APIs. This enables dynamic sorting, custom pagination, and post-filtering before processing pages.
+*   **Hosted Sandboxed Runtimes:** The "run-on-my-laptop" model has hit security and timeout limitations for production. Workloads have transitioned to hosted, isolated Linux cloud sandboxes (such as Anthropic Managed Agents and OpenAI Responses API) where agent sessions can run uninterrupted for hours.
+*   **Two-Stage Architectures (Agent-to-Workflow):** Leading systems separate *exploration* from *synthesis*. Exploratory research is handled by autonomous stateful loops (high-degree agentic pathfinding). Once facts are gathered, the final report is generated through a deterministic, tightly constrained writing workflow (Evaluator-Optimizer pattern) to prevent AI "slop".
+
+---
+
+## 2. Commercial APIs & Hosted Agent Providers
+
+```
+                                  ┌───────────────────────────┐
+                                  │   Developer Application   │
+                                  └─────────────┬─────────────┘
+                                                │
+                 ┌──────────────────────────────┼──────────────────────────────┐
+                 ▼                              ▼                              ▼
+    ┌─────────────────────────┐    ┌─────────────────────────┐    ┌─────────────────────────┐
+    │   OpenAI Responses API  │    │  Perplexity Agent API   │    │Anthropic Managed Agents │
+    ├─────────────────────────┤    ├─────────────────────────┤    ├─────────────────────────┤
+    │ • o3/o4-deep-research   │    │ • Search as Code (SaC)  │    │ • Managed Linux Sandbox │
+    │ • Code Interpreter      │    │ • Finance Search Tool   │    │ • Vault Credentials    │
+    │ • MCP Connectors        │    │ • Per-invocation Billing│    │ • Normal Claude Tokens │
+    └─────────────────────────┘    └─────────────────────────┘    └─────────────────────────┘
+```
+
+### OpenAI Responses API (`o3-deep-research` & `o4-mini-deep-research`)
+OpenAI exposes its native deep research capabilities programmatically through the **Responses API**.
+*   **Models:**
+    *   `o3-deep-research`: The premier reasoning model optimized for legal, scientific, and massive data synthesis. ($10/M input, $40/M output; 200k context window).
+    *   `o4-mini-deep-research`: Extremely fast, cost-effective alternative ($2/M input, $8/M output).
+*   **Key Features:** Must be initialized with at least one data source (`web_search_preview`, remote Model Context Protocol (MCP) servers, or custom `file_search` vector stores). Supports long running actions via `background: True` and webhooks.
+
+### Perplexity Agent API
+A robust developer surface designed specifically for agentic search.
+*   **Search as Code (SaC):** Allows agents to programmatically query and filter Perplexity's index.
+*   **Finance Search:** Combines licensed financial data, SEC transcripts, earnings estimates, and real-time market data directly inside a unified tool call, bypassing custom scraper logic.
+*   **Pricing Pattern:** Billed per-invocation of tools ($0.005 per `web_search`, $0.0005 per `fetch_url`) alongside base token rates. Fully compatible with OpenAI client SDK schemas.
+
+### Anthropic Claude Managed Agents
+Launched in April 2026, this is a fully hosted runtime execution platform.
+*   **The Architecture:** Instead of exposing a simple chat endpoint, Anthropic provisions a secure cloud-hosted Linux sandbox for Claude.
+*   **Key Features:** Equipped with 8 built-in tools (bash, read, write, edit, glob, grep, web_fetch, web_search). Sessions run for up to 3 hours.
+*   **Vault-Scoped Credentials:** Allows developers to securely inject client tokens (e.g., Stripe, Slack, GitHub keys) into the hosted environment using vault proxies, meaning the credentials remain completely hidden from the underlying model.
+*   **Pricing:** Standard Claude token rates + $0.08 per session-hour.
+
+---
+
+## 3. Top Open-Source Frameworks & Repositories
+
+### 1. [OpenResearcher](https://github.com/TIGER-AI-Lab/OpenResearcher) (TIGER-AI-Lab)
+An open-source pipeline for long-horizon deep research trajectory synthesis.
+*   **The Model:** A fully open 30B-A3B model optimized for web browsing trajectories.
+*   **The Dataset:** Releases a massive **96K high-quality research trajectory dataset** containing 100+ turns per research path, eliminating the need to burn expensive APIs for basic research agent training.
+*   **Performance:** Achieves **54.8% on BrowseComp-Plus**, outperforming Claude Opus, Gemini 2.5 Pro, and DeepSeek-R1.
+
+### 2. [OpenClaw](https://github.com/openclaw/openclaw)
+The viral breakout star of 2026 (surging past 210,000+ GitHub stars).
+*   An entirely local, on-device agent platform that runs offline-capable LLMs.
+*   Connects to 50+ communication integrations (iMessage, Signal, Slack, WhatsApp).
+*   Operates with extreme autonomy; it is capable of running bash commands locally and **writing its own skill extensions** dynamically to solve unexpected research bottlenecks.
+
+### 3. [open_deep_research](https://github.com/langchain-ai/open_deep_research) (LangChain-AI)
+A stateful, graph-based deep research agent built natively on **LangGraph**.
+*   Uses graph states to manage planning, parallel querying, deduplication, and compilation.
+*   Natively compatible with LangGraph Studio for visual tracing, local human-in-the-loop editing, and MCP server tools.
+
+### 4. [gpt-researcher](https://github.com/assafelovic/gpt-researcher) (assafelovic)
+*   The most mature, community-vetted Python-based research framework.
+*   Relies deeply on the **Model Context Protocol (MCP)** to isolate scraping and search tools into separate, secure microservices.
+
+---
+
+## 4. Benchmark Leaderboards (2026 State of the Art)
+
+Traditional benchmarks (GPQA, MMLU) are widely saturated. In 2026, deep research agents are graded on long-horizon planning, multi-hop reasoning, and strict citation audits.
+
+### 1. Perplexity `search_evals` Leaderboard (June 2026)
+`search_evals` is Perplexity's open-source benchmark execution runner. It tracks four challenging, real-world web search datasets. Below is the verified performance of various managed configurations:
+
+| Benchmark | Tasks | Perplexity API | Anthropic Managed | OpenAI Responses | Parallel Task API | Exa Agent API |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **DeepSearchQA** (`dsqa`) | 900 | **0.871** | 0.815 | 0.733 | 0.810 | 0.530 |
+| **BrowseComp** (`browsecomp`) | 1,266 | **0.805** | 0.598 | 0.720 | 0.560 | 0.380 |
+| **Humanity's Last Exam** (`hle`) | 2,158 | 0.612 | 0.566 | **0.614** | 0.515 | 0.387 |
+| **WideSearch** (`widesearch`) | 200 | **0.651** | 0.590 | 0.522 | 0.584 | 0.471 |
+
+### 2. DeepSearchQA (Google DeepMind)
+A benchmark containing 900 multi-step, hand-crafted "causal chain" questions across 17 fields. Finding evidence for step $N$ requires successfully retrieving and resolving step $N-1$.
+*   **SOTA Leader:** **Claude Opus 4.8** leads the public leaderboard with a score of **0.931**.
+
+### 3. Labelbox Agentic Deep Research Leaderboard
+Partnered with domain-expert PhDs to evaluate: **Depth** (reasoning across 20k+ tokens), **Evidence** (formatting of peer-reviewed citations), and **Taste** (the ability to note nuance, counter-arguments, and address inconclusive findings).
+1.  **Gemini 2.5 Pro:** **77.55%** (Ranks #1 due to massive context parsing capacity and direct integration with active documents).
+2.  **GPT-o4-mini (Research Mode):** **71.46%**
+
+### 4. DRACO Benchmark (Perplexity AI)
+Released in February 2026, DRACO (Deep Research Accuracy, Completeness, and Objectivity) uses real-world user queries spanning 10 complex domains from Perplexity's traffic, assessing completeness, factual accuracy, and citation truthfulness.
+*   **The Standout Performer:** OpenRouter's **Fusion** (`openrouter/fusion`) model slug outscores single-frontier models on DRACO by routing query branches to multiple models in parallel (Gemini, Qwen, DeepSeek) and utilizing a centralized LLM judge to reconcile contradictions.
+
+---
+
+## 5. Tips, Tricks & Orchestration Best Practices
+
+1.  **The "Writer-Reviewer" Split (Avoid Agentic Slop):** Do not let your exploratory search agent write the final report. Instead, save the research artifacts into a unified JSON/Markdown schema (the "research dump"). Pass this dump to a non-agentic LLM executing a highly constrained **Evaluator-Optimizer** loop with explicit writing stylesheets (such as prohibiting generic summaries, ensuring exact active-voice syntax, and enforcing strict citation rules).
+2.  **Web Scrapers vs. Browser Use:** Only use full browser-automation frameworks (like `browser-use`) when interacting with behind-the-firewall web applications or complex UI states. For normal research, prioritize clean extraction APIs (like **Firecrawl**, **Jina Reader**, or **JigsawStack**). This saves up to 90% in execution speed and prevents brittle UI selector breaks.
+3.  **MCP-First Integrations:** When writing custom tool functions for your agents, package them as **Model Context Protocol (MCP)** servers. This separates tool execution environments from the main orchestrator, making it trivial to port tools (such as database lookups, secure scrapers, or internal code engines) between different agent frameworks.
+4.  **Enforce Visual Evidence Fidelity (VEF):** When scraping research papers with charts and data tables, do not rely on raw OCR or simple PDF-to-text parsers. Use deep parsing tools like **RAGFlow** to maintain document layout context, and pass tables as structured markdown or image crops directly to multimodal vision-enabled reasoners to prevent citation hallucinations.
+
+---
+
+## 6. Actionable Recommendations for `awesome-deep-researchers`
+
+To transform the `closedloop-technologies/awesome-deep-researchers` repository into a definitive guide, the following structural updates are recommended:
+
+### 1. Update Repository Directory Layout
+Update the folder tree to reflect the separation between hosted execution sandboxes, search/parsing APIs, and modern evaluative benchmarks:
+```text
+├── README.md
+├── COMMERCIAL_APIS.md      # Distinguish OpenAI Responses API, Perplexity Agent API, Anthropic Managed
+├── OPEN_SOURCE.md          # Feature OpenResearcher, OpenClaw, open_deep_research, gpt-researcher
+├── PARSING_TOOLS.md        # Jina Reader, Firecrawl, RAGFlow, Browser-Use, JigsawStack
+├── BENCHMARKS.md           # DeepSearchQA, DRACO, MMDeepResearch-Bench, Labelbox Leaderboard
+└── mcp-servers/            # Directory containing reusable Smithery MCP Server configurations
+```
+
+### 2. Implement the "OpenRouter Fusion" Model Blueprint
+Add a codebase folder or Markdown recipe detailing how to implement a local equivalent of OpenRouter's `openrouter/fusion` pattern:
+*   **Step 1:** Deconstruct user query into 3 parallel sub-queries.
+*   **Step 2:** Execute queries using different APIs (e.g., Perplexity for real-time web facts, Claude for academic papers).
+*   **Step 3:** Feed the results to a reasoning model (like `deepseek-r1`) to identify contradictions, consensus, and unique gaps.
+*   **Step 4:** Execute a final structured synthesis step to write the unified report.
+
+### 3. Add a Standardized Evaluation Suite Runner
+Integrate a workflow script pointing to Perplexity’s newly open-sourced `search_evals` repository. Instruct developers how to run reproducible local evaluation loops across custom agent pipelines using the `dsqa` (DeepSearchQA) and `draco` evaluation suites, ensuring that PRs to the repository are backed by objective benchmark gains.
+
+# Citations
+
+[1] [perplexity.ai](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEgbygAHGGgWLo8DybTMuqLeHZNtf8uQFLyr6mE3KNH9GQmB3k7XYjh8BjanIPD0mhMzpN3j5T0xoRCAKzw87iOwxkPPgh7I2k-25R5kDE6JGI5H2qInAWtHWl0EcDfAdUkGGSdpCqcVnhFDArKU89EkMtSkxbBesCorBoyOg==)
+[2] [arxiv.org](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGvTnZsnAmpzv6-o6WG5EeaJUi9tByoP5CS404W1vTtAnBEQK7lULrO2Qe5ujhTI9xGZDqpXbc8wTl0SGdLUv_VRnTCQZd423fgt3n4iVIvJ2k-MkXQ9w==)
+[3] [youtube.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE6zWAXkwXc5OYfy8_KfToUjTAPT3KOm01BwcyFkgKa6OG611dP14jguY7CexbEOOLBpagQq8SA2ZPeBgk0zyGYGHWlCamqR6NGTD4WrCJVSfzLJ2DgVLXSzh_LYT70cg==)
+[4] [perplexity.ai](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE58IgVUvvnjfay0FJAqTQ_d1hZKm_n1MJ2Bl_Rra9NevjPo_cYyB2m4v0E-XN-hOnP-Uv8G6UmFpynoY2oqE-iqkRk-2CXLScJ7V4en9ktSWT_Tssk0XyMinLC2DiwxM0z5-OjzLCbcTMqaHidzpH6przlzVNr3YvuG4rsrOOP8wY=)
+[5] [openai.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGHqFfRPe6woyu3_ZnlxtKHPwBWkwVInaNgFRKKNr9RyinpEUgo6uY5Ez2OcNHg7Bm3-Y1iSOjySVqijpyBCi-GPceuoeWA1ucSRcl31tUTcutHqTNvpYt7JXfPpCKYHr_9UGXBXr9-zJ7fbysmcek-oA==)
+[6] [youtube.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGmcetC1IbfEGY5f6nWz60G3N3wShPkCkAffdaKlGj8TrYZ1R-XNEmdNa4YP3IZuiLBKM4O9Xa612qtdak8IlCkCniweDeWd4b_jhlphb6Dbv-Ic0B5ULc-WsbFv6_nKjU=)
+[7] [youtube.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGettwEbIKiFc_53uPzOn6SBvbKMclhgjbJ6cbh2saXr-yvx68c8lBELvWC_0S9vsAv3rsaVdMi7ebM3OrqJOxHrnIF4BBgZ6-xX_OECpNyxkFeymy25Or-8NURfSNnxIY=)
+[8] [youtube.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH-K43kBPpmotPxVf2N--jDVHtIGFMWx_bHnWysD5FmVk6dbLU_GNxvmFx6jXUnKBg0x885Gy_Tfz3h7Zcsr0QMGrM0aP3YQisE27R3AAu9KdSUCh51Hh7tWY71G5CJymft)
+[9] [openai.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHlFm0xladfFdBBOZ8gIYvKD3f95xsHv-Qd5TyWvohRCuGelZlV7jwpBYoaPzq52ISUj8tcU6FbQ4mB4ZB4OJSZnA3COIQCxhKe2KMZIoI-4bQMshvgXhICbp8M0scXmFXsgL-h0bmqIaOvouN6Cm2t2A==)
+[10] [openai.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEPl32UO8HW2ewS5r1jbaC33l_-FD10dibmnQIqlOkU5WrZL4ov4HWe7XsySlFRWHkDlitzm_DsVWwq6g6wlNWKrX2GPVrrxyxvplj50eGtx9vAITFGATumcatImEshr_zgepl15U3F6aZMGDEhDNTA9ybn8g==)
+[11] [openrouter.ai](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF1TJQjD3rPvfFmHrwSo2TcX4YdW4c-rtKGiC84QE9bzG7VGfq4zHI6yR2oADynujhH9Moy_kH0Zh890JLWCw6Y7f451QOE4G1IoXm9fKbIkgyXCAMcgD9rAdsTepOzzeY4dRo=)
+[12] [simonwillison.net](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEy_uCIEbohBWsgowP2Q-sIaHr5pa_nLZE5xgUxylXq1E44Yckc_yAOCFe7hs0LhzqBrYR70u8-e0VaTXCuluUM6VzrhG3MalrKrJC6-AHIoEm72ppmtWuyYoM7_KKxMsIScimKBL9ZFwOi7-d06g==)
+[13] [openrouter.ai](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFG76X-kJmV0Tz59tNkOnrbLmPEi1tZ-xWdkIviVMDF_h1-MrTdVh6PG_UKJG4fKUefxQqncq5_ObG529GDhOIqp_mNIgQEyJyk9X-3mSdsKZlQhKbNcLcm5V1DlEvxWoWzJ0cLUt6MMQ==)
+[14] [openai.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGBN9y_PhGYYOY0ASQ5F34lXaxhoGSHDc96xW8dYi1uZOTW4S74S0uxzAJ2zUVCn06es_EDWt7RdquDhJcjIwRAKcpNTR9BddXP4AutL-oxKPHt5xJutqU3VfJM4GUJCCsTY9hwlg57kMIafPrLBO9cejhI_Mq9bYE-TCIg5BoNoJg4YUZYVPCb3DnPOh_vnp0GtwwFaw==)
+[15] [perplexity.ai](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFNCb6CnRncc263wFTdqfqCITcLXsbfhozE_yp0AbgNSERKg67Xe_uHeTpchR4PYFi1gVySmCAsEl0Dfej3BauZZ1R0JkiHp-33Gimq5o2kdWvWZEqIvJ90VIiLZBXYJXol_wsMvjcdzrWDSOsdknKxhYrPEVDB6Yi5CDmy44Bru1LrcPaDoze_sQ==)
+[16] [gend.co](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHKBisKhE-ahfBo4rRuDnfc8bQ4HCjK2bD-l-H3p6W-ibT7Lr6GrTh5P8HRKbbA9ZJxZlNBQyBP-YO_FI0UeZuRpl6v4MNDsW9xiLebQilpqyvZ-XnK5qEY-BS_P5i6CtQBErEy2RilwXe3)
+[17] [perplexity.ai](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFJONdl5zJTowQof8JyI7ICMDL69ypkyYwc_zvB-xGyM5b6XPX8uEsG6eh1geJUweovGpQ1bWYquoENPMg43nJGMk3vmuMvJS9-3Ke2LxcR-b0OloHNDU9XokvZTLuO5lSHpwGC9xl3Cya4hg-rJQNpQ9roPotRb3jFx1XqjnK6VUVDfQ==)
+[18] [techjacksolutions.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQELqBPeWdPsZyiiGgcASUFDak04NV7-yA9VaPhmhGQU3SXiZYp78ipDr6iU-DhNxzZRfXbu0czhBOouhW2y9yLHPNQTXvCvoBnJJmf2eb5S-ahf6rtJS45Za4PFqrlDpA7Z2aahfxhm4zL-y-g5sFaw2nbi6-yZtXmFHg==)
+[19] [perplexity.ai](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEEHRIOQ2hVWHPflEkIRoA2CY8QOAWhrmalcSXtxXjlj2Xwo-i9QMk6_Q59CuVnQVpVoUZhruJCJt_RbxTawuhn4EgU46mWRQd9jVfH6foZUFMu-ymNzjRjFGeL9sYjvTY0tjGzgFO5u_oJHUA8-xUZw5Ex)
+[20] [mindstudio.ai](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFxyL3p108dVvUHS0Ta-mIO_kp9e0jvDCG8u_uRi2m0QpyHjO347lCb-eUrXE9wqnRunLWpzydwBksD1rX8HA_WSXpFQ0MLU2X1ZNmMLg0Wxgfi7Ko9ha1oWzojG8E3Z0TYvTDh5VS3HxhncONcjJ_jAO_3zg==)
+[21] [reddit.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEAAXWi_C-7U7P5besDLAxZe0jWZI3C2k6pxdkXoyfziN6r61uPBh3kFFC6KBuKyDpqQTNvF1RCk_E2QatVvBNfCbSAoqhkT8jLOJlq8N7v1iIlZwBqrf7Ag8TKLaFZGHo3PwmFbghPy38DUyJEZ3JG_QIX_Sjl_41jyDTENyzn59fcWLfct7y3yJb4ZpHjiY0Tk61XJoQ=)
+[22] [github.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHYdyALVSgZ9lcEu4YpK1wb583YKfznjGUMTbsbn-0EfpP4zOPcw4P5FmbIJXAUfD-dLcRN0zx0T_2nxoKan-Ukvr8XncGMFrk8XMrLYodT3rNcpR-O9wEhQX-rAJUSIfcq5SCO)
+[23] [youtube.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQENFzALeD9GcOk0k1dhroIyRtIFcPo9q3tZ3n7qdBYknQPD-BW1oYbo9pETY8wie0D757LcDjKEuOybtaUuR6Dxj9_mQyzwyNz0i5n11ESApH4c4swrbe9Iq297T3A6PBrY)
+[24] [bytebytego.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFb96-dXgFjSg0tw_mj4zpvxDYcwDU-z-H56ca21QChnx8n8e8ZyHSV4zFl-yx-9QhG0zROvMK0bZZpP0-PxCiyotzGHyT_RxkW2wu_ZRC-h_pfygh_p6ql0_rSafOLNHDmcG-kN9cDYL8kwsT02sOdzzPpevaw)
+[25] [github.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE7ws9qz5RF6lOXFd05Y9FqYshk43UrG4CViyRO9Lbz07_zmC_vIJVItCCtWkexyOZ7sByKj3B0ZvUoQL7_yFF6InhxSgWNR8uRfizVOt2Suomes8apee9qQ6L0DH5VJ0WocaANeUyHyA==)
+[26] [reddit.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHk8jMH1y2eMN4JoI8R_vEOq9Mf-bobRHE0uzVAeXxx-vvSC7vSBmiSy0sTHS0GIpMkXogXsLNXEgctSxM1CDRUdlLbLz3h3URR8_3K4ZDpSjGnE92ygtsEggTfYqtVPayBqn1t-a8Zwy2u-aAax10GPUVF5cWHCZndIQhldMURr5QHmRJuYwBw_JT_xB2DxWAQ1sqsBHxONLW23w==)
+[27] [github.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFMGsc-mIAz8os12LCGit7nNWZ1bfD3ffTA6LhejA_6uwy82PJt9hGyirQWGyQ2zn92PjKV56ugJi4xAWAZN3b3Rh4YY-go26qIj3b1a8C7H0PKs4060BjPBx3s_K_KmPAYqZiZYn_I)
+[28] [github.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE3IUlINbXjGJh96GbL5m9-cNE8BdPdtj28XuCy-dx16dj_pIrq2kmPRJPSRObYizpebwFQgjeYMt2aFWIAJMbAonn-GrHpsjUbL131hPzfqHqUp3BDD_cW2Slh19slKG2DlQ==)
+[29] [opensourceforu.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF4kLYf2QnqmNy0LCybsHjPNXNhNX0dMMR_59YLzEgJZZEnvk6EPMczz6kkZiYmeHsrp-BvOm0ZJzWVKJPEa1ZSyNkUoq0M7liT5cTEaPahSIFKi4TqPawojsKybPaYEHG3Gdtt4M19cfFb6yU89UR1_xHtqZTDbZycnqJ86VTxDYFtlgoTGRTibqJTT_ygpVk9TXWAbpripnNYBcU=)
+[30] [youtube.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHRkrC8MekT9-FgCCBZ8L0HGFrCXRaS6b36rGXYd7YjJpjyM-fR6WRSMx2LB-Hpjgu_KQQSWRNyQNZXJQ6n2R7HZhEM02_maVEeVwoduECzO6DGZMzJTmW5N7_DeZk2cl2b)
+[31] [arxiv.org](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFWmIo5Yz3SLE0HardnU_hhsIFpeoZ5HBqdN0w4QDZRCCPVFFDK5JFdkwyONsBDV_eYZcd14bRMeurfC01JxOchb9xrdydOCdkRL3hdRrLVqTF5uf513YsAlA==)
+[32] [llm-stats.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFtn8N1B3jJGhTpiU1PS_0iEpIZFJm6uG1AbscxQbY3sPFd1Pw9Y6MVTFH11SuHUS6ibcPLOkfF3xkSA2fmShPDtQSn7mcqgKD9LI_htn52j3PtLpWOsBcyXAiiwHL_8ITeJ40=)
+[33] [labelbox.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE6tRpS0ge-mbJ_8nnFDF9R5CRTvlQFi7ZALWqe6Q1NjdVnTRvIhYeMcSDej_esg9yAm_lR9TOYLxocj9xFbvL6qquzx8DZ-glr9Do2M3DcUpGwoaOJjFRp_PJsCaxkbgFaFpHCg4NCqoKGhKg8oeFsLSg=)
+[34] [youtube.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF9Vl6BfUE0nfkSow_Ds3-ekka9hT4H2mgu6lJpjXrZ_XSYzlMPiXf96upvlDFqecfCOdYhI7cshrPUcYbz428pn_RPgddhrF_ozaSglrh619EWZkLp9y7XqWjF3aNm2EZx)
+[35] [perplexity.ai](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFhpFrxqR_GmjrZrp7cD-kFSVdARSHLIiSS6_YRT3tv_0WPaQW3kGNqHzbko7sItVqTWrYLoZU0YE_HL6hLd8Y2NuOQWZYc8hIuXA0Tlz9KplTN7BLE9gXnbkL7hlKol-Yv9ERySAo1C6ZP06Qk-odl1bP1Re9sjVbbvTkPlT3FCrbStUdl22Zho4wumDg4AYFzQNTR-JpeXEpOH6x4nuPMt17ApAT_BQ==)
+[36] [openrouter.ai](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFxnUG9QZ6RQDvN6iomDtmjeOd9sBPE1G625cV7BJ6TU2tDR58d340hGs1V4X56dmmSbb6ezJlfm8pWnc-J4b6EUAEMVYijmuCQNUy4bl2fAdwHI_IpmZm37woe24BmoKC6KkA69i4eLwnYhHPikaOren1EKbk=)
+[37] [medium.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHXB0m-tfkaJsg6tBnkkPjYXbqm5xAahYzq2XVC0Q1MKjhbaTUZQzELmX9PKFBq4RwuiUP33no9xhCMqzPuBNZkTSDM4JzaixIG_M7OPlvx2bwR-T15k7ylB61Hz1hydoZ-0KCUORBA76muBkYwYcD5gpohuWYR0_XSBsl70JJsKGAtykhaOZPTGUSQJEIEzo8bJlsLna9U4QIhuETL6BseyhLK_Lmyql0a7io0G4ggNTtONagyCPP3kYk98f7iuZaqLQ==)
+[38] [github.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEgWC2T9zx_jhO7PFoj02kInoIsyNdMyt5Zh-SRW9Y0w2Qj0nnz3TCMLzllRlTUc2CSJkjciFGcvw40LpVGrrXNN3_SbJ6s4IzVQO1MIXP0Rn5U80nPkIyT8EvgQ_I8cdUfaGT5Bn9d)
+[39] [github.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFGRZkRVI5nyDU40b80XIRSnYXtAwcQFFr5yNF0cmh5rB8Cq2wMq5FRNIEcxsF6cJiIcpJQWm660NVv0jRBIa_LEJWj3K-AY14XStdfMwPQDRoH9TkYZnj3aoqfUfa9oGHvLA==)
+[40] [smithery.ai](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEcBtJg_L_mvLbTDDyV4kZgaybzwYgKPpLVGvyq7Ly23vBdQ8oULt3tTEl6kNBUa1cZ1ETOkkE86f1ZqqYrJlpVhz4f-Jw7UX-QAvYQyHLhdK3ZSarIjUObE_OIzS5um1uxwEF4wGTUrqf_SvtA3Wg=)
+[41] [arxiv.org](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHXUm7UaOWxtJs54FxHCY06uk59yaE4xBBNQCPSA6Mu4SONHdZbpbb_BU5orY1cTBQxnPU6BqCjhi99NZ3jw6J9_0_KLPL9NzA78QG7ZWoS_uTTyCbfSdsLAA==)
+[42] [github.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEYGHThI8BKt9qEC67V7U_OB0l6A8xSweVGY8HwRS3CXPtj5a68hLoc1QXCR-FJymbXEZvVWZXDf7GuwC-fP-4xqJBuVL87KIV5a6wz2H03-dB2_gpWBUWVIIIgEDaHL98WAj2glWZ5YxVKGHd_2-kv5aoKv4tZ7oE=)
+[43] [github.com](https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHjp03pC4bV_xC7R5_UTPNAODApv2AhSbFER1mK3bFhI5AGzUFZ3gM8JJU3HTupNB2-HN5a8hiIpDP5d1ClR5OqXesRGfv7J5omXMK0uJDgEa-37nabHv0Hzm89gkNGYhxk)

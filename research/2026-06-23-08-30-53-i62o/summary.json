@@ -1,0 +1,113 @@
+{
+  "prompt": "Deepresearch the 2026 latest and best deep research APIs, providers, open-source frameworks, tips, tricks, skills, best practices, benchmarks, concepts, and emerging patterns. Prioritize official provider docs, current benchmark leaderboards, and primary sources. Include actionable recommendations for this awesome-deep-researchers repository.",
+  "created_at": "2026-06-23T08:31:56",
+  "results": [
+    {
+      "provider": "exa-research",
+      "command": [
+        "/home/gizmo/.local/share/mise/installs/python/latest/bin/python",
+        "/home/gizmo/Documents/repos/my_oss/awesome-deep-researchers/.agents/skills/exa-research/scripts/exa_tools.py",
+        "search",
+        "Deepresearch the 2026 latest and best deep research APIs, providers, open-source frameworks, tips, tricks, skills, best practices, benchmarks, concepts, and emerging patterns. Prioritize official provider docs, current benchmark leaderboards, and primary sources. Include actionable recommendations for this awesome-deep-researchers repository.",
+        "--num-results",
+        "5",
+        "--highlights"
+      ],
+      "response_file": "exa-research.response.txt",
+      "stderr_file": "exa-research.stderr.txt",
+      "returncode": 0,
+      "duration_seconds": 2.165906,
+      "skipped": false,
+      "error": null
+    },
+    {
+      "provider": "gemini-deep-research",
+      "command": [
+        "/home/gizmo/.local/share/mise/installs/python/latest/bin/python",
+        "/home/gizmo/Documents/repos/my_oss/awesome-deep-researchers/.agents/skills/gemini-deep-research/scripts/gemini_research.py",
+        "--prompt",
+        "Deepresearch the 2026 latest and best deep research APIs, providers, open-source frameworks, tips, tricks, skills, best practices, benchmarks, concepts, and emerging patterns. Prioritize official provider docs, current benchmark leaderboards, and primary sources. Include actionable recommendations for this awesome-deep-researchers repository.",
+        "--mode",
+        "grounded",
+        "--model",
+        "gemini-3.5-flash"
+      ],
+      "response_file": "gemini-deep-research.response.txt",
+      "stderr_file": "gemini-deep-research.stderr.txt",
+      "returncode": 0,
+      "duration_seconds": 62.97419,
+      "skipped": false,
+      "error": null
+    },
+    {
+      "provider": "jina-ai",
+      "command": [
+        "/home/gizmo/.local/share/mise/installs/python/latest/bin/python",
+        "/home/gizmo/Documents/repos/my_oss/awesome-deep-researchers/.agents/skills/jina-ai/scripts/jina_tools.py",
+        "search",
+        "Deepresearch the 2026 latest and best deep research APIs, providers, open-source frameworks, tips, tricks, skills, best practices, benchmarks, concepts, and emerging patterns. Prioritize official provider docs, current benchmark leaderboards, and primary sources. Include actionable recommendations for this awesome-deep-researchers repository."
+      ],
+      "response_file": "jina-ai.response.txt",
+      "stderr_file": "jina-ai.stderr.txt",
+      "returncode": 0,
+      "duration_seconds": 21.005934,
+      "skipped": false,
+      "error": null
+    },
+    {
+      "provider": "perplexity-sonar",
+      "command": [
+        "/home/gizmo/.local/share/mise/installs/python/latest/bin/python",
+        "/home/gizmo/Documents/repos/my_oss/awesome-deep-researchers/.agents/skills/perplexity-sonar/scripts/ask.py",
+        "--prompt",
+        "Deepresearch the 2026 latest and best deep research APIs, providers, open-source frameworks, tips, tricks, skills, best practices, benchmarks, concepts, and emerging patterns. Prioritize official provider docs, current benchmark leaderboards, and primary sources. Include actionable recommendations for this awesome-deep-researchers repository.",
+        "--model",
+        "sonar",
+        "--search-context-size",
+        "low"
+      ],
+      "response_file": "perplexity-sonar.response.txt",
+      "stderr_file": "perplexity-sonar.stderr.txt",
+      "returncode": 0,
+      "duration_seconds": 59.706243,
+      "skipped": false,
+      "error": null
+    },
+    {
+      "provider": "tavily-search",
+      "command": [
+        "/home/gizmo/.local/share/mise/installs/python/latest/bin/python",
+        "/home/gizmo/Documents/repos/my_oss/awesome-deep-researchers/.agents/skills/tavily-search/scripts/tavily_search.py",
+        "--query",
+        "Deepresearch the 2026 latest and best deep research APIs, providers, open-source frameworks, tips, tricks, skills, best practices, benchmarks, concepts, and emerging patterns. Prioritize official provider docs, current benchmark leaderboards, and primary sources. Include actionable recommendations for this awesome-deep-researchers repository.",
+        "--search-depth",
+        "basic",
+        "--max-results",
+        "5"
+      ],
+      "response_file": "tavily-search.response.txt",
+      "stderr_file": "tavily-search.stderr.txt",
+      "returncode": 0,
+      "duration_seconds": 2.83367,
+      "skipped": false,
+      "error": null
+    },
+    {
+      "provider": "you-research",
+      "command": [
+        "/home/gizmo/.local/share/mise/installs/python/latest/bin/python",
+        "/home/gizmo/Documents/repos/my_oss/awesome-deep-researchers/.agents/skills/you-research/scripts/you_research.py",
+        "--prompt",
+        "Deepresearch the 2026 latest and best deep research APIs, providers, open-source frameworks, tips, tricks, skills, best practices, benchmarks, concepts, and emerging patterns. Prioritize official provider docs, current benchmark leaderboards, and primary sources. Include actionable recommendations for this awesome-deep-researchers repository.",
+        "--research-effort",
+        "lite"
+      ],
+      "response_file": "you-research.response.txt",
+      "stderr_file": "you-research.stderr.txt",
+      "returncode": 0,
+      "duration_seconds": 17.298163,
+      "skipped": false,
+      "error": null
+    }
+  ]
+}

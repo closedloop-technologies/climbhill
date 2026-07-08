@@ -1,0 +1,10 @@
+model,overall_score,comprehensiveness,insight,instruction_following,readability,citation_accuracy,effective_citations
+WhaleCloud-DocChain_0612,54.78,55.14,55.33,54.85,52.48,-,-
+bodhi,54.07,54.15,54.60,54.41,51.87,-,-
+lunon_full100_FINAL.submission,53.51,53.42,54.83,53.41,50.48,-,-
+dalpha-deepresearch,53.10,52.58,52.94,53.87,53.20,-,-
+sourcery,51.17,50.53,52.22,51.06,49.68,-,-
+gemini-2.5-pro-deepresearch,49.98,50.01,49.92,50.22,49.58,-,-
+openai-deepresearch,47.84,48.05,46.69,49.29,47.62,-,-
+perplexity-Research,43.05,41.78,41.27,45.31,46.03,-,-
+grok-deeper-search,41.22,39.65,38.12,44.62,45.72,-,-

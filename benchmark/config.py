@@ -4,7 +4,8 @@ from pathlib import Path
 
 # Paths
 REPO_ROOT = Path(__file__).parent.parent
-SKILLS_DIR = REPO_ROOT / ".claude" / "skills"
+SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
+SKILLS_DIRS = [SKILLS_DIR]
 TAXONOMY_FILE = REPO_ROOT / "docs" / "taxonomy-and-examples.md"
 RESULTS_DIR = REPO_ROOT / "benchmark" / "results"
 
@@ -42,6 +43,9 @@ DEFAULT_COST_PER_1K = {"input": 0.001, "output": 0.003}
 
 # Timeout for each skill run (seconds)
 SKILL_TIMEOUT = 600  # 10 minutes
+
+# Maximum expected or estimated cost for a single benchmark call.
+MAX_BENCHMARK_COST_USD = 1.00
 
 # Skills to exclude from benchmarking (if needed)
 EXCLUDED_SKILLS = []

@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "awesome-deep-researchers": {
+      "type": "stdio",
+      "command": "python",
+      "args": [
+        "-m",
+        "awesome_deep_research.mcp_server"
+      ],
+      "env": {
+        "DEEP_RESEARCH_OUTPUT_ROOT": "~/.deep-research/outputs"
+      }
+    }
+  }
+}

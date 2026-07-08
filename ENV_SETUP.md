@@ -32,16 +32,16 @@ TAVILY_API_KEY=tvly-...      # Used by multiple skills
 
 | Skill | Required Keys | Optional Keys |
 |-------|--------------|---------------|
-| **exa-research** | `EXA_API_KEY` | - |
-| **gpt-researcher** | `TAVILY_API_KEY`, `OPENAI_API_KEY` | - |
-| **jina-ai** | - | `JINA_API_KEY` |
-| **langchain-deep-research** | `TAVILY_API_KEY`, `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` | - |
-| **openai-deep-research** | `OPENAI_API_KEY` | - |
-| **perplexity-sonar** | `PERPLEXITY_API_KEY` | - |
-| **smolagents** | `HF_TOKEN` or `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` | - |
-| **stanford-storm** | `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`, `BING_SEARCH_API_KEY` or `YDC_API_KEY` | - |
-| **tavily-search** | `TAVILY_API_KEY` | - |
-| **xai-grok** | `XAI_API_KEY` | - |
+| **deep-research-exa** | `EXA_API_KEY` | - |
+| **deep-research-gpt-researcher** | `TAVILY_API_KEY`, `OPENAI_API_KEY` | - |
+| **deep-research-jina** | - | `JINA_API_KEY` |
+| **deep-research-langchain** | `TAVILY_API_KEY`, `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` | - |
+| **deep-research-openai** | `OPENAI_API_KEY` | - |
+| **deep-research-perplexity** | `PERPLEXITY_API_KEY` | - |
+| **deep-research-smolagents** | `HF_TOKEN` or `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` | - |
+| **deep-research-stanford-storm** | `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`, `BING_SEARCH_API_KEY` or `YDC_API_KEY` | - |
+| **deep-research-tavily** | `TAVILY_API_KEY` | - |
+| **deep-research-xai-grok** | `XAI_API_KEY` | - |
 
 ## Getting API Keys
 
@@ -97,15 +97,15 @@ TAVILY_API_KEY=tvly-...      # Used by multiple skills
 
 ```bash
 # Test Tavily
-cd .claude/skills/tavily-search
+cd .agents/skills/deep-research-tavily
 python scripts/tavily_search.py --query "test"
 
 # Test OpenAI Deep Research
-cd ../openai-deep-research
+cd ../deep-research-openai
 python scripts/run_deep_research.py --prompt "test query"
 
 # Test Exa
-cd ../exa-research
+cd ../deep-research-exa
 python scripts/exa_tools.py search "test"
 ```
 
@@ -120,7 +120,7 @@ python test_system.py
 
 ```bash
 # Test one skill with minimal questions
-python run_benchmark.py --skills tavily-search --max-questions 1 -v
+python run_benchmark.py --skills deep-research-tavily --max-questions 1 -v
 ```
 
 ## Cost Management
@@ -128,14 +128,14 @@ python run_benchmark.py --skills tavily-search --max-questions 1 -v
 ### Free Tier Options
 
 Skills that can work with free tiers:
-- **jina-ai**: Works without API key (rate limited)
-- **smolagents**: Can use HuggingFace free tier
-- **tavily-search**: 1,000 free searches/month
+- **deep-research-jina**: Works without API key (rate limited)
+- **deep-research-smolagents**: Can use HuggingFace free tier
+- **deep-research-tavily**: 1,000 free searches/month
 
 ### Budget-Friendly Combinations
 
 For testing on a budget (~$5-10):
-1. Use `HF_TOKEN` with smolagents (free tier)
+1. Use `HF_TOKEN` with deep-research-smolagents (free tier)
 2. Use `TAVILY_API_KEY` (free tier)
 3. Use `OPENAI_API_KEY` with GPT-3.5-turbo (cheaper)
 
@@ -153,7 +153,7 @@ Some skills support multiple providers. They check in this order:
 **LLM Selection:**
 1. `OPENAI_API_KEY` (most common)
 2. `ANTHROPIC_API_KEY` (alternative)
-3. `HF_TOKEN` (fallback for smolagents)
+3. `HF_TOKEN` (fallback for deep-research-smolagents)
 
 **Search Selection:**
 1. `TAVILY_API_KEY` (recommended for research)
@@ -211,7 +211,7 @@ OPENAI_API_KEY=sk-proj-abc123...
 ANTHROPIC_API_KEY=sk-ant-api03-xyz789...
 HF_TOKEN=hf_abc123...
 
-# Search Providers  
+# Search Providers
 TAVILY_API_KEY=tvly-abc123...
 EXA_API_KEY=exa_abc123...
 PERPLEXITY_API_KEY=pplx-abc123...
@@ -237,4 +237,4 @@ After setting up your environment:
 - [Benchmark System README](benchmark/README.md)
 - [Benchmark Quick Start](benchmark/QUICKSTART.md)
 - [Complete System Summary](benchmark/SUMMARY.md)
-- [Skills Documentation](.claude/skills/*/SKILL.md)
+- [Skills Documentation](.agents/skills/*/SKILL.md)

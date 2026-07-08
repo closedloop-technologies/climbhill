@@ -1,60 +1,135 @@
 """Utility functions for benchmark system."""
 import re
-from pathlib import Path
-from typing import List, Dict, Tuple
-import json
+from typing import Dict, List
 
-from .config import SKILLS_DIR, TAXONOMY_FILE, EXCLUDED_SKILLS
+from .config import SKILLS_DIRS, TAXONOMY_FILE, EXCLUDED_SKILLS
+
+
+PREFERRED_MAIN_SCRIPTS = {
+    "deep-research-custom-data": "validate_manifest.py",
+    "deep-research-okf-normalize": "normalize_to_okf.py",
+}
+
+SKILL_COMMAND_INFO = {
+    "deep-research-exa": {
+        "command": "python {script} search {question} --num-results 5 --highlights",
+        "supports_query": True,
+    },
+    "deep-research-gpt-researcher": {
+        "command": "python {script} --query {question}",
+        "supports_query": True,
+    },
+    "deep-research-jina": {
+        "command": "python {script} search {question}",
+        "supports_query": True,
+    },
+    "deep-research-langchain": {
+        "command": "python {script} --query {question}",
+        "supports_query": True,
+        "requires_server": True,
+    },
+    "deep-research-openai": {
+        "command": "python {script} --prompt {question}",
+        "supports_query": True,
+    },
+    "deep-research-perplexity": {
+        "command": "python {script} --prompt {question} --model sonar --search-context-size low",
+        "supports_query": True,
+    },
+    "deep-research-smolagents": {
+        "command": "python {script} --task {question}",
+        "supports_query": True,
+    },
+    "deep-research-stanford-storm": {
+        "command": "python {script} --topic {question}",
+        "supports_query": True,
+    },
+    "deep-research-tavily": {
+        "command": "python {script} --query {question} --search-depth basic --max-results 5",
+        "supports_query": True,
+    },
+    "deep-research-xai-grok": {
+        "command": "python {script} --query {question}",
+        "supports_query": True,
+    },
+    "deep-research-you": {
+        "command": "python {script} --prompt {question} --research-effort lite",
+        "supports_query": True,
+    },
+    "deep-research-gemini": {
+        "command": "python {script} --prompt {question} --mode grounded --model gemini-3.5-flash",
+        "supports_query": True,
+    },
+    "deep-research-custom-data": {
+        "command": "python {script} docs/examples/custom-data-corpus.example.json",
+        "supports_query": False,
+    },
+    "deep-research-okf-normalize": {
+        "command": "python {script} --text {question} --title {question} --provider {skill_name} --bundle-dir \"{output_dir}/okf/{skill_name}/{category_slug}/{question_slug}\"",
+        "supports_query": True,
+    },
+}
 
 
 def discover_skills() -> List[Dict[str, str]]:
     """
-    Dynamically discover all skills in .claude/skills directory.
+    Dynamically discover all runnable skills in configured skill directories.
     
     Returns:
         List of skill dictionaries with name, script_path, and requirements
     """
     skills = []
     
-    if not SKILLS_DIR.exists():
-        raise FileNotFoundError(f"Skills directory not found: {SKILLS_DIR}")
-    
-    for skill_dir in SKILLS_DIR.iterdir():
-        if not skill_dir.is_dir():
-            continue
-        
-        skill_name = skill_dir.name
-        
-        # Skip excluded skills and test-related directories
-        if skill_name in EXCLUDED_SKILLS or skill_name in ['tests', '__pycache__']:
-            continue
-        
-        # Find the main script
-        scripts_dir = skill_dir / "scripts"
-        if not scripts_dir.exists():
-            continue
-        
-        # Look for Python scripts
-        python_files = list(scripts_dir.glob("*.py"))
-        if not python_files:
-            continue
-        
-        # Use the first Python file (or look for specific patterns)
-        main_script = python_files[0]
-        
-        # Check for requirements
-        requirements_file = skill_dir / "requirements.txt"
-        requirements = []
-        if requirements_file.exists():
-            requirements = requirements_file.read_text().strip().split('\n')
-            requirements = [r.strip() for r in requirements if r.strip() and not r.startswith('#')]
-        
-        skills.append({
-            "name": skill_name,
-            "script_path": str(main_script),
-            "requirements": requirements,
-            "skill_dir": str(skill_dir)
-        })
+    existing_roots = [skills_dir for skills_dir in SKILLS_DIRS if skills_dir.exists()]
+    if not existing_roots:
+        searched = ", ".join(str(skills_dir) for skills_dir in SKILLS_DIRS)
+        raise FileNotFoundError(f"No skills directory found. Searched: {searched}")
+
+    for skills_dir in existing_roots:
+        for skill_dir in skills_dir.iterdir():
+            if not skill_dir.is_dir():
+                continue
+
+            skill_name = skill_dir.name
+
+            # Skip excluded skills and test-related directories
+            if skill_name in EXCLUDED_SKILLS or skill_name in ['tests', '__pycache__']:
+                continue
+
+            # Find the main script
+            scripts_dir = skill_dir / "scripts"
+            if not scripts_dir.exists():
+                continue
+
+            # Look for Python scripts
+            python_files = list(scripts_dir.glob("*.py"))
+            if not python_files:
+                continue
+
+            preferred_script = PREFERRED_MAIN_SCRIPTS.get(skill_name)
+            if preferred_script and (scripts_dir / preferred_script).exists():
+                main_script = scripts_dir / preferred_script
+            else:
+                main_script = sorted(python_files)[0]
+
+            # Check for requirements
+            requirements_file = skill_dir / "requirements.txt"
+            requirements = []
+            if requirements_file.exists():
+                requirements = requirements_file.read_text().strip().split('\n')
+                requirements = [
+                    r.strip()
+                    for r in requirements
+                    if r.strip() and not r.startswith('#')
+                ]
+
+            skills.append({
+                "name": skill_name,
+                "script_path": str(main_script),
+                "requirements": requirements,
+                "skill_dir": str(skill_dir),
+                "skills_root": str(skills_dir),
+            })
     
     return sorted(skills, key=lambda x: x['name'])
 
@@ -111,57 +186,15 @@ def get_skill_command_info(skill_name: str) -> Dict[str, str]:
     Returns:
         Dictionary with command template and parameter mappings
     """
-    # Define command templates for each skill
-    # These map to the actual CLI arguments each skill expects
-    
-    command_info = {
-        "exa-research": {
-            "command": "python {script} research {question}",
-            "supports_query": True,
-        },
-        "gpt-researcher": {
-            "command": "python {script} --query {question}",
-            "supports_query": True,
-        },
-        "jina-ai": {
-            "command": "python {script} search {question}",
-            "supports_query": True,
-        },
-        "langchain-deep-research": {
-            "command": "python {script} --query {question}",
-            "supports_query": True,
-            "requires_server": True,  # Needs LangGraph server running
-        },
-        "openai-deep-research": {
-            "command": "python {script} --prompt {question}",
-            "supports_query": True,
-        },
-        "perplexity-sonar": {
-            "command": "python {script} --prompt {question}",
-            "supports_query": True,
-        },
-        "smolagents": {
-            "command": "python {script} --task {question}",
-            "supports_query": True,
-        },
-        "stanford-storm": {
-            "command": "python {script} --topic {question}",
-            "supports_query": True,
-        },
-        "tavily-search": {
-            "command": "python {script} --query {question}",
-            "supports_query": True,
-        },
-        "xai-grok": {
-            "command": "python {script} --query {question}",
-            "supports_query": True,
-        },
-    }
-    
-    return command_info.get(skill_name, {
-        "command": "python {script} {question}",
-        "supports_query": True,
-    })
+    if skill_name not in SKILL_COMMAND_INFO:
+        raise KeyError(f"No benchmark command registered for skill: {skill_name}")
+    return SKILL_COMMAND_INFO[skill_name]
+
+
+def find_unregistered_benchmark_skills() -> List[str]:
+    """Return discovered runnable skills that lack explicit benchmark commands."""
+    discovered = {skill["name"] for skill in discover_skills()}
+    return sorted(discovered - set(SKILL_COMMAND_INFO))
 
 
 def sanitize_filename(text: str, max_length: int = 100) -> str:

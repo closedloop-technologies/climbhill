@@ -70,6 +70,15 @@ class BenchmarkMetrics:
             model,
             provider
         )
+
+    def apply_actual_cost_if_present(self, output: str, error: str = "") -> None:
+        """Use provider-reported cost when output includes a parseable USD amount."""
+        actual_cost = self.extract_cost_from_output(output, error)
+        if actual_cost is not None:
+            self.estimated_cost_usd = actual_cost
+            self.add_metadata("cost_source", "provider_output")
+        else:
+            self.add_metadata("cost_source", "token_estimate")
     
     def add_metadata(self, key: str, value: Any) -> None:
         """Add custom metadata."""
@@ -107,6 +116,22 @@ class BenchmarkMetrics:
         
         # Default: assume 1 API call if we got output
         return 1 if output else 0
+
+    @staticmethod
+    def extract_cost_from_output(output: str, error: str = "") -> Optional[float]:
+        """Extract an actual USD cost if a skill prints one."""
+        combined = output + "\n" + (error or "")
+        patterns = [
+            r'(?:total[_\s-]?cost|actual[_\s-]?cost|cost[_\s-]?usd|usd[_\s-]?cost)\s*[:=]\s*\$?([0-9]+(?:\.[0-9]+)?)',
+            r'\bCost\s*:\s*\$([0-9]+(?:\.[0-9]+)?)',
+            r'\$([0-9]+(?:\.[0-9]+)?)\s*(?:USD)?\s*(?:total|for this run|estimated)',
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, combined, re.IGNORECASE)
+            if match:
+                return float(match.group(1))
+        return None
     
     @staticmethod
     def extract_model_info(output: str, error: str = "") -> Dict[str, str]:

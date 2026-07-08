@@ -9,7 +9,7 @@ The comprehensive benchmark system has been successfully created and tested.
 ### Core Components
 
 1. **Benchmark Runner** (`benchmark.py`)
-   - Dynamically discovers all skills in `.claude/skills/`
+   - Dynamically discovers all skills in `.agents/skills/`
    - Extracts questions from taxonomy document
    - Runs each skill on each question
    - Tracks comprehensive metrics
@@ -47,16 +47,16 @@ The comprehensive benchmark system has been successfully created and tested.
 
 ### Skills: 10 Total
 
-✅ exa-research
-✅ gpt-researcher
-✅ jina-ai
-✅ langchain-deep-research
-✅ openai-deep-research
-✅ perplexity-sonar
-✅ smolagents
-✅ stanford-storm
-✅ tavily-search
-✅ xai-grok
+✅ deep-research-exa
+✅ deep-research-gpt-researcher
+✅ deep-research-jina
+✅ deep-research-langchain
+✅ deep-research-openai
+✅ deep-research-perplexity
+✅ deep-research-smolagents
+✅ deep-research-stanford-storm
+✅ deep-research-tavily
+✅ deep-research-xai-grok
 
 ### Question Categories: 10 Total (30 Questions)
 
@@ -104,7 +104,7 @@ python benchmark/test_system.py
 ```bash
 cd benchmark
 export TAVILY_API_KEY="your-key"
-python run_benchmark.py --skills tavily-search --max-questions 1 -v
+python run_benchmark.py --skills deep-research-tavily --max-questions 1 -v
 ```
 
 ### 3. Test Multiple Skills
@@ -114,7 +114,7 @@ export TAVILY_API_KEY="your-key"
 export PERPLEXITY_API_KEY="your-key"
 
 python run_benchmark.py \
-  --skills tavily-search perplexity-sonar exa-research \
+  --skills deep-research-tavily deep-research-perplexity deep-research-exa \
   --max-questions 2 \
   -v
 ```
@@ -173,9 +173,9 @@ After running, you'll get reports showing:
 - Total tokens: 850,000
 
 **By Skill Rankings**
-1. tavily-search: 30/30 success, avg 12s, $0.45 total
-2. perplexity-sonar: 29/30 success, avg 18s, $1.20 total
-3. exa-research: 28/30 success, avg 25s, $2.50 total
+1. deep-research-tavily: 30/30 success, avg 12s, $0.45 total
+2. deep-research-perplexity: 29/30 success, avg 18s, $1.20 total
+3. deep-research-exa: 28/30 success, avg 25s, $2.50 total
 ...
 
 **By Category Analysis**
@@ -240,7 +240,7 @@ Weighted combination (customizable):
 ## 🛠️ Extending the System
 
 ### Add a New Skill
-1. Place code in `.claude/skills/{skill-name}/scripts/`
+1. Place code in `.agents/skills/{skill-name}/scripts/`
 2. Add `requirements.txt`
 3. Skill auto-discovered on next run
 
@@ -310,7 +310,7 @@ Start with:
 ```bash
 cd benchmark
 python test_system.py
-python run_benchmark.py --skills tavily-search --max-questions 1 -v
+python run_benchmark.py --skills deep-research-tavily --max-questions 1 -v
 ```
 
 Happy benchmarking! 🚀
