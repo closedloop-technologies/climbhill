@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import re
-import tomllib
 from pathlib import Path
 
 import yaml
 
 import climbhill
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 CI path
+    import tomli as tomllib
 
 
 ROOT = Path(__file__).resolve().parents[1]
