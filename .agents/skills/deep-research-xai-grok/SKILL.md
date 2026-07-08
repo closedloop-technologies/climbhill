@@ -11,7 +11,7 @@ especially for social, market, or news-oriented research.
 ## Environment
 
 ```bash
-op run --env-file .env.adr -- python .agents/skills/deep-research-xai-grok/scripts/grok_research.py \
+op run --env-file .env.climbhill -- python .agents/skills/deep-research-xai-grok/scripts/grok_research.py \
   --query "deepresearch the deepresearchers" \
   --model grok-4.3 \
   --web-search

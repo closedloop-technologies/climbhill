@@ -242,7 +242,7 @@ def check_provider_skill_commands() -> AuditResult:
     missing = []
     for skill_name in sorted(REQUIRED_OP_EXAMPLE_SKILLS):
         path = REPO_ROOT / ".agents" / "skills" / skill_name / "SKILL.md"
-        if path.exists() and "op run --env-file .env.adr" not in read_text(path):
+        if path.exists() and "op run --env-file .env.climbhill" not in read_text(path):
             missing.append(skill_name)
     ok = not missing
     return AuditResult("provider op command examples", ok, ", ".join(missing) if missing else "all present")
@@ -280,9 +280,9 @@ def check_no_compiled_python_artifacts() -> AuditResult:
 
 
 def check_env_template() -> AuditResult:
-    path = REPO_ROOT / ".env.adr.example"
+    path = REPO_ROOT / ".env.climbhill.example"
     if not path.exists():
-        return AuditResult("1Password env template", False, "missing .env.adr.example")
+        return AuditResult("1Password env template", False, "missing .env.climbhill.example")
     text = read_text(path)
     missing = [name for name in sorted(REQUIRED_ENV_NAMES) if f"{name}=op://" not in text]
     return AuditResult(
@@ -294,8 +294,8 @@ def check_env_template() -> AuditResult:
 
 def check_gitignore_env() -> AuditResult:
     text = read_text(REPO_ROOT / ".gitignore")
-    ok = ".env.adr" in text
-    return AuditResult("env secret ignore", ok, ".env.adr ignored" if ok else ".env.adr not ignored")
+    ok = ".env.climbhill" in text
+    return AuditResult("env secret ignore", ok, ".env.climbhill ignored" if ok else ".env.climbhill not ignored")
 
 
 def check_benchmark_tasks() -> AuditResult:
@@ -489,7 +489,7 @@ def check_api_key_signup_checklist() -> AuditResult:
         "OPENAI_API_KEY",
         "GOOGLE_API_KEY",
         "YOU_API_KEY",
-        "op run --env-file .env.adr",
+        "op run --env-file .env.climbhill",
     ]
     missing = [snippet for snippet in required if snippet not in text]
     return AuditResult(

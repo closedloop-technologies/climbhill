@@ -11,7 +11,7 @@ research, reflection, and configurable retrieval.
 ## Environment
 
 ```bash
-op run --env-file .env.adr -- python .agents/skills/deep-research-langchain/scripts/research.py \
+op run --env-file .env.climbhill -- python .agents/skills/deep-research-langchain/scripts/research.py \
   --query "AI for Science agents: current systems and evidence" \
   --max-iterations 2
 ```

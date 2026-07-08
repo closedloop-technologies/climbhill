@@ -11,7 +11,7 @@ and explicit intermediate actions.
 ## Environment
 
 ```bash
-op run --env-file .env.adr -- python .agents/skills/deep-research-smolagents/scripts/agent.py \
+op run --env-file .env.climbhill -- python .agents/skills/deep-research-smolagents/scripts/agent.py \
   --task "Find current deep research APIs and summarize cost controls" \
   --model openai \
   --model-id gpt-4o-mini \

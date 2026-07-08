@@ -14,7 +14,7 @@ def test_template_has_valid_op_references_for_core_scope():
 
 
 def test_env_file_rejects_plain_secret(tmp_path: Path):
-    env_file = tmp_path / ".env.adr"
+    env_file = tmp_path / ".env.climbhill"
     env_file.write_text("OPENAI_API_KEY=sk-plain-secret\n", encoding="utf-8")
 
     results = op_env.check_env_file(env_file, ["OPENAI_API_KEY"])
@@ -24,7 +24,7 @@ def test_env_file_rejects_plain_secret(tmp_path: Path):
 
 
 def test_env_file_rejects_duplicate_required_assignment(tmp_path: Path):
-    env_file = tmp_path / ".env.adr"
+    env_file = tmp_path / ".env.climbhill"
     env_file.write_text(
         "\n".join(
             [
@@ -42,7 +42,7 @@ def test_env_file_rejects_duplicate_required_assignment(tmp_path: Path):
 
 
 def test_env_file_rejects_whitespace_in_op_references(tmp_path: Path):
-    env_file = tmp_path / ".env.adr"
+    env_file = tmp_path / ".env.climbhill"
     env_file.write_text(
         "OPENAI_API_KEY=op://climbhill/api keys/OPENAI_API_KEY\n",
         encoding="utf-8",
@@ -55,7 +55,7 @@ def test_env_file_rejects_whitespace_in_op_references(tmp_path: Path):
 
 
 def test_env_file_rejects_encoded_op_reference_aliases(tmp_path: Path):
-    env_file = tmp_path / ".env.adr"
+    env_file = tmp_path / ".env.climbhill"
 
     for reference in [
         "op://climbhill/api%2fkeys/OPENAI_API_KEY",
@@ -72,7 +72,7 @@ def test_env_file_rejects_encoded_op_reference_aliases(tmp_path: Path):
 
 
 def test_env_file_rejects_duplicate_op_references_across_required_names(tmp_path: Path):
-    env_file = tmp_path / ".env.adr"
+    env_file = tmp_path / ".env.climbhill"
     env_file.write_text(
         "\n".join(
             [
@@ -94,7 +94,7 @@ def test_env_file_rejects_duplicate_op_references_across_required_names(tmp_path
 
 
 def test_env_file_rejects_malformed_required_assignment_name(tmp_path: Path):
-    env_file = tmp_path / ".env.adr"
+    env_file = tmp_path / ".env.climbhill"
     env_file.write_text(
         " OPENAI_API_KEY=op://climbhill/api-keys/OPENAI_API_KEY\n",
         encoding="utf-8",
@@ -107,7 +107,7 @@ def test_env_file_rejects_malformed_required_assignment_name(tmp_path: Path):
 
 
 def test_env_file_rejects_malformed_unrequired_assignment_name(tmp_path: Path):
-    env_file = tmp_path / ".env.adr"
+    env_file = tmp_path / ".env.climbhill"
     env_file.write_text(
         "\n".join(
             [

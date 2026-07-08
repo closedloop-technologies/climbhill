@@ -15,8 +15,8 @@ from urllib.parse import unquote
 from .audit import REQUIRED_ENV_NAMES, REPO_ROOT
 
 
-DEFAULT_ENV_FILE = REPO_ROOT / ".env.adr"
-DEFAULT_TEMPLATE_FILE = REPO_ROOT / ".env.adr.example"
+DEFAULT_ENV_FILE = REPO_ROOT / ".env.climbhill"
+DEFAULT_TEMPLATE_FILE = REPO_ROOT / ".env.climbhill.example"
 DEFAULT_OP_VAULT = "climbhill"
 DEFAULT_OP_ITEM = "api-keys"
 OP_REF_RE = re.compile(r"^op://[^\s/]+/[^\s/]+/[^\s/]+$")
@@ -220,12 +220,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--env-file",
         type=Path,
         default=DEFAULT_ENV_FILE,
-        help="Dotenv file with op:// references. Defaults to .env.adr.",
+        help="Dotenv file with op:// references. Defaults to .env.climbhill.",
     )
     parser.add_argument(
         "--template",
         action="store_true",
-        help="Check .env.adr.example instead of .env.adr.",
+        help="Check .env.climbhill.example instead of .env.climbhill.",
     )
     parser.add_argument(
         "--live",

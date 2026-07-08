@@ -2,7 +2,7 @@
 
 Create accounts and API keys for the services below, then store each value in
 the `climbhill` 1Password vault item named `api-keys`. The field
-names must match `.env.adr.example`.
+names must match `.env.climbhill.example`.
 
 ## Core Provider Keys
 
@@ -76,12 +76,12 @@ the live benchmark runner skips providers whose required key is not set unless
 Verify without printing secrets:
 
 ```bash
-python -m climbhill.op_env --env-file .env.adr --scope commercial
-op run --env-file .env.adr -- python -m climbhill.op_env --live --scope commercial
+python -m climbhill.op_env --env-file .env.climbhill --scope commercial
+op run --env-file .env.climbhill -- python -m climbhill.op_env --live --scope commercial
 ```
 
 Run the live smoke only after verification passes:
 
 ```bash
-op run --env-file .env.adr -- python benchmark/live_smoke.py -v
+op run --env-file .env.climbhill -- python benchmark/live_smoke.py -v
 ```

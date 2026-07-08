@@ -12,7 +12,7 @@ Search or uploaded documents.
 ## Environment
 
 ```bash
-op run --env-file .env.adr -- python .agents/skills/deep-research-gemini/scripts/gemini_research.py \
+op run --env-file .env.climbhill -- python .agents/skills/deep-research-gemini/scripts/gemini_research.py \
   --prompt "Research current deep research APIs. Keep the answer concise and cite sources." \
   --mode grounded \
   --model gemini-3.5-flash

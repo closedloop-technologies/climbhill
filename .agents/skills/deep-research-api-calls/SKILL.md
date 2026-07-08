@@ -22,7 +22,7 @@ assumption and measured token/search counts.
 Load keys from 1Password with `op run` rather than hard-coding secrets:
 
 ```bash
-op run --env-file .env.adr -- python benchmark/run_benchmark.py --max-questions 1 -v
+op run --env-file .env.climbhill -- python benchmark/run_benchmark.py --max-questions 1 -v
 ```
 
 Expected environment names:

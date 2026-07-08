@@ -11,7 +11,7 @@ build/
 
 # Environment variables
 .env
-.env.adr
+.env.climbhill
 .env.local
 
 # Testing

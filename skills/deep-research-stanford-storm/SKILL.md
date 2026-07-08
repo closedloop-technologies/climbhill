@@ -12,7 +12,7 @@ it for article synthesis benchmarks.
 ## Environment
 
 ```bash
-op run --env-file .env.adr -- python .agents/skills/deep-research-stanford-storm/scripts/run_storm.py \
+op run --env-file .env.climbhill -- python .agents/skills/deep-research-stanford-storm/scripts/run_storm.py \
   --topic "AI for Science research agents" \
   --rm-name you \
   --fast-model gpt-4o-mini \

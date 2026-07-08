@@ -65,7 +65,7 @@ Use `.agents/skills/<skill-name>/SKILL.md` for exact command and environment
 details. Store secrets in 1Password and run commands with `op run`:
 
 ```bash
-op run --env-file .env.adr -- python benchmark/run_benchmark.py \
+op run --env-file .env.climbhill -- python benchmark/run_benchmark.py \
   --skills deep-research-perplexity \
   --categories "Source Retrieval" \
   --max-questions 1 \
