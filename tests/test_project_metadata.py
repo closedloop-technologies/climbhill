@@ -45,3 +45,30 @@ def test_pypi_publish_workflow_uses_trusted_publishing() -> None:
     ]
     assert "python -m build" in build_commands
     assert "python -m twine check dist/*" in build_commands
+
+
+def test_ci_workflow_runs_release_gates() -> None:
+    workflow = yaml.safe_load((ROOT / ".github" / "workflows" / "ci.yml").read_text())
+    triggers = workflow.get("on", workflow.get(True))
+
+    assert "pull_request" in triggers
+    assert triggers["push"]["branches"] == ["main"]
+
+    test_job = workflow["jobs"]["test"]
+    assert test_job["strategy"]["matrix"]["python-version"] == [
+        "3.10",
+        "3.11",
+        "3.12",
+        "3.13",
+    ]
+    commands = [
+        step.get("run", "")
+        for step in test_job["steps"]
+        if "run" in step
+    ]
+    assert "pytest" in commands
+    assert "python -m build" in commands
+    assert "python -m twine check dist/*" in commands
+    assert "python .github/scripts/validate_plugin.py ." in commands
+    assert "python .github/scripts/validate_plugin.py plugin/climbhill-ai" in commands
+    assert any("climbhill --help" in command for command in commands)
