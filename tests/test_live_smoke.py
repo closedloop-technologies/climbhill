@@ -71,7 +71,7 @@ def test_live_smoke_script_runs_when_invoked_as_file():
             "--skills",
             "missing-skill",
             "--output-dir",
-            "/tmp/adr-live-smoke-test",
+            "/tmp/climbhill-live-smoke-test",
         ],
         cwd=REPO_ROOT,
         capture_output=True,

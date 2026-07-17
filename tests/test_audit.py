@@ -3,7 +3,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from awesome_deep_research import audit
+from climbhill import audit
 
 
 def test_audit_passes_current_repo_requirements():
@@ -48,7 +48,7 @@ def test_audit_covers_goal_critical_checks():
 
 def test_compiled_artifact_audit_scans_all_tracked_files(monkeypatch):
     class Result:
-        stdout = "awesome_deep_research/__pycache__/audit.cpython-313.pyc\n"
+        stdout = "climbhill/__pycache__/audit.cpython-313.pyc\n"
 
     def fake_run(*args, **kwargs):
         assert args[0] == ["git", "ls-files"]
@@ -60,13 +60,13 @@ def test_compiled_artifact_audit_scans_all_tracked_files(monkeypatch):
 
     assert result.ok is False
     assert result.name == "compiled Python artifacts"
-    assert "awesome_deep_research/__pycache__/audit.cpython-313.pyc" in result.detail
+    assert "climbhill/__pycache__/audit.cpython-313.pyc" in result.detail
 
 
 def test_readme_mentions_op_env_checker():
     readme = (audit.REPO_ROOT / "README.md").read_text(encoding="utf-8")
 
-    assert "awesome_deep_research.op_env --template" in readme
+    assert "climbhill.op_env --template" in readme
 
 
 def test_custom_data_source_guide_covers_requested_sources():

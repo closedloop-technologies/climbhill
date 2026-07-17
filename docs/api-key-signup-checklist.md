@@ -1,8 +1,8 @@
 # API Key Signup Checklist
 
 Create accounts and API keys for the services below, then store each value in
-the `awesome-deep-researchers` 1Password vault item named `api-keys`. The field
-names must match `.env.adr.example`.
+the `climbhill` 1Password vault item named `api-keys`. The field
+names must match `.env.climbhill.example`.
 
 ## Core Provider Keys
 
@@ -36,14 +36,14 @@ backends.
 After signup, create the vault if needed:
 
 ```bash
-op vault create awesome-deep-researchers
+op vault create climbhill
 ```
 
 Then create or update the item:
 
 ```bash
 op item create \
-  --vault awesome-deep-researchers \
+  --vault climbhill \
   --category "API Credential" \
   --title api-keys \
   OPENAI_API_KEY= \
@@ -65,7 +65,7 @@ Add real key values as you get them. Example for one field:
 
 ```bash
 op item edit api-keys \
-  --vault awesome-deep-researchers \
+  --vault climbhill \
   OPENAI_API_KEY="paste-openai-key-here"
 ```
 
@@ -76,12 +76,12 @@ the live benchmark runner skips providers whose required key is not set unless
 Verify without printing secrets:
 
 ```bash
-python -m awesome_deep_research.op_env --env-file .env.adr --scope commercial
-op run --env-file .env.adr -- python -m awesome_deep_research.op_env --live --scope commercial
+python -m climbhill.op_env --env-file .env.climbhill --scope commercial
+op run --env-file .env.climbhill -- python -m climbhill.op_env --live --scope commercial
 ```
 
 Run the live smoke only after verification passes:
 
 ```bash
-op run --env-file .env.adr -- python benchmark/live_smoke.py -v
+op run --env-file .env.climbhill -- python benchmark/live_smoke.py -v
 ```

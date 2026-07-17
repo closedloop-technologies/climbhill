@@ -1,0 +1,39 @@
+{
+  "name": "climbhill-ai",
+  "version": "0.1.0",
+  "description": "Repo-local recursive self-improvement workflows for coding agents.",
+  "author": {
+    "name": "ClimbHill.ai Contributors",
+    "url": "https://climbhill.ai"
+  },
+  "homepage": "https://climbhill.ai",
+  "repository": "https://github.com/closedloop-technologies/climbhill",
+  "license": "MIT",
+  "keywords": [
+    "coding-agents",
+    "self-improvement",
+    "mcp",
+    "policy",
+    "evaluation"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ClimbHill.ai",
+    "shortDescription": "Run controlled recursive repo-improvement loops.",
+    "longDescription": "ClimbHill.ai provides Codex workflows for aligning repositories, enforcing edit policy, recording candidates, comparing attempts, generating reports, and preserving human promotion gates.",
+    "developerName": "ClimbHill.ai Contributors",
+    "category": "Productivity",
+    "capabilities": [
+      "Write",
+      "MCP"
+    ],
+    "websiteURL": "https://climbhill.ai",
+    "defaultPrompt": [
+      "Align this repo for ClimbHill.ai.",
+      "Run a bounded improvement loop.",
+      "Generate a candidate report."
+    ],
+    "brandColor": "#07523b"
+  },
+  "mcpServers": "./.mcp.json"
+}

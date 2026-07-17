@@ -22,7 +22,7 @@ assumption and measured token/search counts.
 Load keys from 1Password with `op run` rather than hard-coding secrets:
 
 ```bash
-op run --env-file .env.adr -- python benchmark/run_benchmark.py --max-questions 1 -v
+op run --env-file .env.climbhill -- python benchmark/run_benchmark.py --max-questions 1 -v
 ```
 
 Expected environment names:
@@ -35,6 +35,7 @@ Expected environment names:
 | Tavily | `TAVILY_API_KEY` |
 | Jina AI | `JINA_API_KEY` |
 | xAI | `XAI_API_KEY` |
+| Xquik | `XQUIK_API_KEY` |
 | You.com | `YOU_API_KEY` |
 | Google Gemini | `GOOGLE_API_KEY` |
 
@@ -48,6 +49,7 @@ Expected environment names:
 | Tavily Search | `python .agents/skills/deep-research-tavily/scripts/tavily_search.py --query "$PROMPT"` | cap results and include answer mode only when needed |
 | Jina AI | `python .agents/skills/deep-research-jina/scripts/jina_tools.py search "$PROMPT"` | cap result count and fetched pages |
 | xAI Grok | `python .agents/skills/deep-research-xai-grok/scripts/grok_research.py --query "$PROMPT"` | use economical model and cap output |
+| [Xquik](https://docs.xquik.com/api-reference/x/search-tweets) | `curl -fsS -G https://xquik.com/api/v1/x/tweets/search -H "x-api-key: $XQUIK_API_KEY" --data-urlencode "q=$PROMPT" --data "limit=10"` | cap result count and narrow the date window for social evidence |
 | You.com ARI | provider-specific ARI endpoint wrapper | avoid high-cost professional report mode for benchmark calls |
 | Google Gemini Deep Research | Gemini API or UI workflow where available | cap grounding/search effort and output tokens |
 

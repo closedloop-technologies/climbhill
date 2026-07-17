@@ -10,8 +10,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from awesome_deep_research.mcp_app import DeepResearchService
-from awesome_deep_research.providers import (
+from climbhill.mcp_app import DeepResearchService
+from climbhill.providers import (
     ProviderAdapter,
     ProviderOutput,
     ProviderRegistry,

@@ -1,11 +1,11 @@
 {
   "mcpServers": {
-    "awesome-deep-researchers": {
+    "climbhill": {
       "type": "stdio",
       "command": "python",
       "args": [
         "-m",
-        "awesome_deep_research.mcp_server"
+        "climbhill.mcp_server"
       ],
       "env": {
         "DEEP_RESEARCH_OUTPUT_ROOT": "~/.deep-research/outputs"

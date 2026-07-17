@@ -112,7 +112,7 @@ def main() -> int:
         print(f"SKIP\t{message}", file=sys.stderr)
 
     if not selected:
-        print("No live smoke skills are ready. Run through op run with .env.adr.", file=sys.stderr)
+        print("No live smoke skills are ready. Run through op run with .env.climbhill.", file=sys.stderr)
         return 1
 
     runner = BenchmarkRunner(output_dir=args.output_dir, verbose=args.verbose)

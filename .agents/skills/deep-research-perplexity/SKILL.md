@@ -11,7 +11,7 @@ source citations. The Sonar API is OpenAI-compatible.
 ## Environment
 
 ```bash
-op run --env-file .env.adr -- python .agents/skills/deep-research-perplexity/scripts/ask.py \
+op run --env-file .env.climbhill -- python .agents/skills/deep-research-perplexity/scripts/ask.py \
   --prompt "deepresearch the deepresearchers" \
   --model sonar \
   --search-context-size low

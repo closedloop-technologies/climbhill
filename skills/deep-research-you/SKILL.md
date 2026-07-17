@@ -12,7 +12,7 @@ tier that can answer the benchmark prompt.
 ## Environment
 
 ```bash
-op run --env-file .env.adr -- python - <<'PY'
+op run --env-file .env.climbhill -- python - <<'PY'
 import os, requests
 
 response = requests.post(
@@ -49,7 +49,7 @@ Required 1Password-backed variable:
 ## Benchmark Command
 
 ```bash
-op run --env-file .env.adr -- python .agents/skills/deep-research-you/scripts/you_research.py \
+op run --env-file .env.climbhill -- python .agents/skills/deep-research-you/scripts/you_research.py \
   --prompt "deepresearch the deepresearchers" \
   --research-effort lite
 ```
@@ -62,7 +62,7 @@ company fundamentals, equity and commodity prices, macro indicators, SEC
 filings, earnings transcripts, analyst coverage, and financial news.
 
 ```bash
-op run --env-file .env.adr -- python .agents/skills/deep-research-you/scripts/you_research.py \
+op run --env-file .env.climbhill -- python .agents/skills/deep-research-you/scripts/you_research.py \
   --api finance \
   --prompt "Compare the gross margins of Apple, Microsoft, and Google over the past three fiscal years." \
   --research-effort deep

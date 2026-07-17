@@ -1,39 +1,38 @@
 {
-  "name": "awesome-deep-researchers",
+  "name": "climbhill",
   "version": "0.1.0+codex.20260626135956",
-  "description": "Codex skills and benchmark guidance for evaluating deep research agents and normalizing their outputs.",
+  "description": "Codex workflows for controlled recursive repository improvement with ClimbHill.ai.",
   "author": {
-    "name": "Awesome Deep Researchers Contributors",
-    "url": "https://github.com/closedloop-technologies/awesome-deep-researchers"
+    "name": "ClimbHill.ai Contributors",
+    "url": "https://github.com/closedloop-technologies/climbhill"
   },
-  "homepage": "https://github.com/closedloop-technologies/awesome-deep-researchers",
-  "repository": "https://github.com/closedloop-technologies/awesome-deep-researchers",
+  "homepage": "https://climbhill.ai",
+  "repository": "https://github.com/closedloop-technologies/climbhill",
   "license": "MIT",
   "keywords": [
-    "deep-research",
+    "climbhill",
+    "self-improvement",
     "agents",
-    "benchmark",
-    "okf",
     "codex-skills"
   ],
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
-    "displayName": "Awesome Deep Researchers",
-    "shortDescription": "Run and evaluate deep research agents.",
-    "longDescription": "Skills and benchmark guidance for calling third-party deep research APIs, comparing under-$1 research tasks, and normalizing outputs to Open Knowledge Format bundles.",
-    "developerName": "Awesome Deep Researchers Contributors",
+    "displayName": "ClimbHill.ai",
+    "shortDescription": "Run controlled repository improvement loops.",
+    "longDescription": "Codex skills, MCP tooling, policies, resources, and registry workflows for safe recursive repository improvement.",
+    "developerName": "ClimbHill.ai Contributors",
     "category": "Productivity",
     "capabilities": [
       "Write",
       "Automation"
     ],
-    "websiteURL": "https://github.com/closedloop-technologies/awesome-deep-researchers",
+    "websiteURL": "https://climbhill.ai",
     "defaultPrompt": [
-      "Run an under-$1 deep research benchmark.",
-      "Normalize this research report to OKF.",
-      "Compare deep research API call patterns."
+      "Inspect this repository for ClimbHill alignment.",
+      "Create a bounded candidate improvement run.",
+      "Compare recorded candidates and generate a report."
     ],
-    "brandColor": "#2563EB"
+    "brandColor": "#1F7A5A"
   }
 }

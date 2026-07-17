@@ -8,7 +8,7 @@ from typing import List
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from awesome_deep_research.mcp_server import build_fastmcp_server, forward_event_to_context
+from climbhill.mcp_server import build_fastmcp_server, forward_event_to_context
 
 
 class FakeContext:

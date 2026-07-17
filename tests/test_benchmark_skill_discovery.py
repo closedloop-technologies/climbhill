@@ -84,7 +84,7 @@ def test_agents_provider_guides_exist_with_plugin_mirror():
         assert agents_skill.exists(), f"Missing .agents skill for {skill_name}"
         assert plugin_skill.exists(), f"Missing plugin skill mirror for {skill_name}"
         if skill_name in OP_EXAMPLE_SKILLS:
-            assert "op run --env-file .env.adr" in agents_skill.read_text(encoding="utf-8")
+            assert "op run --env-file .env.climbhill" in agents_skill.read_text(encoding="utf-8")
 
 
 def test_taxonomy_includes_requested_canonical_tasks():

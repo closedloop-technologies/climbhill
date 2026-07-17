@@ -3,35 +3,34 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "awesome-deep-research"
+name = "climbhill-ai"
 version = "0.1.0"
-description = "A Python library for working with deep research AI agents"
+description = "Local-first tooling for controlled recursive repository improvement with coding agents"
 readme = "README.md"
-requires-python = ">=3.8"
-license = {text = "MIT"}
+requires-python = ">=3.10"
+license = "MIT"
 authors = [
-    {name = "Awesome Deep Researchers Contributors"}
+    {name = "ClimbHill.ai Contributors"}
 ]
 keywords = [
     "ai",
-    "research",
-    "deep-research",
+    "self-improvement",
+    "coding-agents",
+    "mcp",
+    "codex",
+    "repository",
     "agents",
     "llm",
-    "chatgpt",
-    "gemini",
-    "perplexity",
-    "citations",
+    "evaluation",
+    "policy",
+    "sqlite",
     "automation"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -46,6 +45,8 @@ dependencies = [
     "python-dateutil>=2.8.0",
     "typing-extensions>=4.8.0",
     "python-dotenv>=1.2.1",
+    "PyYAML>=6.0",
+    "mcp[cli]>=1.27,<2",
     "tox>=4.32.0",
 ]
 
@@ -58,6 +59,7 @@ dev = [
     "mypy>=1.5.0",
     "isort>=5.12.0",
     "pre-commit>=3.5.0",
+    "tomli>=2.0.0; python_version < '3.11'",
 ]
 mcp = [
     "mcp>=1.0.0",
@@ -74,25 +76,25 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/closedloop-technologies/awesome-deep-researchers"
-Documentation = "https://github.com/closedloop-technologies/awesome-deep-researchers#readme"
-Repository = "https://github.com/closedloop-technologies/awesome-deep-researchers"
-Issues = "https://github.com/closedloop-technologies/awesome-deep-researchers/issues"
+Homepage = "https://climbhill.ai"
+Documentation = "https://climbhill.ai"
+Repository = "https://github.com/closedloop-technologies/climbhill"
+Issues = "https://github.com/closedloop-technologies/climbhill/issues"
 
 [project.scripts]
-adr = "awesome_deep_research.cli:main"
-adr-audit = "awesome_deep_research.audit:main"
-adr-op-check = "awesome_deep_research.op_env:main"
-adr-live-smoke = "benchmark.live_smoke:main"
-adr-source-check = "awesome_deep_research.source_refresh:main"
-adr-mcp = "awesome_deep_research.mcp_server:main"
-adr-mcp-smoke = "awesome_deep_research.mcp_server:smoke_main"
+climbhill = "climbhill.cli:main"
+climbhill-audit = "climbhill.audit:main"
+climbhill-op-check = "climbhill.op_env:main"
+climbhill-live-smoke = "benchmark.live_smoke:main"
+climbhill-source-check = "climbhill.source_refresh:main"
+climbhill-mcp = "climbhill.mcp_server:main"
+climbhill-mcp-smoke = "climbhill.mcp_server:smoke_main"
 
 [tool.setuptools]
-packages = ["awesome_deep_research", "benchmark"]
+packages = ["climbhill", "benchmark"]
 
 [tool.setuptools.package-data]
-awesome_deep_research = ["py.typed"]
+climbhill = ["py.typed"]
 
 [tool.black]
 line-length = 100
@@ -119,7 +121,7 @@ use_parentheses = true
 ensure_newline_before_comments = true
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
@@ -150,7 +152,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["awesome_deep_research"]
+source = ["climbhill"]
 omit = [
     "*/tests/*",
     "*/test_*.py",

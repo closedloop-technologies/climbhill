@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package and test tools
+        run: python -m pip install --upgrade ".[dev]" build twine
+
+      - name: Run tests
+        run: pytest
+
+      - name: Build package
+        run: python -m build
+
+      - name: Check package
+        run: python -m twine check dist/*
+
+      - name: Validate root Codex plugin
+        run: python .github/scripts/validate_plugin.py .
+
+      - name: Validate packaged Codex plugin
+        run: python .github/scripts/validate_plugin.py plugin/climbhill-ai
+
+      - name: Smoke CLI
+        run: |
+          climbhill --help
+          climbhill-mcp-smoke

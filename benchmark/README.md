@@ -333,4 +333,4 @@ jobs:
 
 ## License
 
-Part of the awesome-deep-researchers repository.
+Part of the ClimbHill.ai repository.
