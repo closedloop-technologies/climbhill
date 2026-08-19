@@ -1,3 +1,8 @@
+---
+name: protected-surface-editing
+description: Classify proposed paths and enforce denied or approval-required ClimbHill policy before edits. Use when work may touch tests, CI, infrastructure, secrets, or other protected surfaces.
+---
+
 # Protected Surface Editing
 
 Use this skill before touching paths that are denied or approval-required by ClimbHill policy.

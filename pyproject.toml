@@ -46,6 +46,7 @@ dependencies = [
     "typing-extensions>=4.8.0",
     "python-dotenv>=1.2.1",
     "PyYAML>=6.0",
+    "baml-py==0.226.1",
     "mcp[cli]>=1.27,<2",
     "tox>=4.32.0",
 ]
@@ -90,8 +91,8 @@ climbhill-source-check = "climbhill.source_refresh:main"
 climbhill-mcp = "climbhill.mcp_server:main"
 climbhill-mcp-smoke = "climbhill.mcp_server:smoke_main"
 
-[tool.setuptools]
-packages = ["climbhill", "benchmark"]
+[tool.setuptools.packages.find]
+include = ["climbhill*", "benchmark*"]
 
 [tool.setuptools.package-data]
 climbhill = ["py.typed"]

@@ -87,6 +87,10 @@ def test_pages_workflow_can_enable_pages() -> None:
     )
     assert configure_pages["with"]["enablement"] is True
 
-    stage_site = next(step for step in build_steps if step.get("name") == "Stage static site")
-    assert "cp CNAME _site/" in stage_site["run"]
-    assert "cp .nojekyll _site/" in stage_site["run"]
+    build_site = next(step for step in build_steps if step.get("name") == "Build Remix site")
+    assert build_site["run"] == "npm run www:build"
+
+    upload = next(
+        step for step in build_steps if step.get("uses") == "actions/upload-pages-artifact@v4"
+    )
+    assert upload["with"]["path"] == "www/dist"

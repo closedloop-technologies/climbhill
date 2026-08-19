@@ -1,3 +1,8 @@
+---
+name: climbhill-repo-alignment
+description: Align a repository with goals, agent guidance, policies, evaluations, resources, and protected surfaces for repeated safe improvement. Use when setting up or auditing ClimbHill repository structure.
+---
+
 # ClimbHill Repo Alignment
 
 Use this skill when a repository needs enough structure for coding agents to improve it safely over repeated loops.

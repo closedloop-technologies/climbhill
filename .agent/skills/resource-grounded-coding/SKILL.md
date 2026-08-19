@@ -1,3 +1,8 @@
+---
+name: resource-grounded-coding
+description: Ground implementation decisions in recorded ClimbHill resources and cited prior work. Use when code changes should trace back to research, guidance, postmortems, or experiment evidence.
+---
+
 # Resource-Grounded Coding
 
 Use this skill to ground code changes in `resources/` entries and cited prior work.

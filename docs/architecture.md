@@ -1,59 +1,60 @@
 # Architecture
 
-ClimbHill.ai is a local-first system for controlled recursive improvement of Git repositories by coding agents.
+ClimbHill.ai is a local-first system for controlled research and recursive improvement of Git repositories by coding agents. Durable state is readable, reviewable files on a dedicated Git branch; derived indexes are disposable.
 
-## Major Components
+## Runtime Layers
 
-- **Codex plugin**: distribution package for install instructions, MCP configuration, skills, policy templates, evaluation templates, and example workflows.
-- **MCP server**: agent-facing runtime and system of record. It exposes tools for repo inspection, policy checks, resource search, run creation, candidate registration, evaluation recording, reporting, decisions, history sampling, and issue proposals.
-- **CLI**: human-friendly commands over the same concepts, initially `climbhill init`, `inspect`, `align`, `run`, `report`, `reflect`, and `policy check`.
-- **Experiment registry**: SQLite plus local file storage for repositories, goals, runs, candidates, patches, evaluations, costs, resources, policy snapshots, human decisions, reports, and issue proposals.
-- **Policy layer**: conservative edit and promotion controls around allowed paths, denied paths, approval-required paths, budgets, command requirements, and protected surfaces.
-- **Skills**: readable agent procedures under `.agent/skills` for alignment, sampling, candidate evolution, protected editing, reporting, and human promotion.
-- **Resources**: reusable context under `resources/` with metadata for source, date, trust level, tags, summary, and reason for inclusion.
+- **npm CLI**: `climbhill` commands initialize jobs, ingest and derive sources, build graphs, run bounded research, manage recursive candidates, enforce policy, and validate OKF bundles.
+- **Git control topology**: every job owns either a split control branch or a separate Ouroboros clone/worktree. The target repository stores only a portable pointer; machine-local checkout locations live in Git's common directory.
+- **File-backed run store**: YAML, Markdown, JSON, JSONL, patches, and raw artifacts are the system of record under the job root. Atomic writes and append-only event files make interrupted operations recoverable.
+- **BAML clients**: checked-in TypeScript and Python clients provide typed derivation, planning, and synthesis calls against an exact OpenAI model snapshot.
+- **Source adapters**: local files, PDFs, webpages, YouTube transcripts, and arXiv papers are normalized into content-addressed raw artifacts and versioned source manifests.
+- **Evidence graph**: observations are converted into canonical concepts and relationships with resource, observation, and locator provenance. Conflicts remain explicit instead of being silently collapsed.
+- **Bounded research**: local evidence is searched first. Optional web search obeys query, page-read, wall-clock, token, and dollar budgets; partial progress can resume without repeating completed searches.
+- **Recursive improvement**: flat run IDs record lineage, plans, candidates, patches, evaluations, decisions, reflections, costs, and skill provenance. Promotion remains a human decision.
+- **Policy layer**: allowed, denied, and approval-required paths plus evaluation commands and budgets constrain candidate work and policy changes.
+- **OKF v0.2**: validated concept bundles preserve source and finding provenance. The upstream specification and license are vendored with hashes and provenance metadata.
+- **Skills**: procedures under `.agent/skills` are installable through the `skills` CLI and can be promoted only with run and evaluation evidence.
+- **Remix site**: a static Remix 3 beta site documents the product and is deployable through GitHub Pages.
 
-## Runtime Flow
+## Git Topology
 
 ```text
-Repo + Goal + Policy + Resources + Skills
-  -> Create Run
-  -> Register Candidate Attempts
-  -> Attach Patches and Code Pointers
-  -> Check Policy
-  -> Record Evaluations and Costs
-  -> Compare Candidates
-  -> Record Human Decision
-  -> Generate Report
-  -> Promote, Reject, or Reflect
+target checkout
+  .climbhill/jobs/<job-id>.yaml       portable repository IDs + control branch
+
+git common directory
+  climbhill/locators/<job-id>.yaml    machine-local control checkout location
+
+control branch/worktree
+  job.yaml
+  policy.yaml
+  sources/
+  observations/
+  graph/
+  research/
+  runs/
+  okf/
+  events/
+  cache/registry.sqlite               ignored, rebuildable index only
 ```
 
-## Data Model
+Split mode creates a sibling worktree on an orphan control branch. Ouroboros mode creates an isolated sibling clone and worktree. Existing branches are never repurposed, and `climbhill recover` repairs a missing local locator explicitly.
 
-The MVP registry should include:
+## Evidence Flow
 
-- Repository
-- Goal
-- Resource
-- Skill
-- Run
-- Candidate
-- Evaluation
-- Cost
-- Human decision
-- Report
-- Issue proposal
+```text
+Source URI
+  -> immutable raw artifact + versioned source manifest
+  -> typed BAML derivation + observations
+  -> deterministic graph build
+  -> bounded local/web research
+  -> cited synthesis + OKF bundle
+  -> recursive candidate/evaluation/decision records
+```
 
-Candidate lineage should support relationships such as `forked_from`, `inspired_by`, `combined_with`, `supersedes`, `reverted_from`, `failed_due_to`, and `promoted_from`.
+Every derivation identity includes the raw hash, profile, resolved prompt, model, schema, and chunking configuration. A derivation manifest is committed only after all observation files exist, so interrupted work cannot be mistaken for a cache hit.
 
 ## Safety Boundaries
 
-Human approval is required by default for:
-
-- Promotion to pull request.
-- Modification of tests or evals.
-- Modification of CI workflows.
-- Modification of infrastructure.
-- Modification of security-sensitive code.
-- Budget increases.
-- Policy relaxation.
-- Merge or deployment.
+Human approval is required for promotion, changes to approval-required paths, budget increases, and policy relaxation. Merge, deployment, external publication, and credential provisioning stay outside the autonomous runtime. Failed and rejected candidates remain queryable evidence, while rebuildable SQLite cache files never become canonical state.

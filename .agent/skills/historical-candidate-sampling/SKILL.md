@@ -1,3 +1,8 @@
+---
+name: historical-candidate-sampling
+description: Sample successful and failed historical ClimbHill candidates before planning a new attempt. Use when prior runs may contain reusable approaches or known failure modes.
+---
+
 # Historical Candidate Sampling
 
 Use this skill before generating a new candidate when prior ClimbHill runs exist.

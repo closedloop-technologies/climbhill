@@ -1,3 +1,8 @@
+---
+name: parallel-coding-agent-loop
+description: Coordinate independent, bounded coding candidates against one goal and compare them after policy and evaluation checks. Use for parallel ClimbHill improvement attempts.
+---
+
 # Parallel Coding Agent Loop
 
 Use this skill to coordinate independent candidate attempts for the same goal.

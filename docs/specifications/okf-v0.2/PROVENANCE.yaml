@@ -1,0 +1,16 @@
+schema: climbhill.vendored-spec/v1
+name: Open Knowledge Format
+version: "0.2"
+source_repository: https://github.com/GoogleCloudPlatform/knowledge-catalog
+upstream_commit: 3fcbb9f828c2f23d109c855ee403c3a4c81f3a96
+retrieved_at: 2026-08-19
+license: Apache-2.0
+files:
+  - path: SPEC.md
+    upstream_path: okf/SPEC.md
+    source_url: https://raw.githubusercontent.com/GoogleCloudPlatform/knowledge-catalog/3fcbb9f828c2f23d109c855ee403c3a4c81f3a96/okf/SPEC.md
+    sha256: 5a3311d270bebb16d558010e75064f5b75323f284992641732b1c8097511f948
+  - path: LICENSE.md
+    upstream_path: okf/LICENSE.md
+    source_url: https://raw.githubusercontent.com/GoogleCloudPlatform/knowledge-catalog/3fcbb9f828c2f23d109c855ee403c3a4c81f3a96/okf/LICENSE.md
+    sha256: 8c6db340475136df3c1201d458fa5755698eace76e510471ecc9d857d6083dac

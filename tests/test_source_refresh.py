@@ -35,7 +35,7 @@ def test_parse_refreshed_date_rejects_invalid_iso_date():
 
 
 def test_source_index_checker_passes_current_index():
-    results = source_refresh.check_source_index(today=date(2026, 6, 23))
+    results = source_refresh.check_source_index(today=date(2026, 8, 19))
 
     assert results
     assert all(result.ok for result in results), source_refresh.format_results(results)
