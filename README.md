@@ -33,14 +33,15 @@ ClimbHill.ai begins when a user identifies a job to be done in a Git repository.
 
 ClimbHill.ai is:
 
-- A Codex plugin for distributing repo-improvement workflows.
-- An MCP server that records runs, candidates, patches, evaluations, costs, decisions, and reports.
+- An npm CLI for versioned research and recursive repository-improvement workflows.
+- A file-backed control plane on dedicated Git branches and worktrees.
+- A Codex plugin and `npx skills` bundle for distributing repo-improvement procedures.
+- A BAML-defined agent runtime with generated TypeScript and Python clients.
 - A skill bundle under `.agent/skills` for recursive improvement workflows.
-- A `/resources` convention for research, prior art, user guidance, postmortems, and reusable experiment learnings.
+- An OKF v0.2 evidence workspace for sources, observations, graphs, and reports.
 - A policy system for allowed, denied, and approval-required edits.
 - A candidate-evolution system for parallel attempts, historical sampling, recombination, comparison, and promotion.
-- A reporting and meta-analysis layer for humans to inspect progress, risk, failures, and next actions.
-- An evidence-first research workflow built around Open Knowledge Format (OKF) concepts and immutable raw sources.
+- A compatibility MCP and Python surface for the earlier workflow during migration.
 
 ClimbHill.ai is not a hosted agent cloud, a model-training framework, an automatic merge system, or a tool that silently modifies tests to make candidates pass.
 
@@ -74,11 +75,11 @@ The loop is designed around repo safety, durable memory, evaluation before promo
 |-----------|---------|
 | Landing page | Remix application under `www/`, statically built and deployed to GitHub Pages at `https://climbhill.ai/`. |
 | Codex plugin | Packages workflows, MCP configuration, skills, policy templates, and install docs. |
-| MCP server | Agent-facing runtime and system of record for runs, candidates, policy checks, evaluations, reports, and decisions. |
+| Compatibility MCP | Preserves the earlier Python agent-facing interface; canonical job state lives in files. |
 | CLI | npm-distributed local CLI for job setup, source ingestion, derivation, graph construction, research, candidate runs, and reporting. |
 | Skills | Agent-readable procedures for alignment, historical sampling, candidate evolution, protected editing, reporting, and promotion. |
 | Resources | Versioned context with provenance, trust level, tags, summary, and reason for inclusion. |
-| Experiment registry | SQLite-backed durable state for goals, runs, candidates, evaluations, costs, decisions, reports, and issue proposals. |
+| Experiment registry | Version-controlled run files for goals, candidates, evaluations, costs, decisions, reports, and lineage; SQLite is a rebuildable query cache. |
 | Policy layer | Conservative defaults for allowed edits, denied edits, approval-required paths, budgets, commands, and promotion gates. |
 | Research workspace | Immutable raw evidence plus a version-controlled OKF bundle of resources, claims, entities, relationships, topics, and reports. |
 
@@ -209,6 +210,7 @@ Run a bounded research loop:
 ```bash
 climbhill research "What best practices would improve this repository's release reliability?"
 climbhill research "What does the current corpus say?" --local-only
+climbhill research --resume RESEARCH_RUN_ID --max-api-cost 2
 ```
 
 Research inspects existing knowledge, identifies gaps, discovers new evidence when allowed, ingests it through `add`, derives source-local knowledge, and produces a cited answer. It persists its question, plan, searches, sources, derivations, answer, API cost, wall time, partial work, and stopping reason. API-cost and wall-time budgets stop cleanly without discarding progress. Graph reconciliation remains an explicit command.
@@ -218,22 +220,19 @@ Research inspects existing knowledge, identifies gaps, discovers new evidence wh
 The existing candidate workflow remains the interface for comparing changes to the target repository:
 
 ```bash
-# Inspect alignment status
-climbhill inspect --repo /path/to/repo
+# Classify target paths against the active job policy
+climbhill policy check src/app.ts tests/app.test.ts .env
 
-# Classify paths against .climbhill/policy.yaml
-climbhill policy check src/app.py tests/test_app.py .env --repo /path/to/repo
-
-# Create a run, record evidence, compare candidates, and report
-climbhill run --repo /path/to/repo --goal "Improve setup docs" --candidates 2
-climbhill registry --repo /path/to/repo record-evaluation --candidate-id 1 --type test --status passed --command "pytest"
-climbhill compare --repo /path/to/repo --run-id 1
-climbhill decision --repo /path/to/repo --run-id 1 --candidate-id 1 --type promote --rationale "Best passing candidate"
-climbhill report --repo /path/to/repo --run-id 1
-climbhill reflect --repo /path/to/repo --run-id 1
+# Create a run, evaluate candidates, compare them, and record a human decision
+climbhill run --goal "Improve setup docs" --candidates 2
+climbhill evaluate --run RUN_ID --candidate CANDIDATE_ID --command "npm test"
+climbhill compare --run RUN_ID
+climbhill candidate attach-patch --run RUN_ID --candidate CANDIDATE_ID --patch ./candidate.patch
+climbhill decision --run RUN_ID --candidate CANDIDATE_ID --decision promote --rationale "Best passing candidate" --approve
+climbhill reflect --run RUN_ID --text "Record what the next run should preserve."
 ```
 
-The current Python CLI is transitional. The npm implementation will preserve the `climbhill` command and the job/research interface above.
+The npm CLI is the primary implementation. Install it with `npm install -g climbhill` or run it from a checkout with `npm install && npm run build`. The Python CLI remains available during the compatibility transition.
 
 ## MCP Servers
 
@@ -256,16 +255,15 @@ ClimbHill has three distribution surfaces:
 - **Skills:** installable through `npx skills` so users can add the ClimbHill workflows independently of the CLI.
 - **Website:** a Remix `3.0.0-beta.10` application under `www/`; its static build output is deployed through GitHub Pages at `https://climbhill.ai/`.
 
-The intended repository layout is:
+The website source layout is:
 
 ```text
 www/
 ├── app/
-├── public/
-│   ├── CNAME
-│   └── assets/
+│   └── home.tsx
+├── build-static.tsx
 ├── package.json
-└── remix.config.ts
+└── tsconfig.json
 ```
 
 The npm package will expose the `climbhill` executable:
@@ -281,7 +279,7 @@ Skills will be discoverable and downloadable through:
 npx skills
 ```
 
-The repository currently still contains a Python package, PyPI workflow, and root-level GitHub Pages files from the transitional implementation. They will be replaced or migrated as the npm CLI, BAML-generated clients, and Remix-based `www/` layout are implemented.
+The release workflows publish the npm CLI with provenance, retain the Python compatibility package on PyPI, and deploy the statically rendered Remix output with the `climbhill.ai` CNAME.
 
 ## Legacy Deep-Research Assets
 
@@ -299,4 +297,4 @@ python -m climbhill.source_refresh
 
 ## Status
 
-The repository currently includes Python MVP scaffolding: a CLI, MCP tools, SQLite registry, policy and evaluation templates, reports, deep-research provider skills, benchmark tooling, and a root-level static site. The job-oriented research CLI, BAML agent definitions and generated clients, npm distribution, vendored OKF v0.2 specification, Git LFS setup, graph builder, and Remix-based `www/` migration described above are the agreed design and remain to be implemented.
+The MVP implementation includes the npm CLI, split-control and Ouroboros persistence, five source adapters, BAML derivation and bounded research, explicit graph construction, recursive run records, policy gates, a rebuildable SQLite cache, validated OKF v0.2 bundles, installable skills, npm/PyPI release workflows, and the Remix-based `www/` site. The Python CLI and MCP remain compatibility surfaces; new durable job state is owned by the version-controlled filesystem model.

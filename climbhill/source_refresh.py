@@ -672,7 +672,15 @@ def check_link(entry: SourceEntry, repo_root: Path = REPO_ROOT, timeout: float =
 
 def check_links(index_path: Path = DEFAULT_INDEX) -> List[CheckResult]:
     text = index_path.read_text(encoding="utf-8")
-    repo_root = index_path.parent.parent
+    resolved = index_path.resolve()
+    repo_root = next(
+        (
+            parent
+            for parent in resolved.parents
+            if (parent / "pyproject.toml").is_file() or (parent / "docs").is_dir()
+        ),
+        resolved.parent.parent,
+    )
     return [check_link(entry, repo_root=repo_root) for entry in parse_source_entries(text)]
 
 

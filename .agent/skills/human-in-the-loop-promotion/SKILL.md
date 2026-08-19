@@ -1,3 +1,8 @@
+---
+name: human-in-the-loop-promotion
+description: Review policy, evaluations, cost, lineage, and risk before recording a human promotion or rejection decision. Use when a ClimbHill candidate is ready for disposition.
+---
+
 # Human-in-the-Loop Promotion
 
 Use this skill when a candidate is ready to be promoted, rejected, or converted into follow-up work.

@@ -1,3 +1,8 @@
+---
+name: experiment-tree-analysis
+description: Analyze ClimbHill runs, candidates, lineage, costs, failures, and recurring constraints. Use for experiment-history diagnosis and evidence-backed follow-up proposals.
+---
+
 # Experiment Tree Analysis
 
 Use this skill to analyze runs, candidates, failures, lineage, and recurring constraints.

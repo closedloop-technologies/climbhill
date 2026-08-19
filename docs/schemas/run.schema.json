@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://climbhill.ai/schemas/run.schema.json",
+  "title": "ClimbHill Run",
+  "type": "object",
+  "required": ["schema", "id", "kind", "status", "startedAt", "updatedAt", "targetCommit", "controlCommit", "inputs", "outputs", "costs"],
+  "properties": {
+    "schema": { "const": "climbhill.run/v1" },
+    "id": { "type": "string" },
+    "kind": { "enum": ["ingest", "derive", "graph", "research", "improvement"] },
+    "status": { "enum": ["running", "completed", "partial", "failed", "rejected"] },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "targetCommit": { "type": "string" },
+    "controlCommit": { "type": "string" },
+    "researchSnapshotCommit": { "type": "string" },
+    "parentRun": { "type": "string" },
+    "parentCandidate": { "type": "string" },
+    "inputs": { "type": "object" },
+    "outputs": { "type": "array" },
+    "costs": {
+      "type": "object",
+      "required": ["apiUsd", "wallTimeSeconds"],
+      "properties": { "apiUsd": { "type": "number", "minimum": 0 }, "wallTimeSeconds": { "type": "number", "minimum": 0 } }
+    }
+  },
+  "additionalProperties": true
+}

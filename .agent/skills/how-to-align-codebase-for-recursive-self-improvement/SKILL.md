@@ -1,3 +1,8 @@
+---
+name: how-to-align-codebase-for-recursive-self-improvement
+description: Align a repository for safe recursive improvement by defining goals, agent guidance, policies, evaluations, resources, and protected surfaces. Use when a codebase lacks ClimbHill operating structure.
+---
+
 # Align a Codebase for Recursive Self-Improvement
 
 Use this skill when a repository needs enough structure for coding agents to improve it safely over repeated loops.

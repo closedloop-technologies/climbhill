@@ -1,3 +1,8 @@
+---
+name: evolving-solutions
+description: Recombine proven parts of multiple evaluated candidates into a coherent follow-up candidate. Use when ClimbHill candidate comparison reveals complementary partial wins.
+---
+
 # Evolving Solutions
 
 Use this skill when combining lessons from multiple candidates into a stronger follow-up candidate.

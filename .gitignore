@@ -8,6 +8,10 @@ climbhill.egg-info
 *.egg-info/
 dist/
 build/
+dist-tests/
+node_modules/
+www/node_modules/
+www/dist/
 
 # Environment variables
 .env

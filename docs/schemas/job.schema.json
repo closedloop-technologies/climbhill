@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://climbhill.ai/schemas/job.schema.json",
+  "title": "ClimbHill Job",
+  "type": "object",
+  "required": ["schema", "okfSchema", "id", "slug", "objective", "createdAt", "target", "control", "baseCommit", "controlBranch", "budgets", "policy"],
+  "properties": {
+    "schema": { "const": "climbhill.job/v1" },
+    "okfSchema": { "const": "okf/0.2" },
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+-[a-f0-9]{12}$" },
+    "slug": { "type": "string" },
+    "objective": { "type": "string", "minLength": 1 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "target": { "$ref": "#/$defs/repository" },
+    "control": { "$ref": "#/$defs/repository" },
+    "baseCommit": { "type": "string" },
+    "controlBranch": { "type": "string", "pattern": "^climbhill/" },
+    "budgets": { "type": "object" },
+    "policy": { "type": "object" }
+  },
+  "$defs": {
+    "repository": {
+      "type": "object",
+      "required": ["id"],
+      "properties": { "id": { "type": "string" }, "remote": { "type": "string" } },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

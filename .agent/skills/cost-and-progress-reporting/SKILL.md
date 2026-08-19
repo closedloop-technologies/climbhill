@@ -1,3 +1,8 @@
+---
+name: cost-and-progress-reporting
+description: Produce evidence-backed run and candidate reports with evaluations, costs, risks, and promotion recommendations. Use at the end of a ClimbHill run or candidate attempt.
+---
+
 # Cost and Progress Reporting
 
 Use this skill at the end of a run or candidate attempt.

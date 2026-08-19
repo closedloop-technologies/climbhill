@@ -22,23 +22,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: www/package-lock.json
+
+      - name: Install website dependencies
+        run: npm ci --prefix www
+
+      - name: Build Remix site
+        run: npm run www:build
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
 
-      - name: Stage static site
-        run: |
-          mkdir -p _site/assets
-          cp index.html _site/
-          cp CNAME _site/
-          cp .nojekyll _site/
-          cp assets/hero-research-harness.png _site/assets/
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: _site
+          path: www/dist
 
   deploy:
     runs-on: ubuntu-latest

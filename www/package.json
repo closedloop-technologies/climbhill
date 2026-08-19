@@ -1,0 +1,19 @@
+{
+  "name": "climbhill-www",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.3.0"
+  },
+  "scripts": {
+    "build": "NODE_ENV=production node --import remix/node-tsx build-static.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "remix": "3.0.0-beta.10"
+  },
+  "devDependencies": {
+    "@types/node": "24.3.0",
+    "typescript": "5.9.2"
+  }
+}

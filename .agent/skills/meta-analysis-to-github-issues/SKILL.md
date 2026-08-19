@@ -1,3 +1,8 @@
+---
+name: meta-analysis-to-github-issues
+description: Convert evidence-backed ClimbHill experiment findings into reviewable GitHub issue proposals. Use after experiment-tree analysis identifies actionable repository improvements.
+---
+
 # Meta-Analysis to GitHub Issues
 
 Use this skill to convert experiment-tree findings into concrete GitHub issue proposals.

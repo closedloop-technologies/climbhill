@@ -70,7 +70,7 @@ REQUIRED_SOURCE_INDEX_SNIPPETS = {
     "deep-research-gemini",
     "deep-research-you",
     "okf/SPEC.md",
-    "Last refreshed: 2026-06-23",
+    "Last refreshed:",
 }
 
 
