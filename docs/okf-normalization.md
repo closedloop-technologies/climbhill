@@ -1,7 +1,7 @@
 # Normalizing Deep Research Outputs with OKF
 
 This repository uses Google's Open Knowledge Format draft as the target shape
-for normalized deep research outputs. OKF v0.1 is intentionally small: a bundle
+for normalized deep research outputs. OKF v0.2 is intentionally small: a bundle
 is a directory of markdown concept files with YAML frontmatter, and every
 non-reserved concept file has a non-empty `type` field.
 
