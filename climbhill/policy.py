@@ -50,9 +50,9 @@ DEFAULT_POLICY: Dict[str, Any] = {
         "test": "pytest",
     },
     "budgets": {
-        "max_parallel_candidates": 5,
+        "max_parallel_attempts": 5,
         "max_usd_per_run": 20,
-        "max_minutes_per_candidate": 45,
+        "max_minutes_per_attempt": 45,
     },
     "promotion": {
         "require_tests_pass": True,

@@ -14,9 +14,9 @@ Current status: local MVP. The manifest, skill path, MCP config path, and Python
 
 - Align a repository for recursive self-improvement.
 - Read and check ClimbHill policy.
-- Register candidate attempts.
+- Register Attempts.
 - Record evaluations and costs.
-- Compare candidates.
+- Compare attempts.
 - Generate Markdown reports.
 - Record human decisions.
 - Propose GitHub issues from meta-analysis.

@@ -8,7 +8,7 @@ from typing import Dict, List
 from .policy import DEFAULT_POLICY, dump_policy
 
 
-ALIGNMENT_PATHS = [
+PREPAREDNESS_PATHS = [
     "goal.md",
     "AGENTS.md",
     "README.md",
@@ -32,11 +32,11 @@ DEFAULT_EVAL = {
     "rubrics": [
         {
             "id": "policy-safety",
-            "description": "Candidate avoids denied paths and records approval requirements.",
+            "description": "Attempt avoids denied paths and records approval requirements.",
         },
         {
             "id": "report-quality",
-            "description": "Candidate report explains goal, changes, tests, risks, costs, and next actions.",
+            "description": "Attempt report explains goal, changes, tests, risks, costs, and next actions.",
         },
     ],
 }
@@ -48,10 +48,10 @@ TEMPLATE_FILES: Dict[str, str] = {
     "README.md": "# Project\n\nDescribe setup, usage, and development workflows.\n",
     "ARCHITECTURE.md": "# Architecture\n\nDescribe important modules, ownership boundaries, and design constraints.\n",
     "TESTING.md": "# Testing\n\nRecord install, lint, typecheck, test, and build commands.\n",
-    "EVALS.md": "# Evaluation Strategy\n\nDescribe how candidates should be evaluated before promotion.\n",
+    "EVALS.md": "# Evaluation Strategy\n\nDescribe how attempts should be evaluated before promotion.\n",
     "resources/README.md": "# Resources\n\nStore reusable context, prior art, postmortems, and promoted experiment learnings here.\n",
     ".github/pull_request_template.md": (
-        "## Candidate Summary\n\n"
+        "## Attempt Summary\n\n"
         "## Test Results\n\n"
         "## Policy Status\n\n"
         "## Risk Notes\n\n"
@@ -64,7 +64,7 @@ TEMPLATE_FILES: Dict[str, str] = {
 
 
 @dataclass(frozen=True)
-class AlignmentReport:
+class PreparednessReport:
     repo_path: Path
     present: List[str]
     missing: List[str]
@@ -72,7 +72,7 @@ class AlignmentReport:
     current_commit: str
 
     @property
-    def is_aligned(self) -> bool:
+    def is_prepared(self) -> bool:
         return not self.missing
 
 
@@ -92,17 +92,17 @@ def _git_output(repo_path: Path, *args: str) -> str:
     return completed.stdout.strip()
 
 
-def inspect_repo(repo_path: Path) -> AlignmentReport:
+def inspect_preparedness(repo_path: Path) -> PreparednessReport:
     repo_path = repo_path.resolve()
     present: List[str] = []
     missing: List[str] = []
-    for relative in ALIGNMENT_PATHS:
+    for relative in PREPAREDNESS_PATHS:
         target = repo_path / relative
         if target.exists():
             present.append(relative)
         else:
             missing.append(relative)
-    return AlignmentReport(
+    return PreparednessReport(
         repo_path=repo_path,
         present=present,
         missing=missing,

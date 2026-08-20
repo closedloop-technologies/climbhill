@@ -1,10 +1,9 @@
 # MCP Server
 
-The MCP server is the agent-facing runtime and system of record.
+The MCP server exposes ClimbHill's core interfaces to coding agents. It is an
+adapter, not the canonical product interface or source of truth.
 
-It should be usable by Codex and other MCP-capable coding agents.
-
-The current local entrypoint is:
+The current Python entrypoint is:
 
 ```bash
 python -m climbhill.mcp_server
@@ -12,20 +11,23 @@ python -m climbhill.mcp_server
 
 ## Responsibilities
 
-- Inspect repo alignment.
-- Read and check policy.
-- Search and add resources.
-- Create runs.
-- Register candidates.
-- Attach code pointers and patches.
-- Record evaluations.
-- Track costs.
-- Sample from history.
-- Compare candidates.
-- Generate reports.
-- Record human decisions.
-- Propose GitHub issues.
+- Assess repository and machine capabilities.
+- Create and inspect standalone Runs.
+- Create and attach Attempt artifacts.
+- Record typed Evaluations and Decisions.
+- Explain policy, authorization, and eligibility.
+- Invoke Continuation Analysis at a frozen Evidence Snapshot.
+- Search and add research resources.
+- Generate derived reports.
 
-## MVP Storage
+## Persistence
 
-The MVP should use SQLite and local file storage. Future versions may support Postgres and object storage.
+The target server reads and writes canonical file-backed Run state and may use a
+rebuildable SQLite cache. The transitional Python server currently uses SQLite
+directly and is not the target persistence contract.
+
+## Safety
+
+MCP callers cannot self-assert human authority, widen Authorization Envelopes,
+change the pinned evaluator, bypass post-diff checks, or promote an ineligible
+Attempt.

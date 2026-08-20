@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 from urllib.parse import unquote
 
-from .alignment import initialize_repo, inspect_repo
+from .preparedness import initialize_repo, inspect_preparedness
 from .policy import check_paths, load_policy, paths_from_patch, policy_allows_promotion
 from .registry import Registry
 from .reports import generate_markdown_report
@@ -354,48 +354,33 @@ def init_command(args: argparse.Namespace) -> int:
     registry = Registry(database)
     registry.close()
 
-    print(f"Initialized ClimbHill alignment in {repo_path}")
+    print(f"Initialized ClimbHill repository support in {repo_path}")
     print(f"Registry: {database}")
     if created:
         print("Created or updated:")
         for path in created:
             print(f"- {path.relative_to(repo_path)}")
     else:
-        print("No files were created; existing alignment files were preserved.")
+        print("No files were created; existing repository support files were preserved.")
     return 0
 
 
-def inspect_command(args: argparse.Namespace) -> int:
+def prepare_command(args: argparse.Namespace) -> int:
     repo_path = Path(args.repo).resolve()
-    report = inspect_repo(repo_path)
-    print(f"Repository: {report.repo_path}")
-    print(f"Remote: {report.git_remote or 'unknown'}")
-    print(f"Current commit: {report.current_commit or 'unknown'}")
-    print(f"Aligned: {'yes' if report.is_aligned else 'no'}")
-    if report.present:
-        print("\nPresent:")
-        for relative in report.present:
-            print(f"- {relative}")
-    if report.missing:
-        print("\nMissing:")
-        for relative in report.missing:
-            print(f"- {relative}")
-    return 0 if report.is_aligned else 2
-
-
-def align_command(args: argparse.Namespace) -> int:
-    repo_path = Path(args.repo).resolve()
-    before = inspect_repo(repo_path)
+    before = inspect_preparedness(repo_path)
     if not before.missing:
-        print("Repository is already ClimbHill-aligned.")
+        print("Repository support files are present.")
         return 0
     if args.apply:
         created = initialize_repo(repo_path, force=False)
-        print("Created missing alignment files:")
+        print("Created missing repository support files:")
         for path in created:
             print(f"- {path.relative_to(repo_path)}")
         return 0
-    print("Missing alignment files:")
+    print(f"Repository: {before.repo_path}")
+    print(f"Remote: {before.git_remote or 'unknown'}")
+    print(f"Current commit: {before.current_commit or 'unknown'}")
+    print("Missing repository support files:")
     for relative in before.missing:
         print(f"- {relative}")
     print("\nRun with --apply to create conservative defaults without overwriting existing files.")
@@ -429,8 +414,8 @@ def registry_command(args: argparse.Namespace) -> int:
             run_id = registry.create_run(args.goal, repo_path, base_commit=current_commit(repo_path))
             print(run_id)
             return 0
-        if args.registry_command == "register-candidate":
-            candidate_id = registry.register_candidate(
+        if args.registry_command == "register-attempt":
+            attempt_id = registry.register_attempt(
                 args.run_id,
                 args.summary,
                 branch=args.branch or "",
@@ -439,11 +424,11 @@ def registry_command(args: argparse.Namespace) -> int:
                 patch_path=args.patch_path or "",
                 status=args.status,
             )
-            print(candidate_id)
+            print(attempt_id)
             return 0
         if args.registry_command == "record-evaluation":
             evaluation_id = registry.record_evaluation(
-                args.candidate_id,
+                args.attempt_id,
                 args.type,
                 args.status,
                 command=args.command or "",
@@ -454,18 +439,18 @@ def registry_command(args: argparse.Namespace) -> int:
             print(evaluation_id)
             return 0
         if args.registry_command == "attach-patch":
-            registry.attach_candidate_patch(
-                args.candidate_id,
+            registry.attach_attempt_patch(
+                args.attempt_id,
                 patch_path=args.patch_path,
                 head_commit=args.head_commit or "",
                 status=args.status,
             )
-            print(args.candidate_id)
+            print(args.attempt_id)
             return 0
         if args.registry_command == "record-cost":
             cost_id = registry.record_cost(
                 run_id=args.run_id,
-                candidate_id=args.candidate_id,
+                attempt_id=args.attempt_id,
                 agent=args.agent or "",
                 model=args.model or "",
                 input_tokens=args.input_tokens,
@@ -478,9 +463,9 @@ def registry_command(args: argparse.Namespace) -> int:
             return 0
         if args.registry_command == "record-lineage":
             lineage_id = registry.record_lineage(
-                args.candidate_id,
+                args.attempt_id,
                 args.relationship,
-                related_candidate_id=args.related_candidate_id,
+                related_attempt_id=args.related_attempt_id,
                 note=args.note or "",
             )
             print(lineage_id)
@@ -515,16 +500,16 @@ def run_command(args: argparse.Namespace) -> int:
     try:
         run_id = registry.create_run(args.goal, repo_path, base_commit=current_commit(repo_path))
         print(f"Created run {run_id}")
-        for index in range(1, args.candidates + 1):
-            branch = args.branch_template.format(run_id=run_id, candidate=index)
-            candidate_id = registry.register_candidate(
+        for index in range(1, args.attempts + 1):
+            branch = args.branch_template.format(run_id=run_id, attempt=index)
+            attempt_id = registry.register_attempt(
                 run_id,
-                f"Candidate {index} for: {args.goal}",
+                f"Attempt {index} for: {args.goal}",
                 branch=branch,
                 base_commit=current_commit(repo_path),
                 status="planned",
             )
-            print(f"Registered candidate {candidate_id}: {branch}")
+            print(f"Registered attempt {attempt_id}: {branch}")
         print(f"Registry: {database}")
         return 0
     finally:
@@ -535,15 +520,15 @@ def compare_command(args: argparse.Namespace) -> int:
     repo_path = Path(args.repo).resolve()
     registry = Registry(registry_path(repo_path, args.registry))
     try:
-        comparison = registry.compare_candidates(args.run_id)
+        comparison = registry.compare_attempts(args.run_id)
         if not comparison:
-            print("No candidates registered.")
+            print("No attempts registered.")
             return 1
-        print("rank\tcandidate\tpasses\tfailures\tsummary")
-        for index, candidate in enumerate(comparison, start=1):
+        print("rank\tattempt\tpasses\tfailures\tsummary")
+        for index, attempt in enumerate(comparison, start=1):
             print(
-                f"{index}\t{candidate['id']}\t{candidate['passing_evaluations']}\t"
-                f"{candidate['failing_evaluations']}\t{candidate['summary']}"
+                f"{index}\t{attempt['id']}\t{attempt['passing_evaluations']}\t"
+                f"{attempt['failing_evaluations']}\t{attempt['summary']}"
             )
         return 0
     finally:
@@ -582,7 +567,7 @@ def decision_command(args: argparse.Namespace) -> int:
         decision_id = registry.record_decision(
             args.run_id,
             args.type,
-            candidate_id=args.candidate_id,
+            attempt_id=args.attempt_id,
             rationale=args.rationale or "",
             actor=args.actor or "",
         )
@@ -607,30 +592,30 @@ def reflect_command(args: argparse.Namespace) -> int:
         proposed = []
 
         for run in runs:
-            candidates = registry.list_candidates(run.id)
-            evaluations = registry.list_evaluations_for_candidates(candidate.id for candidate in candidates)
+            attempts = registry.list_attempts(run.id)
+            evaluations = registry.list_evaluations_for_attempts(attempt.id for attempt in attempts)
             failures = [evaluation for evaluation in evaluations if evaluation["status"] != "passed"]
-            if not candidates:
-                title = f"Add candidate attempts for run {run.id}"
+            if not attempts:
+                title = f"Add Attempts for run {run.id}"
                 body = (
-                    f"Problem: Run {run.id} has no registered candidates.\n\n"
-                    f"Evidence: Goal was `{run.goal}` but no candidate records exist.\n\n"
-                    "Suggested implementation: run at least two bounded candidate attempts and record patches, evaluations, and costs.\n\n"
-                    "Acceptance criteria: run has multiple candidates with policy and evaluation records.\n\n"
+                    f"Problem: Run {run.id} has no registered attempts.\n\n"
+                    f"Evidence: Goal was `{run.goal}` but no attempt records exist.\n\n"
+                    "Suggested implementation: run at least two bounded Attempts and record patches, evaluations, and costs.\n\n"
+                    "Acceptance criteria: run has multiple attempts with policy and evaluation records.\n\n"
                     "Risk level: medium\n"
                 )
                 priority = "medium"
             elif failures:
                 title = f"Investigate failing evaluations for run {run.id}"
                 failure_lines = "\n".join(
-                    f"- Candidate {failure['candidate_id']}: {failure['type']} {failure['status']} {failure['failure_reason'] or ''}".strip()
+                    f"- Attempt {failure['attempt_id']}: {failure['type']} {failure['status']} {failure['failure_reason'] or ''}".strip()
                     for failure in failures
                 )
                 body = (
-                    f"Problem: Run {run.id} has failing candidate evaluations.\n\n"
+                    f"Problem: Run {run.id} has failing attempt evaluations.\n\n"
                     f"Evidence:\n{failure_lines}\n\n"
-                    "Suggested implementation: inspect the failed candidates, improve tests or docs if they exposed real gaps, and record a follow-up run.\n\n"
-                    "Acceptance criteria: failure causes are documented and a follow-up issue, resource, or candidate loop exists.\n\n"
+                    "Suggested implementation: inspect the failed attempts, improve tests or docs if they exposed real gaps, and record a follow-up run.\n\n"
+                    "Acceptance criteria: failure causes are documented and a follow-up issue, resource, or child Run exists.\n\n"
                     "Risk level: medium\n"
                 )
                 priority = "high"
@@ -644,7 +629,7 @@ def reflect_command(args: argparse.Namespace) -> int:
                 priority=priority,
                 evidence=f"run:{run.id}",
                 source_run_ids=str(run.id),
-                source_candidate_ids=",".join(str(candidate.id) for candidate in candidates),
+                source_attempt_ids=",".join(str(attempt.id) for attempt in attempts),
             )
             issue_path = issue_dir / f"issue-{issue_id}.md"
             issue_path.write_text(f"# {title}\n\n{body}", encoding="utf-8")
@@ -667,10 +652,10 @@ def history_command(args: argparse.Namespace) -> int:
         query = (args.query or "").lower()
         count = 0
         for run in registry.list_runs():
-            for candidate in registry.list_candidates(run.id):
-                if query and query not in run.goal.lower() and query not in candidate.summary.lower():
+            for attempt in registry.list_attempts(run.id):
+                if query and query not in run.goal.lower() and query not in attempt.summary.lower():
                     continue
-                print(f"run {run.id}\tcandidate {candidate.id}\t{candidate.status}\t{candidate.summary}")
+                print(f"run {run.id}\tattempt {attempt.id}\t{attempt.status}\t{attempt.summary}")
                 count += 1
                 if count >= args.limit:
                     return 0
@@ -746,20 +731,18 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    init_parser = subparsers.add_parser("init", help="Create ClimbHill alignment files.")
+    init_parser = subparsers.add_parser("init", help="Initialize ClimbHill repository support.")
     init_parser.add_argument("--repo", default=".", help="Repository path to initialize.")
     init_parser.add_argument("--registry", help="Registry path relative to repo or absolute path.")
     init_parser.add_argument("--force", action="store_true", help="Overwrite existing ClimbHill templates.")
     init_parser.set_defaults(func=init_command)
 
-    inspect_parser = subparsers.add_parser("inspect", help="Inspect ClimbHill alignment status.")
-    inspect_parser.add_argument("--repo", default=".", help="Repository path to inspect.")
-    inspect_parser.set_defaults(func=inspect_command)
-
-    align_parser = subparsers.add_parser("align", help="Report or create missing alignment files.")
-    align_parser.add_argument("--repo", default=".", help="Repository path to align.")
-    align_parser.add_argument("--apply", action="store_true", help="Create missing files.")
-    align_parser.set_defaults(func=align_command)
+    prepare_parser = subparsers.add_parser(
+        "prepare", help="Report or create repository support files."
+    )
+    prepare_parser.add_argument("--repo", default=".", help="Repository path to prepare.")
+    prepare_parser.add_argument("--apply", action="store_true", help="Create missing files.")
+    prepare_parser.set_defaults(func=prepare_command)
 
     policy_parser = subparsers.add_parser("policy", help="Policy commands.")
     policy_subparsers = policy_parser.add_subparsers(dest="policy_command", required=True)
@@ -778,20 +761,20 @@ def build_parser() -> argparse.ArgumentParser:
     create_run.add_argument("--goal", required=True, help="Improvement goal.")
     create_run.set_defaults(func=registry_command)
 
-    register_candidate = registry_subparsers.add_parser(
-        "register-candidate", help="Register a candidate attempt."
+    register_attempt = registry_subparsers.add_parser(
+        "register-attempt", help="Register an Attempt."
     )
-    register_candidate.add_argument("--run-id", required=True, type=int)
-    register_candidate.add_argument("--summary", required=True)
-    register_candidate.add_argument("--branch")
-    register_candidate.add_argument("--base-commit")
-    register_candidate.add_argument("--head-commit")
-    register_candidate.add_argument("--patch-path")
-    register_candidate.add_argument("--status", default="registered")
-    register_candidate.set_defaults(func=registry_command)
+    register_attempt.add_argument("--run-id", required=True, type=int)
+    register_attempt.add_argument("--summary", required=True)
+    register_attempt.add_argument("--branch")
+    register_attempt.add_argument("--base-commit")
+    register_attempt.add_argument("--head-commit")
+    register_attempt.add_argument("--patch-path")
+    register_attempt.add_argument("--status", default="registered")
+    register_attempt.set_defaults(func=registry_command)
 
     record_eval = registry_subparsers.add_parser("record-evaluation", help="Record an evaluation.")
-    record_eval.add_argument("--candidate-id", required=True, type=int)
+    record_eval.add_argument("--attempt-id", required=True, type=int)
     record_eval.add_argument("--type", required=True)
     record_eval.add_argument("--status", required=True)
     record_eval.add_argument("--command")
@@ -800,16 +783,16 @@ def build_parser() -> argparse.ArgumentParser:
     record_eval.add_argument("--failure-reason")
     record_eval.set_defaults(func=registry_command)
 
-    attach_patch = registry_subparsers.add_parser("attach-patch", help="Attach a patch to a candidate.")
-    attach_patch.add_argument("--candidate-id", required=True, type=int)
+    attach_patch = registry_subparsers.add_parser("attach-patch", help="Attach a patch to an Attempt.")
+    attach_patch.add_argument("--attempt-id", required=True, type=int)
     attach_patch.add_argument("--patch-path", required=True)
     attach_patch.add_argument("--head-commit")
     attach_patch.add_argument("--status", default="patched")
     attach_patch.set_defaults(func=registry_command)
 
-    record_cost = registry_subparsers.add_parser("record-cost", help="Record run or candidate cost.")
+    record_cost = registry_subparsers.add_parser("record-cost", help="Record run or attempt cost.")
     record_cost.add_argument("--run-id", type=int)
-    record_cost.add_argument("--candidate-id", type=int)
+    record_cost.add_argument("--attempt-id", type=int)
     record_cost.add_argument("--agent")
     record_cost.add_argument("--model")
     record_cost.add_argument("--input-tokens", type=int)
@@ -820,11 +803,11 @@ def build_parser() -> argparse.ArgumentParser:
     record_cost.set_defaults(func=registry_command)
 
     record_lineage = registry_subparsers.add_parser(
-        "record-lineage", help="Record candidate lineage."
+        "record-lineage", help="Record attempt lineage."
     )
-    record_lineage.add_argument("--candidate-id", required=True, type=int)
+    record_lineage.add_argument("--attempt-id", required=True, type=int)
     record_lineage.add_argument("--relationship", required=True)
-    record_lineage.add_argument("--related-candidate-id", type=int)
+    record_lineage.add_argument("--related-attempt-id", type=int)
     record_lineage.add_argument("--note")
     record_lineage.set_defaults(func=registry_command)
 
@@ -842,15 +825,15 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--repo", default=".", help="Repository path.")
     run_parser.add_argument("--registry", help="Registry path relative to repo or absolute path.")
     run_parser.add_argument("--goal", required=True, help="Improvement goal.")
-    run_parser.add_argument("--candidates", type=int, default=1, help="Number of planned candidates to register.")
+    run_parser.add_argument("--attempts", type=int, default=1, help="Number of planned attempts to register.")
     run_parser.add_argument(
         "--branch-template",
-        default="climbhill/run-{run_id}/candidate-{candidate}",
-        help="Branch naming template using {run_id} and {candidate}.",
+        default="climbhill/run-{run_id}/attempt-{attempt}",
+        help="Branch naming template using {run_id} and {attempt}.",
     )
     run_parser.set_defaults(func=run_command)
 
-    compare_parser = subparsers.add_parser("compare", help="Compare candidates for a run.")
+    compare_parser = subparsers.add_parser("compare", help="Compare attempts for a run.")
     compare_parser.add_argument("--repo", default=".", help="Repository path.")
     compare_parser.add_argument("--registry", help="Registry path relative to repo or absolute path.")
     compare_parser.add_argument("--run-id", required=True, type=int)
@@ -880,7 +863,7 @@ def build_parser() -> argparse.ArgumentParser:
     decision_parser.add_argument("--repo", default=".", help="Repository path.")
     decision_parser.add_argument("--registry", help="Registry path relative to repo or absolute path.")
     decision_parser.add_argument("--run-id", required=True, type=int)
-    decision_parser.add_argument("--candidate-id", type=int)
+    decision_parser.add_argument("--attempt-id", type=int)
     decision_parser.add_argument("--type", required=True, help="Decision type such as promote or reject.")
     decision_parser.add_argument("--rationale")
     decision_parser.add_argument("--actor")
@@ -892,11 +875,11 @@ def build_parser() -> argparse.ArgumentParser:
     reflect_parser.add_argument("--run-id", type=int)
     reflect_parser.set_defaults(func=reflect_command)
 
-    history_parser = subparsers.add_parser("history", help="Historical candidate commands.")
+    history_parser = subparsers.add_parser("history", help="Historical attempt commands.")
     history_parser.add_argument("--repo", default=".", help="Repository path.")
     history_parser.add_argument("--registry", help="Registry path relative to repo or absolute path.")
     history_subparsers = history_parser.add_subparsers(dest="history_command", required=True)
-    history_sample = history_subparsers.add_parser("sample", help="Sample historical candidates.")
+    history_sample = history_subparsers.add_parser("sample", help="Sample historical attempts.")
     history_sample.add_argument("--query", default="")
     history_sample.add_argument("--limit", type=int, default=5)
     history_sample.set_defaults(func=history_command)

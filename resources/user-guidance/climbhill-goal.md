@@ -11,4 +11,4 @@ Metadata:
 
 Summary:
 
-ClimbHill.ai is a repo-local self-improvement system that helps coding agents run controlled, measurable recursive improvement loops on Git repositories. It emphasizes policy gates, durable experiment memory, candidate comparison, evaluation before promotion, human decisions, reporting, and meta-analysis that proposes follow-up GitHub issues.
+ClimbHill.ai is a repo-local self-improvement system that helps coding agents run controlled, measurable recursive improvement loops on Git repositories. It emphasizes policy gates, durable experiment memory, attempt comparison, evaluation before promotion, human decisions, reporting, and meta-analysis that proposes follow-up GitHub issues.

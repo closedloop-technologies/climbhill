@@ -1,60 +1,104 @@
 # Architecture
 
-ClimbHill.ai is a local-first system for controlled research and recursive improvement of Git repositories by coding agents. Durable state is readable, reviewable files on a dedicated Git branch; derived indexes are disposable.
+ClimbHill is a local-first controlled optimizer over Git repositories. The CLI is
+the primary human interface; MCP is an agent-facing adapter over the same core
+modules.
 
-## Runtime Layers
+## Module Map
 
-- **npm CLI**: `climbhill` commands initialize jobs, ingest and derive sources, build graphs, run bounded research, manage recursive candidates, enforce policy, and validate OKF bundles.
-- **Git control topology**: every job owns either a split control branch or a separate Ouroboros clone/worktree. The target repository stores only a portable pointer; machine-local checkout locations live in Git's common directory.
-- **File-backed run store**: YAML, Markdown, JSON, JSONL, patches, and raw artifacts are the system of record under the job root. Atomic writes and append-only event files make interrupted operations recoverable.
-- **BAML clients**: checked-in TypeScript and Python clients provide typed derivation, planning, and synthesis calls against an exact OpenAI model snapshot.
-- **Source adapters**: local files, PDFs, webpages, YouTube transcripts, and arXiv papers are normalized into content-addressed raw artifacts and versioned source manifests.
-- **Evidence graph**: observations are converted into canonical concepts and relationships with resource, observation, and locator provenance. Conflicts remain explicit instead of being silently collapsed.
-- **Bounded research**: local evidence is searched first. Optional web search obeys query, page-read, wall-clock, token, and dollar budgets; partial progress can resume without repeating completed searches.
-- **Recursive improvement**: flat run IDs record lineage, plans, candidates, patches, evaluations, decisions, reflections, costs, and skill provenance. Promotion remains a human decision.
-- **Policy layer**: allowed, denied, and approval-required paths plus evaluation commands and budgets constrain candidate work and policy changes.
-- **OKF v0.2**: validated concept bundles preserve source and finding provenance. The upstream specification and license are vendored with hashes and provenance metadata.
-- **Skills**: procedures under `.agent/skills` are installable through the `skills` CLI and can be promoted only with run and evaluation evidence.
-- **Remix site**: a static Remix 3 beta site documents the product and is deployable through GitHub Pages.
+- **Run engine**: resolves Baseline, Focus, Evaluation Strategy, Promotion Target,
+  budgets, policy, and Authorization Envelope.
+- **Attempt engine**: generates and records alternative mutations within one Run
+  contract.
+- **Evaluation engine**: executes pinned evaluators and separates execution state
+  from quality verdict.
+- **Continuation controller**: converts frozen typed evidence into a typed
+  recommendation.
+- **Deterministic control**: resolves Focus paths, authorization, eligibility,
+  budgets, state transitions, freshness, and atomic consumption.
+- **Execution adapters**: worktree, isolated clone, container, sequential
+  in-place, and manual operation.
+- **Assessment module**: deterministic probes plus lightweight agentic skills that
+  produce capability findings.
+- **File-backed store**: canonical YAML, Markdown, JSONL, and artifacts with a
+  rebuildable SQLite index.
+- **Research module**: source ingestion, derivation, graph construction, and OKF
+  evidence persistence.
+- **CLI**: deep human interface over orchestration.
+- **MCP server**: agent-readable adapter over core module interfaces.
 
-## Git Topology
-
-```text
-target checkout
-  .climbhill/jobs/<job-id>.yaml       portable repository IDs + control branch
-
-git common directory
-  climbhill/locators/<job-id>.yaml    machine-local control checkout location
-
-control branch/worktree
-  job.yaml
-  policy.yaml
-  sources/
-  observations/
-  graph/
-  research/
-  runs/
-  okf/
-  events/
-  cache/registry.sqlite               ignored, rebuildable index only
-```
-
-Split mode creates a sibling worktree on an orphan control branch. Ouroboros mode creates an isolated sibling clone and worktree. Existing branches are never repurposed, and `climbhill recover` repairs a missing local locator explicitly.
-
-## Evidence Flow
+## Recursive Flow
 
 ```text
-Source URI
-  -> immutable raw artifact + versioned source manifest
-  -> typed BAML derivation + observations
-  -> deterministic graph build
-  -> bounded local/web research
-  -> cited synthesis + OKF bundle
-  -> recursive candidate/evaluation/decision records
+Objective
+  -> Resolve standalone Run contract
+  -> Generate Attempts within the authorization envelope
+  -> Evaluate with the pinned external strategy
+  -> Freeze an Evidence Snapshot
+  -> Produce Continuation Analysis
+  -> Check authorization and execution eligibility
+  -> Add Attempt, gather evidence, recommend promotion, spawn child Run, or stop
+  -> Record human Decision before promotion
 ```
 
-Every derivation identity includes the raw hash, profile, resolved prompt, model, schema, and chunking configuration. A derivation manifest is committed only after all observation files exist, so interrupted work cannot be mistaken for a cache hit.
+Task, learning, and alignment are different Focuses over this same flow. A child
+Run is created only when useful work requires a different Focus or authorization
+envelope.
 
-## Safety Boundaries
+## Core Interfaces
 
-Human approval is required for promotion, changes to approval-required paths, budget increases, and policy relaxation. Merge, deployment, external publication, and credential provisioning stay outside the autonomous runtime. Failed and rejected candidates remain queryable evidence, while rebuildable SQLite cache files never become canonical state.
+The external interfaces remain small:
+
+```text
+Assessment.assess(repositories, machine) -> AssessmentRecord
+RunEngine.create(RunRequest) -> Run
+RunEngine.status(run_id) -> RunStatusView
+ContinuationPolicy.evaluate(ContinuationInput) -> ContinuationAnalysis
+DecisionEngine.record(DecisionRequest) -> Decision
+```
+
+Internal adapters satisfy interfaces for Git, filesystem, clocks, models,
+evidence readers, evaluators, policy, authorization, budget accounting, and
+execution environments. Tests cross the same seams as the CLI.
+
+## Trust And Authority
+
+The agentic Continuation Policy receives typed evidence from controlled readers.
+It does not receive raw hidden holdouts, secrets, or unrestricted repository
+access. It recommends but cannot authorize or execute.
+
+Deterministic control computes:
+
+```text
+recommendation
+  -> authorization
+  -> execution eligibility
+  -> atomic consumption
+  -> adapter execution
+```
+
+Authority and eligibility are distinct. An authorized action may be ineligible
+because of stale evidence, exhausted budget, invalid Focus, or failed preflight.
+
+## Persistence
+
+Canonical state lives under `.climbhill/runs`, independently of optional Jobs.
+Git commits provide content identity and ancestry. Semantic Attempt relationships
+remain metadata. SQLite is an ignored, rebuildable query cache.
+
+The detailed schema and invariants are defined in
+[recursive-loops.md](recursive-loops.md).
+
+## Implemented Substrate
+
+The npm MVP already provides file-backed YAML/Markdown records, atomic writes,
+source adapters, BAML clients, research workflows, graph construction, policy
+checks, OKF validation, a rebuildable SQLite index, and the Remix site. Its
+recursive implementation persists Attempts, Evaluations, and Decisions under a
+Run directory.
+
+Some modules still reflect the implementation that preceded this contract:
+`init` creates a Job-owned control checkout, worktree isolation is assumed, and
+research operations use the Run store. Those are migration constraints, not
+architectural invariants. New recursive-engine work targets the interfaces and
+repository layout above.

@@ -8,7 +8,7 @@ import { JOB_SCHEMA, OKF_SCHEMA, type JobPointer, type JobRecord } from "./types
 const DEFAULT_BUDGETS = {
   maxApiCostUsd: 5,
   maxWallTimeSeconds: 900,
-  maxCandidateConcurrency: 2,
+  maxAttemptConcurrency: 2,
   maxResearchConcurrency: 2,
 };
 

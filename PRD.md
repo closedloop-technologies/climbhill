@@ -7,655 +7,740 @@ Distribution: npm, `npx skills`, and `climbhill.ai`
 
 ## 1. Executive Summary
 
-ClimbHill is a local-first system for creating an agentic workflow that performs
-a job at a new quality and efficiency bar. A user points ClimbHill at one Git
-repository, defines a job to be done, gathers relevant evidence, derives
-structured knowledge, runs bounded improvement attempts, evaluates candidates,
-and preserves what was learned across recursive iterations.
+ClimbHill is a local-first controlled optimizer for Git repositories. A user
+states an outcome; ClimbHill gathers evidence, generates alternative Attempts,
+evaluates them, and determines what to improve next while changing only surfaces
+for which it has authority.
 
-The target product has three durable layers:
+The recursive engine is centered on:
 
 ```text
-research/       accumulated evidence and structured knowledge
-runs/           recursive plans, candidates, evaluations, and decisions
-target repo     promoted executable artifacts, including .agent/skills
+Run -> Attempt -> Evaluation -> Decision
 ```
 
-The research layer follows Open Knowledge Format (OKF) v0.2. Agentic functions,
-prompts, and structured outputs are defined in BAML. BAML generates the Python
-and TypeScript clients required by the runtime. The primary CLI is distributed
-through npm. Skills are distributed through `npx skills`. Frontend code uses
-`remix@3.0.0-beta.10`, including the static GitHub Pages site under `www/`.
+A Run freezes the Target and Control commits, declares one writable Focus, pins
+an external Evaluation Strategy, and identifies a Promotion Target. Task,
+learning, and alignment work use the same engine with different Focuses.
+Recursion emerges when an authorized Decision creates a child Run.
 
-## 2. Problem
+Jobs are optional UX projections that group Runs and supply defaults. They are
+not required engine state. Git owns content versioning; ClimbHill does not create
+a second revision system.
 
-Coding agents can make useful one-off changes, but most repositories do not
-provide the structure needed to improve repeatedly and safely. Agents commonly
-lack:
+The canonical recursive contract is [docs/recursive-loops.md](docs/recursive-loops.md).
+Canonical terminology is mapped in [CONTEXT-MAP.md](CONTEXT-MAP.md). The rationale
+for the Run-centered model is recorded in
+[ADR 0001](docs/adr/0001-run-centered-recursive-optimization.md).
 
-- A stable job definition and success criteria.
-- Relevant, cited, reusable background knowledge.
-- Separation between raw evidence, source-local observations, and reconciled
-  knowledge.
-- Durable records of attempts, costs, failures, and decisions.
-- A safe way to compare multiple candidates.
-- A way to use lessons from one attempt in the next attempt.
-- Explicit policy and budget controls.
-- A clear promotion path from research to skills and code.
+## 2. Product Definition
 
-The result is opaque report generation, repeated research, lost failures,
-untraceable claims, and agent behavior that does not improve with experience.
+Recursive self-improvement is evidence-guided experiment selection under scoped
+authority. ClimbHill separates:
+
+1. Diagnosis: what might explain insufficient progress?
+2. Experiment selection: what action would discriminate between explanations?
+3. Authority: what may the system inspect, change, or promote?
+4. Optimization: what Attempt should replace the baseline within the selected
+   Focus?
+
+The controller may recommend actions. Deterministic policy and Decisions control
+whether those actions can execute.
 
 ## 3. Job To Be Done
 
-When I need a repository to perform a task at a materially higher quality and
-efficiency bar, I want to create a version-controlled agentic workflow that
-researches the problem, accumulates inspectable knowledge, tries bounded
-solutions, evaluates them, and learns recursively, so that each iteration starts
-from stronger evidence and history than the previous one.
+When I need a Git-backed artifact or agentic workflow to perform a job at a
+materially higher quality and efficiency bar, I want ClimbHill to gather relevant
+evidence, try bounded alternatives, determine which problem-solving surface needs
+attention, and preserve every result, so progress compounds without silently
+changing my evaluator, policy, or deployment state.
 
 ## 4. Product Principles
 
-1. **Local first.** The user owns the target repository, control repository,
-   raw evidence, knowledge bundle, run history, and generated artifacts.
-2. **Evidence before prose.** Research accumulates sources and structured
-   knowledge; reports are derived views.
-3. **Ingest, derive, reconcile.** Retrieval, source-local extraction, and graph
-   construction are separate operations.
-4. **Filesystem is canonical.** Version-controlled YAML and Markdown are the
-   source of truth. SQLite is a rebuildable query cache.
-5. **Provenance survives transformation.** Canonical entities and claims retain
-   links to every contributing observation and exact source locator.
-6. **Partial work is valuable.** Budget limits and failures stop cleanly and
-   preserve all completed work.
-7. **Skills are behavior, not memory.** `.agent/skills` contains executable
-   procedures and supporting code. Research knowledge belongs in the control
-   plane.
-8. **Recursive, not autonomous by default.** ClimbHill preserves lineage and
-   supports repeated improvement without silently merging or deploying changes.
+1. **Run-centered engine.** A standalone Run is executable and auditable without
+   loading a Job.
+2. **Git owns revisions.** Commits and branches represent content history;
+   ClimbHill stores semantic lineage as metadata.
+3. **One primary Focus.** A Run changes one declared surface with a resolved
+   writable scope.
+4. **External evaluation.** Every optimization is judged by evidence outside the
+   surface being optimized.
+5. **Scoped autonomy.** Work may continue within an Authorization Envelope;
+   widening the envelope requires authority.
+6. **Recommendation is not authority.** Agentic Continuation Analysis cannot
+   authorize or execute itself.
+7. **Least change first.** Prefer lower-scope diagnostic or optimization actions
+   when they can produce useful evidence.
+8. **Failure is not evaluator error.** Alignment requires evidence outside the
+   evaluator being challenged.
+9. **Filesystem is canonical.** Version-controlled YAML and Markdown are the
+   source of truth; SQLite is a rebuildable cache.
+10. **Partial work remains evidence.** Failure, cancellation, budget termination,
+    and stale reasoning remain inspectable.
+11. **Local utility requires no account.** Accounts may add identity,
+    collaboration, persistence, hosted execution, or trust services, but not gate
+    the open workflow spine.
 
 ## 5. Scope
 
 ### 5.1 In Scope
 
-- One job targeting one Git repository.
-- A separate or shared Git repository for control-plane persistence.
-- Ouroboros mode, where target and control are the same repository.
-- Source ingestion for local files, PDFs, webpages, YouTube, and arXiv.
-- Bloom-based source enrichment through BAML.
-- OKF v0.2 resources, observations, entities, claims, relationships, topics,
-  and reports.
-- Explicit ontology detection, entity resolution, and graph construction.
-- Bounded web research and local-only research.
-- Recursive candidate runs, evaluations, decisions, costs, and lineage.
+- One Run optimizing one primary Focus in one Target or Control Repository.
+- Parent-linked Run trees pursuing a root objective.
+- Optional Jobs for grouping and reusable defaults.
+- Task, learning, and alignment Focuses.
+- Learning subtypes `skill`, `tool`, `environment`, `context`, and `workflow`.
+- Capability-specific repository and machine assessment.
+- Worktree, isolated-clone, container, sequential in-place, and manual execution
+  adapters.
+- Typed Attempts, Evaluations, Decisions, Continuation Analyses, and consumption
+  receipts persisted as files.
+- Human preference, calibration, and hidden holdout evidence.
+- Source ingestion, typed derivation, OKF research storage, graph construction,
+  and bounded research.
+- Split-control and Ouroboros repository modes.
 - npm CLI distribution, `npx skills` distribution, and a Remix website.
 
-### 5.2 Out of Scope For Initial Release
+### 5.2 Out Of Scope For Initial Release
 
-- Jobs spanning multiple target repositories.
-- Mandatory human or machine verification of every concept.
-- Automatic merge, deployment, or policy relaxation.
+- A bespoke recursive revision graph or custom Git ref namespace.
+- Campaign, Proposal, Judgment, Hypothesis, or ContinuationAnalysis aggregate
+  roots.
+- Automatic merge, deployment, evaluator adoption, or promotion.
+- Mandatory worktrees.
+- Jobs spanning multiple Target Repositories.
 - A hosted agent cloud or hosted source-of-truth database.
 - Real-time multi-user collaboration.
-- Private SaaS connectors beyond the initial plugin interface.
-- Deleting user data without an explicit user command.
+- Deleting user data without an explicit command.
 
 ## 6. Domain Model
 
+### 6.1 Recursive Optimization
+
 | Term | Definition |
 | --- | --- |
-| Target repository | The Git repository ClimbHill is trying to improve. |
-| Control repository | The Git repository that persists `.climbhill/<job-id>/`. |
-| Location | Local base directory where the control branch worktree is checked out. It is not part of portable identity. |
-| Job | One job to be done applied to one target repository. |
-| Job ID | A human-readable slug with a UUID-style suffix that is globally unique. |
-| Control branch | Long-lived `climbhill/<job-id>` branch containing versioned control-plane state. |
-| Resource | An OKF concept describing one retrieved source and its raw artifact. |
-| Observation | A source-local entity mention, claim, opinion, procedure, recommendation, relationship, term, or gap. |
-| Graph concept | A canonical entity, claim, or relationship reconciled from one or more observations. |
-| Run | A versioned execution record with inputs, outputs, costs, status, stopping reason, and optional parent lineage. |
-| Candidate | One attempted change to the target repository within an improvement run. |
-| Skill | Promoted executable agent behavior under `.agent/skills`. |
+| Run | One bounded optimization pass with an immutable Baseline, one Focus, an external Evaluation Strategy, an Authorization Envelope, and a Promotion Target. |
+| Attempt | One proposed mutation of the Run's Focus, represented by a Git commit or pre-promotion patch. |
+| Evaluation | A versioned measurement or judgment of an Attempt under the evaluator pinned by its Run. |
+| Decision | A recorded assertion of authority to authorize, promote, reject, continue, stop, or override. |
 
-## 7. Persistence Model
+These are the recursive engine's only first-class concepts.
 
-The control repository owns the following structure:
+### 6.2 UX And Supporting Records
+
+| Term | Definition |
+| --- | --- |
+| Job | Optional human-facing grouping and defaults copied into new Runs. |
+| Assessment Finding | Timestamped evidence about a repository or machine capability. |
+| Continuation Analysis | Immutable synthesis of hypotheses, evidence, and one typed recommendation at an Evidence Snapshot. |
+| Authorization Envelope | Bounded grant for Attempts, diagnostics, child Focuses, cost, runtime, and depth. |
+| Execution Eligibility | Current deterministic result of policy, authority, budget, freshness, and Focus checks. |
+
+These are typed files or value objects. They do not own independent lifecycles in
+the MVP.
+
+### 6.3 Research
+
+Research retains its own concepts: Resource, Observation, canonical graph Entity,
+Claim, Relationship, Topic, and OKF Bundle. A recursive Run pins research by
+Control commit and path rather than owning or duplicating it.
+
+## 7. Loop Model
+
+All loop kinds share one controller:
+
+```text
+Loop = immutable baseline + mutable focus + evaluation strategy + promotion target
+```
+
+| Run kind | Mutable Focus | Evaluation outside the Focus | Promotion Target |
+| --- | --- | --- | --- |
+| `task` | Artifact performing the user's job | Tests, benchmarks, rubrics, human preference | Product/task artifact |
+| `learning` | Harness producing Attempts | Frozen tasks and holdout benchmarks | Skill, tool, environment, context, or workflow |
+| `alignment` | Evaluation definition or judge configuration | Human judgments and held-out calibration data | Evaluation Strategy |
+
+An Attempt may not change the evaluator that scores it. Alignment Runs pin a
+separate meta-evaluator outside their proposed evaluator paths.
+
+## 8. Persistence Model
+
+The Control Repository owns canonical state:
 
 ```text
 <control-repository>/
 └── .climbhill/
-    └── <job-slug>-<uuid-suffix>/
-        ├── job.yaml
-        ├── research/
-        │   ├── raw/
-        │   └── okf/
-        │       ├── index.md
-        │       ├── log.md
-        │       ├── method.md
-        │       ├── resources/
-        │       ├── observations/
-        │       ├── entities/
-        │       ├── claims/
-        │       ├── relationships/
-        │       ├── topics/
-        │       └── reports/
-        ├── runs/
-        │   ├── index.md
-        │   └── <run-id>/
-        │       ├── run.yaml
-        │       ├── plan.md
-        │       ├── research-delta.md
-        │       ├── candidates/
-        │       ├── evaluations/
-        │       ├── decision.md
-        │       └── reflection.md
-        └── cache/
-            └── registry.sqlite
+    ├── config.yaml
+    ├── jobs/
+    │   └── <job-id>.yaml
+    ├── runs/
+    │   └── <run-id>/
+    │       ├── run.yaml
+    │       ├── attempts/
+    │       ├── evaluations/
+    │       ├── decisions/
+    │       ├── continuation/
+    │       ├── artifacts/
+    │       └── events.jsonl
+    ├── assessments/
+    ├── evaluations/
+    ├── policies/
+    ├── research/
+    │   ├── raw/
+    │   └── okf/
+    └── cache/
+        └── registry.sqlite
 ```
 
-The filesystem is canonical. `cache/registry.sqlite` is ignored and can be
-rebuilt from `job.yaml`, OKF frontmatter, and run records.
+Runs are not nested beneath Jobs. Run identity survives Job rename or deletion.
+SQLite is ignored and rebuildable from canonical files.
 
-Raw artifacts are immutable to derivation operations. If Git LFS is available,
-`init` configures `.climbhill/<job-id>/research/raw/**` for LFS. Otherwise it
-ignores the raw directory and writes visible instructions for enabling LFS.
-Users may delete raw data; derived concepts then remain readable but their raw
-evidence links may no longer resolve.
+Raw research artifacts are immutable to derivation. Git LFS is used when
+available; otherwise raw bytes are ignored with visible migration instructions.
+Derived research and Run records remain version-controlled.
 
-## 8. Persistence Modes
+## 9. Repository Modes
 
-### 8.1 Split Control
+### 9.1 Split Control
 
-The target and control repositories are different. The target contains code and
-promoted skills. The control repository independently versions research and run
-history.
+Target and Control are different Git repositories. The Target contains product
+state and promoted executable behavior. The Control Repository versions research,
+policies, evaluations, and Run trees.
 
-### 8.2 Ouroboros
+### 9.2 Ouroboros
 
-The target and control resolve to the same Git repository. ClimbHill creates
-`climbhill/<job-id>` and checks it out as a separate worktree below `--location`.
-The active target worktree remains on its implementation branch. Control-plane
-commits and target implementation commits share the Git object database without
-requiring the same checkout.
+Target and Control resolve to the same Git repository. Their commits may be equal
+or different, but a Run always records both roles explicitly. A worktree is one
+possible adapter, not an identity or initialization prerequisite. Assessment may
+select an isolated clone, container, sequential in-place execution, manual
+execution, or declare a capability unsupported.
 
-## 9. Primary CLI Interface
+## 10. Primary CLI Interface
+
+The human interface is intentionally small:
+
+```bash
+climbhill assess
+climbhill run "Improve release reliability"
+climbhill status
+climbhill decide --promote <attempt-id>
+```
+
+Jobs remain optional conveniences:
+
+```bash
+climbhill job create release-reliability
+climbhill run --job release-reliability
+climbhill job status release-reliability
+```
+
+Advanced Run creation remains secondary:
+
+```bash
+climbhill run --focus task "Improve release reliability"
+climbhill run --focus learning:environment --from <run-id>
+climbhill run --focus alignment --from <run-id>
+```
+
+Low-level Attempt, Evaluation, Decision, policy, and history commands may exist as
+agent-facing plumbing. Humans do not manually operate recursion in the ordinary
+workflow.
+
+Research commands remain composable:
 
 ```text
-climbhill init -> climbhill add -> climbhill derive -> climbhill graph build -> climbhill research
+climbhill add -> climbhill derive -> climbhill graph build -> climbhill research
 ```
 
-Existing candidate comparison and reporting commands remain available during
-the migration and are adapted to the file-backed job model.
+## 11. Functional Requirements
 
-## 10. Functional Requirements
+### FR-1: Initialize Repositories
 
-### FR-1: Initialize A Job
-
-```text
-climbhill init --target <repo> --control <repo> --location <path> --job <slug>
+```bash
+climbhill init --target <repo> [--control <repo>]
 ```
 
-The command must:
-
-1. Validate that target and control resolve to Git repositories.
-2. Generate `<slug>-<uuid-suffix>` without colliding with an existing job.
-3. Record target identity, control identity, objective, budgets, base commit,
-   control branch, creation time, and schema versions in `job.yaml`.
-4. Create `climbhill/<job-id>` and a separate control worktree at
-   `<location>/<job-id>`.
-5. Create `.climbhill/<job-id>/` in the control worktree.
-6. Record a portable job pointer for discovery from the target repository
-   without committing the absolute worktree path.
-7. Configure Git LFS for raw artifacts when available.
-8. Fall back to `.gitignore` plus a migration note when Git LFS is unavailable.
-9. Refuse to overwrite or reuse an existing job unless an explicit recovery
-   command is used.
+The command must validate Target and Control repositories, default Control to
+Target for Ouroboros operation, create canonical Control directories without a
+Job, record portable repository identities, preserve active branches, configure
+Git LFS or an explicit fallback, create conservative policy/evaluation/ignore
+templates, and avoid creating a worktree until assessment selects that adapter.
 
 Acceptance criteria:
 
-- Split-control and Ouroboros integration tests create usable worktrees.
-- Re-running the same invocation does not create a second ambiguous job.
-- Moving the control worktree does not invalidate portable job identity.
-- Target and control remain on their original active branches after init.
+- Split-control and Ouroboros initialization preserve active branches.
+- A standalone Run can be created immediately without a Job.
+- Re-running init is idempotent and does not create ambiguous state.
 
-### FR-2: Add One Source
+### FR-2: Assess Capabilities
 
-```text
+```bash
+climbhill assess [--target <repo>] [--control <repo>]
+```
+
+Assessment combines deterministic probes with lightweight agentic skills. It
+must probe install/build/test/cleanup, credentials, services, ports, shared state,
+Git behavior, and evaluator availability; report individual capabilities; assess
+all supported execution adapters; persist evidence, timestamp, commits, and
+machine fingerprint; recommend an adapter without granting authority; and expose
+missing or unaligned evaluation criteria.
+
+A Run pins the assessment path and content hash it relied upon. Git-versioned
+environment definitions do not prove that the current machine satisfies them.
+
+### FR-3: Add One Source
+
+```bash
 climbhill add <url-or-file> [--type <type>] [--no-derive]
 ```
 
-`add` retrieves exactly one logical source. It must:
+`add` retrieves one logical source, selects a source adapter, preserves original
+bytes and metadata, hashes content, creates or updates an OKF Resource, runs
+default derivation unless disabled, preserves ingestion when derivation fails,
+and creates an immutable source version when content changes.
 
-1. Detect or accept an explicit source type.
-2. Select a source adapter through a common interface.
-3. Preserve the original bytes or text plus retrieval metadata under `raw/`.
-4. Compute a content hash and stable resource identity.
-5. Create or update an OKF resource concept with URL, author/publisher,
-   publication time when known, retrieval time, raw path, content hash, and
-   adapter metadata.
-6. Run the default derivation unless `--no-derive` is present.
-7. Preserve successful ingestion if derivation fails, mark the derivation
-   failure, and exit nonzero.
-8. Create a new immutable source version when the same logical source changes.
+Initial adapters are local file, PDF, webpage, YouTube, and arXiv. Identical
+content must not duplicate bytes or concepts. Evidence locators must be
+timestamp-addressable for transcripts and page-addressable for PDFs.
 
-Initial adapters:
+### FR-4: Derive Source-Local Knowledge
 
-- Local file.
-- PDF.
-- Webpage.
-- YouTube transcript and video metadata.
-- arXiv metadata and original versioned PDF.
-
-Acceptance criteria:
-
-- Adding identical content twice does not duplicate raw bytes or concepts.
-- A changed remote source creates a new version and does not mutate the old one.
-- YouTube concepts include timestamp-addressable transcript evidence.
-- PDF and arXiv concepts support page-addressable evidence.
-
-### FR-3: Derive Source-Local Knowledge
-
-```text
+```bash
 climbhill derive [--resource <id>] [--append-prompt <text>] [--prompt-file <path>]
 ```
 
-Derivation must be implemented as typed BAML functions. The default profile
-uses Bloom's revised cognitive lenses to extract:
+Typed BAML functions derive source-local entities, claims, opinions, procedures,
+relationships, terminology, practices, and research gaps. Every Observation
+retains Resource identity and the best available exact locator.
 
-- Named entities, dates, definitions, and directly stated facts.
-- Attributed claims, opinions, explanations, and terminology.
-- Procedures, workflows, prerequisites, and ordered steps.
-- Source-local relationships, comparisons, assumptions, and causal claims.
-- Expert recommendations, practices, tradeoffs, and limitations.
-- Research gaps, follow-up questions, and synthesis candidates.
+Derivation identity includes raw content hash, profile, resolved prompt, model,
+schema, and chunking policy. Identical identity is a true cache hit; changed
+identity creates distinct output without overwriting prior derivations.
 
-Every observation must retain the resource ID and an exact timestamp, page,
-heading, or line locator when available. Derivation does not create canonical
-graph entities.
+### FR-5: Build The Knowledge Graph
 
-The derivation identity must include:
-
-```text
-raw content hash + profile + resolved prompt + model + schema + chunking policy
-```
-
-`--append-prompt` extends the default prompt. `--prompt-file` replaces it with a
-versioned custom prompt. An identical identity is a true cache hit and must not
-change `generated.at`. A changed identity creates distinct output without
-overwriting prior derivations.
-
-Acceptance criteria:
-
-- BAML generates working TypeScript and Python clients from the same functions.
-- Structured output validates before it is written as OKF.
-- Repeated identical derivation produces no Git diff.
-- Model-generated output is unverified unless a separate verification event is
-  recorded; verification is optional.
-
-### FR-4: Build The Knowledge Graph
-
-```text
+```bash
 climbhill graph build
 climbhill graph inspect
 ```
 
-Graph construction is explicit and must:
+Graph construction explicitly detects ontology, resolves duplicate entities,
+normalizes relationships, reconciles supporting and conflicting claims, preserves
+all contributing Observations, and exposes uncertainty without forcing merges.
+Rebuilding unchanged inputs must be idempotent.
 
-1. Detect or extend the job's ontology from source-local observations.
-2. Resolve duplicate entity mentions into canonical entities.
-3. Normalize relationship types and endpoints.
-4. Reconcile matching, supporting, and conflicting claims.
-5. Preserve links to every contributing observation and source locator.
-6. Represent uncertain identity and contradictory evidence without forcing a
-   merge.
-7. Produce an inspectable summary of created, merged, unresolved, and
-   superseded concepts.
+### FR-6: Run Bounded Research
 
-Acceptance criteria:
-
-- Rebuilding an unchanged graph is idempotent.
-- Conflicting sources remain independently traceable.
-- A user can inspect why two mentions were merged or kept separate.
-- Graph construction never modifies raw evidence.
-
-### FR-5: Run Bounded Research
-
-```text
+```bash
 climbhill research <question> [--local-only] [budget options]
 ```
 
-Research is a BAML-defined agentic loop. It must:
+Research is a bounded BAML-defined Research Execution, not a recursive Run. It
+must inspect local evidence first, plan gaps, discover sources when permitted,
+ingest relied-upon sources through `add`, derive through `derive`, cite local OKF
+concepts, and persist plan, searches, sources, costs, time, errors, partial work,
+and stopping reason. Graph reconciliation remains explicit.
 
-1. Inspect the existing OKF corpus before searching externally.
-2. Create a plan and identify missing evidence.
-3. In normal mode, use configured search/research skills to discover sources.
-4. Ingest every relied-upon source through the same `add` interface.
-5. Derive source-local observations through the same `derive` interface.
-6. Produce an answer cited to local OKF concepts.
-7. Persist the question, plan, searches, sources, derivations, answer, API cost,
-   wall time, partial output, errors, and stopping reason.
-8. Support `--local-only`, which prohibits external retrieval.
-9. Stop cleanly when API-cost or wall-time budgets are reached.
-10. Leave graph reconciliation explicit; `research` must not silently run
-    `graph build`.
+### FR-7: Create A Run
 
-Acceptance criteria:
+```bash
+climbhill run <objective> [--focus <kind>] [--from <run-id>] [--job <job-id>]
+```
 
-- A budget-limited run exits with a preserved, resumable partial state.
-- Local-only mode performs no network retrieval.
-- An answer cannot cite a transient web result that was not ingested locally.
-- Cost and elapsed time are updated throughout execution, not only at the end.
+Before the first Attempt, Run creation must:
 
-### FR-6: Persist Recursive Runs
+1. Resolve and pin Target and Control commits.
+2. Resolve one semantic Focus to one repository and writable path set.
+3. Pin Evaluation Strategy, policy, ignore fingerprint, assessment, Continuation
+   Policy, budgets, Promotion Target, and Authorization Envelope.
+4. Verify that the evaluator is outside the mutable Focus.
+5. Copy optional Job defaults so execution no longer depends on the Job.
+6. Record parent Run, spawning Decision, and explicitly inherited outputs.
+7. Reject missing commits, unresolved paths, stale required assessment, and
+   unauthorized Focus before execution.
 
-Every material operation creates or updates a file-backed run record. A run
-must record:
+Schemas and validation rules are normative in
+[docs/recursive-loops.md](docs/recursive-loops.md).
 
-- Run ID, kind, status, timestamps, and stopping reason.
-- Target and control commits.
-- Parent run and parent candidate when applicable.
-- Research snapshot commit.
-- Inputs, outputs, models, prompts, tool calls, costs, and wall time.
-- Candidate branches, patches, evaluations, decisions, and reflections.
+### FR-8: Execute Attempts
 
-Runs use stable IDs in a flat directory. Recursive structure is expressed by
-parent references and rendered in `runs/index.md`, avoiding unbounded path
-nesting.
+Within one Run, the engine may create multiple Attempts without another authority
+gate while baseline, Focus, evaluator, Promotion Target, and Authorization
+Envelope remain unchanged.
 
-Acceptance criteria:
+Each Attempt records strategy, agent/model configuration, repository, base
+commit, branch or patch, result commit when available, adapter, timestamps,
+actual changed paths, diff hash, cost, policy verification, and semantic lineage.
 
-- The SQLite cache can be deleted and rebuilt without losing canonical state.
-- Failed and rejected candidates remain queryable.
-- A child run can cite the exact research and candidate state it inherited.
+Pre-execution path checks constrain tools. Post-execution verification against the
+actual Git diff is authoritative. A promotable Attempt requires a Git commit.
 
-### FR-7: Promote Skills
+### FR-9: Evaluate Attempts
 
-`.agent/skills` is the canonical target-repository location for executable
-agent behavior. Skills may include instructions, BAML definitions or generated
-client usage, scripts, configuration, and tests. Volatile provider facts,
-comparisons, and research reports must remain in the control plane.
+Every Evaluation records evaluator commit, path, hash, capability, execution
+status, verdict, requiredness, criteria, trusted evidence summary, raw artifacts,
+and environment fingerprint.
 
-Promoting a skill change must record which OKF concepts, runs, and evaluations
-justify the change. Skills are distributed through `npx skills`.
+Execution status and verdict are separate. Pending, running, errored, cancelled,
+inconclusive, and skipped results are not ordinary failures. Results from
+different evaluator versions or cohorts must never be aggregated as equivalent.
 
-### FR-8: Enforce Policy And Budgets
+Learning Evaluations run proposed harnesses against frozen task suites and
+holdouts. Alignment Evaluations compare proposed evaluators against human
+preference, false-positive/negative cases, ranking stability, variance, cost,
+criterion redundancy, and hidden holdouts.
 
-Policy must cover:
+### FR-10: Analyze Continuation
 
-- Allowed, denied, and approval-required target paths.
-- Maximum API cost per research and improvement run.
-- Maximum wall time per run or candidate.
-- Maximum candidate and research concurrency.
-- Required evaluation commands before promotion.
-- Human approval for promotion, policy relaxation, CI, infrastructure,
-  security-sensitive changes, and deployment.
+At a quiescent Evidence Snapshot, the pinned Continuation Policy receives typed,
+controlled evidence and returns an immutable Continuation Analysis. It must not
+receive arbitrary raw artifacts, repository access, secrets, or hidden holdouts.
 
-Budget termination must preserve work in progress. Budget increases and policy
-relaxation must be explicit recorded decisions.
+The recommendation action is exactly one of:
 
-### FR-9: Conform To OKF v0.2
+```text
+attempt | evaluate | promote | spawn_run | stop
+```
 
-The complete upstream OKF v0.2 specification must be vendored under
-`docs/specifications/` with its source URL, upstream commit, retrieval date,
-checksum, and license. The vendored snapshot is the offline implementation
-reference.
+Each action has a typed payload sufficient for deterministic validation. Prose is
+never parsed for executable scope. Hypothesis status and confidence are relative
+to the analysis snapshot.
 
-The `research/okf/` directory must be independently validatable. Every concept
-except reserved `index.md` and `log.md` must be UTF-8 Markdown with YAML
-frontmatter and a non-empty `type`. Consumers must preserve unknown fields.
+The policy must prefer diagnostic evidence when competing explanations cannot be
+distinguished. It may recommend another Attempt in the current Focus or a child
+Run with a different Focus, but it grants neither authority nor eligibility.
 
-### FR-10: Use BAML For Agentic Behavior
+### FR-11: Enforce Authority And Eligibility
 
-BAML definitions are canonical for prompts, structured model functions, and
-agent output schemas. Generated Python and TypeScript clients are build
-artifacts and are not edited manually. CI must fail when generated clients do
-not match checked-in BAML definitions or when structured fixtures no longer
-validate.
+Deterministic control separately computes authorization (`allowed`,
+`requires_decision`, or `denied`) and execution eligibility at the current state.
+Effective execution permission intersects the Authorization Envelope, repository
+policy, loop-scoped ignore rules, remaining budgets, evidence freshness, and
+resolved Focus.
 
-### FR-11: Distribute The Product
+A child inherits an equal or narrower envelope. Widening Focus, depth, cost,
+runtime, tools, or paths requires a new Decision. Alignment is unavailable unless
+explicitly granted.
 
-- Publish the primary CLI through npm and expose the `climbhill` executable.
-- Make skills installable through `npx skills`.
-- Implement frontend code in `www/` with `remix@3.0.0-beta.10` pinned exactly.
-- Statically build and deploy `www/` to GitHub Pages at `climbhill.ai`.
-- Preserve platform-independent local operation on supported Node runtimes.
+Each recommendation has an atomic consumption key. Before claiming it, the engine
+revalidates baseline, Evidence Snapshot, authority, eligibility, and budget.
+Retries must not create duplicate Attempts or child Runs.
 
-## 11. Non-Functional Requirements
+### FR-12: Decide And Promote
+
+```bash
+climbhill decide --promote <attempt-id>
+```
+
+A Decision records actor assertion, rationale, Evidence Snapshot, action, and the
+authorization or eligibility facts it relied upon. Local identity is an explicit
+human assertion; shared environments may attach authenticated evidence.
+
+Promotion eligibility is computed, not stored as Attempt state. Eligibility
+requires a promotable commit, Focus-compliant diff, successful post-execution
+policy verification, all required passing Evaluations under the pinned evaluator,
+current baseline/budget/target, and no unresolved approvals.
+
+Promotion advances `task_artifact`, `harness`, or `evaluation_strategy` in the
+declared repository, ref, and paths. Human approval is required in the MVP.
+
+### FR-13: Continue And Stop
+
+Changing Focus or widening the Authorization Envelope creates a child Run through
+a Decision. Parent links provide recursion; no Campaign entity is introduced.
+
+Every Run has local budgets. Descendants consume their root Run's remaining cost,
+runtime, and depth budgets. The controller recognizes repetition, Focus cycling,
+and diffusion without measurable progress. It stops on success, budget, risk, no
+progress, insufficient evidence, authority, or unsupported operation while
+preserving resumable state.
+
+### FR-14: Enforce Edit Policy
+
+Repositories may contain:
+
+```text
+.climbhillignore
+.climbhillignore.task
+.climbhillignore.learning
+.climbhillignore.alignment
+```
+
+Global denies are monotonic. Loop-specific files add restrictions and cannot
+negate a global deny. Files use Gitignore syntax relative to their repository.
+Read restrictions and context exclusion remain separate from write protection.
+
+Policy relaxation, budget increase, protected paths, CI, infrastructure,
+security-sensitive changes, and deployment require explicit Decisions.
+
+### FR-15: Promote Skills And Harness State
+
+`.agent/skills` is the canonical Target location for executable agent behavior.
+Promoting harness changes records the Control evidence, parent Run, Attempt,
+Evaluations, Decision, and Promotion Target. Research facts remain in the Control
+Repository rather than being embedded as volatile skill instructions.
+
+### FR-16: Conform To OKF v0.2
+
+The upstream OKF v0.2 specification must be vendored with source URL, commit,
+retrieval date, checksum, and license. The research bundle must be independently
+validatable, UTF-8, frontmatter-bearing, and tolerant of unknown fields.
+
+### FR-17: Use BAML For Agentic Behavior
+
+BAML definitions are canonical for prompts, typed model functions, Continuation
+Policy outputs, derivation outputs, and agentic assessment outputs. Generated
+Python and TypeScript clients are build artifacts. CI fails on generated-client
+drift or invalid structured fixtures.
+
+### FR-18: Distribute The Product
+
+- Publish the CLI through npm with the `climbhill` executable.
+- Publish installable skills through `npx skills`.
+- Implement frontend code under `www/` using exactly `remix@3.0.0-beta.10`.
+- Statically deploy the website to `climbhill.ai`.
+- Preserve account-free local operation on supported platforms.
+
+## 12. State Models
+
+Run lifecycle:
+
+```text
+created -> running -> awaiting_decision -> completed
+                  \-> failed
+                  \-> cancelled
+```
+
+Attempt lifecycle:
+
+```text
+created -> running -> completed
+                  \-> failed
+                  \-> cancelled
+```
+
+Evaluation execution state:
+
+```text
+pending | running | completed | errored | cancelled
+```
+
+Evaluation verdict:
+
+```text
+passed | failed | inconclusive | skipped
+```
+
+Recommendation consumption:
+
+```text
+unconsumed -> claimed -> executed
+                     \-> failed
+```
+
+All transitions are validated. Status, verdict, Decision action, Run kind,
+learning subtype, recommendation action, and lineage relationship are closed
+enums rather than arbitrary strings.
+
+## 13. Non-Functional Requirements
 
 ### Reproducibility
 
-- Hash raw content and resolved derivation configuration.
-- Record exact models, prompts, schema versions, tool versions, and commits.
-- Avoid floating package or model aliases in persisted run metadata.
+- Pin commits, paths, content hashes, schemas, prompts, models, tools, and
+  configuration.
+- Distinguish unique analysis identity from an input fingerprint.
+- Preserve stale Continuation Analyses as valid historical reasoning.
+- Avoid floating model or package aliases in canonical records.
 
 ### Safety
 
 - Never commit secrets or environment files.
-- Use read-only source credentials wherever practical.
-- Avoid automatic merge or deployment.
-- Treat fetched content as untrusted input.
-- Validate paths before writing outside a job's control directory.
+- Treat source, repository, model, and tool output as untrusted.
+- Pass untrusted artifacts through controlled readers before agentic analysis.
+- Keep hidden holdouts outside Attempt and Continuation Policy context.
+- Never allow an Attempt to change its own evaluator or policy.
+- Avoid automatic merge, deployment, evaluator adoption, or promotion.
 
 ### Recoverability
 
-- Use atomic writes for canonical YAML and Markdown records.
-- Preserve completed steps after failures and budget termination.
-- Make interrupted operations resumable from their run record.
-- Do not require SQLite recovery to inspect or resume a job.
+- Use atomic writes for canonical records and compare-and-set for recommendation
+  consumption.
+- Preserve completed work after failures, cancellation, and budget termination.
+- Resume from Run files without SQLite.
+- Never rely on transient chat context as canonical state.
 
 ### Portability
 
-- Never persist an absolute control worktree path as job identity.
-- Keep OKF concepts human-readable and Git-diffable.
-- Generate both TypeScript and Python BAML clients where needed.
+- Use repository identities and commits rather than absolute local paths.
+- Treat worktree/clone/container locations as adapter state, not identity.
+- Keep canonical records human-readable and Git-diffable.
 
 ### Testability
 
-- Interfaces accept filesystem, Git, clock, model, and source adapters rather
-  than creating them internally.
-- Tests exercise the same interfaces used by the CLI.
+- Interfaces accept filesystem, Git, clock, model, evidence-reader, evaluator,
+  policy, and execution adapters.
+- Tests exercise the same interfaces as CLI commands.
 - Network and model calls have deterministic fakes.
-- Split-control and Ouroboros flows have end-to-end fixtures.
+- Integration fixtures cover split-control, Ouroboros, every adapter, stale
+  evidence, authorization, and atomic consumption.
 
-## 12. Success Metrics
+## 14. Adversarial Acceptance Scenarios
 
-The initial release is successful when:
+The target implementation must pass at least these scenarios:
 
-1. A new user can install the CLI from npm and initialize a job in under five
-   minutes.
-2. `init` succeeds in both split-control and Ouroboros modes without changing
-   the active target branch.
-3. Adding the same source twice produces no duplicate evidence.
-4. Deriving the same source with the same profile produces no Git diff.
-5. Every generated claim can resolve to a resource and evidence locator when
-   the source format supports one.
-6. A stopped research run preserves enough state to resume without repeating
-   completed acquisitions.
-7. The graph builder exposes unresolved identity and evidence conflicts.
-8. The cache can be rebuilt entirely from version-controlled files.
-9. ClimbHill can run the `sota-deep-research-agent` job against its own
-   repository in Ouroboros mode.
+1. A task Attempt edits its evaluator; post-execution policy rejects it.
+2. Assessment finds worktrees unsafe and the Run succeeds with an isolated clone.
+3. Evaluator V2 reverses V1's ranking; both result sets remain distinguishable and
+   adoption requires a human alignment Decision.
+4. A learning Attempt improves calibration but regresses hidden holdouts; it is
+   ineligible without an explicit override.
+5. A Continuation Policy recommends replacing itself; the old pinned policy and
+   external historical-run evaluation remain authoritative.
+6. New evidence arrives after analysis; the analysis remains historical but its
+   recommendation cannot be consumed.
+7. A recommendation is authorized but root budget is exhausted; authorization
+   remains allowed while execution eligibility is denied.
+8. A retried consumption does not create duplicate Attempts or child Runs.
 
-## 13. Current State
+## 15. Success Metrics
 
-The repository is a Python `0.1.0` alpha with a working but transitional CLI,
-SQLite registry, policy checks, MCP tools, provider adapters, deep-research
-skills, benchmark tooling, report-oriented OKF output, tests, and GitHub Pages
-workflow.
+The initial product succeeds when:
 
-Current strengths:
+1. A user can initialize repositories, assess capabilities, and start a standalone
+   Run without creating a Job.
+2. A single `climbhill run` invocation can continue automatically within a bounded
+   Authorization Envelope and pause cleanly at an authority boundary.
+3. Every Attempt is reproducible from its Run Baseline, Focus, adapter, and model
+   metadata.
+4. Every Evaluation identifies its evaluator and distinguishes execution state
+   from verdict.
+5. Every promotion is traceable to an eligible Attempt and human Decision.
+6. Task failure alone cannot trigger evaluator modification.
+7. Root-tree cost, runtime, depth, Focus transitions, and no-progress signals are
+   derivable without a Campaign entity.
+8. The SQLite cache can be deleted and rebuilt from canonical files.
+9. Research remains cited, versioned, and reusable by later Runs.
+10. ClimbHill completes a bounded Ouroboros Run against itself without assuming a
+    worktree.
 
-- Provider adapters and provider metadata already exist in `climbhill/`.
-- Deep-research skill scripts and tests exist under `.agents/skills` and
-  mirrored `skills/` directories.
-- The registry already models runs, candidates, evaluations, costs, lineage,
-  decisions, reports, and issue proposals.
-- Policy templates already define cost, time, and candidate-count budgets.
-- OKF utilities already preserve provider reports, findings, uncertainties,
-  methods, raw paths, and metadata.
-- The test suite covers CLI, registry-related flows, MCP tools, providers,
-  auditing, source validation, and skill discovery.
+## 16. Current State And Gap Analysis
 
-Observed baseline on 2026-08-18: 202 tests passed and one audit test failed
-because the provider source index exceeded its 30-day freshness limit. Package
-building and metadata validation succeeded.
+The repository contains an npm MVP with file-backed state, source adapters, BAML
+research, graph construction, OKF validation, policy gates, recursive
+Run/Attempt records, a rebuildable SQLite index, and a Remix site. A transitional
+Python CLI and MCP server remain as secondary surfaces.
 
-## 14. Gap Analysis
+| Area | Current implementation | Target gap | Priority |
+| --- | --- | --- | --- |
+| Recursive model | File-backed Runs, Attempts, Evaluations, lineage, costs, and human Decisions | Add closed states, Focus, baseline, evaluator/policy/assessment pins, Promotion Target, and Continuation Analysis | P0 |
+| Job | npm initialization and discovery require a Job-owned control checkout | Make Job optional UX and make standalone Runs canonical | P0 |
+| Assessment | File-presence and provider-secret checks | Add capability findings, agentic assessment skills, and adapter selection | P0 |
+| Execution | Job setup creates worktree-oriented control isolation | Add assessed worktree, clone, container, sequential, and manual adapters | P1 |
+| Evaluation | Manually recorded free-form result rows | Enforce pinned strategies, state/verdict split, partitions, provenance, and eligibility | P0 |
+| Continuation | Canned reflection and issue proposals | Add typed Continuation Input/Analysis, recommendations, hypotheses, freshness, and consumption | P0 |
+| Authority | Advisory path checks and free-form Decisions | Add envelopes, deterministic intersection, child inheritance, and human promotion gate | P0 |
+| Persistence | Files are canonical and SQLite is rebuildable under the Job workspace | Move Run identity outside Job ownership and preserve cache rebuild guarantees | P0 |
+| Research | Unified ingestion, BAML derivation, explicit graph, and bounded local-first execution | Separate Research Execution records from recursive optimization Runs | P1 |
+| CLI | Manual low-level orchestration | Implement deep `assess`, `run`, `status`, and `decide` modules | P0 |
+| Skills | `.agent`, `.agents`, and top-level skill locations coexist | Make `.agent/skills` canonical for promoted Target behavior | P1 |
+| Distribution | npm CLI, Python package, Codex plugin, release workflows, and Remix site | Make npm the complete primary interface and retire transitional Python orchestration | P1 |
 
-| Area | Current implementation | Target implementation | Gap and disposition | Priority |
-| --- | --- | --- | --- | --- |
-| Primary runtime | Python package `climbhill-ai` with argparse CLI | npm package exposing `climbhill` | Build TypeScript CLI; use Python modules as behavioral reference until parity | P0 |
-| Init interface | `init --repo --registry --force` writes alignment files and SQLite into target | `init --target --control --location --job` creates job ID, control branch, worktree, and portable pointer | Replace interface and persistence behavior; retain conservative no-overwrite rules | P0 |
-| Control persistence | Target-local `.climbhill/registry.local.sqlite` is operational source | Versioned `.climbhill/<job-id>/` filesystem in selected control repo | Build file-backed job store and make SQLite a rebuildable ignored cache | P0 |
-| Ouroboros mode | No target/control distinction or worktree orchestration | Same Git repo, separate `climbhill/<job-id>` branch and worktree | Build Git repository identity checks, branch creation, and worktree management | P0 |
-| Recursive history | SQLite rows for runs, candidates, lineage, costs, and decisions | Canonical `runs/<run-id>/` files with parent references and generated index | Design schemas, migration/export, atomic writer, and cache indexer | P0 |
-| `add` | `resources add` writes a manually described Markdown resource | Top-level one-source retrieval with adapters, raw storage, hashing, OKF resource, and default derivation | Build common source interface; adapt reusable provider/custom-data scripts | P0 |
-| Source adapters | Provider and custom-data scripts exist, but no unified ingestion contract | Local, PDF, web, YouTube, and arXiv adapters producing raw resource records | Extract a shared interface and add deterministic adapter fixtures | P0 |
-| `derive` | Report normalizer heuristically extracts finding-like lines | BAML Bloom-based typed source-local observations with exact locators | Replace heuristic extraction for workspace derivation; retain normalizer for legacy imports | P0 |
-| Derivation idempotency | No content-plus-profile derivation identity | Hash raw content, prompt, model, schema, profile, and chunking | Build derivation manifest, cache lookup, and no-diff tests | P0 |
-| BAML | No BAML files or generated clients | BAML is source of truth; generated Python and TypeScript clients | Add `baml_src`, generator config, fixtures, CI drift check, and runtime adapters | P0 |
-| Knowledge graph | No ontology, entity resolution, canonical graph, or conflict model | Explicit idempotent `graph build` and inspectable reconciliation | New module and schemas; reuse OKF links and provenance conventions | P1 |
-| `research` | Legacy Claude run, provider fan-out, benchmarks, and MCP deep-research calls | Bounded BAML loop over local corpus with optional discovery and persistent partial state | Compose existing providers behind new research interface; add planner, budgets, and resume | P1 |
-| Budget enforcement | Policy stores USD/time/candidate values; costs can be recorded manually | Continuous API-cost and wall-time enforcement with graceful partial completion | Add runtime budget meter and stopping contract | P1 |
-| OKF | v0.2 is referenced; output is provider-report-oriented; upstream spec not vendored | Independently valid research bundle with resource, observation, entity, claim, and relationship concepts | Vendor spec, define producer types, expand validator, migrate legacy bundles | P0 |
-| Skills location | New recursive skills in `.agent/skills`; deep-research skills duplicated under `.agents/skills` and `skills/` | `.agent/skills` is canonical executable behavior, distributed through `npx skills` | Migrate/package skills, remove mirror drift, keep research facts in control plane | P1 |
-| Candidate workflow | CLI can create planned candidates and manually record evaluations and decisions | File-backed recursive execution integrated with research snapshots and provenance | Adapt current concepts; replace SQLite-only writes and add execution adapters | P1 |
-| MCP | Python MCP servers expose ClimbHill and deep-research tools | Generated/runtime interfaces share job, research, graph, and run modules | Retain as adapter; update after core interfaces stabilize | P2 |
-| Website | Root `index.html`, assets, and copy-based Pages workflow | `www/` Remix `3.0.0-beta.10` app with static Pages output | Build Remix app, migrate content/assets/domain files, update Pages workflow | P2 |
-| Distribution | PyPI publish workflow and plugin folders | npm CLI, `npx skills`, static website | Add npm release pipeline; retire PyPI only after parity decision | P1 |
-| CI | Python matrix, package build, plugin validation, CLI/MCP smoke | Node/TypeScript, BAML generation, Python generated client, OKF, Git/LFS fallback, Remix build, and integration matrices | Expand CI incrementally; repair current stale-source failure first | P0 |
-| Documentation | README and design note describe target; architecture docs retain older assumptions | PRD, architecture, schemas, CLI reference, migration, and operator docs agree | Make PRD authoritative and update dependent docs alongside implementation | P1 |
+## 17. Delivery Plan
 
-## 15. Reuse, Migration, And Replacement Plan
+### Phase 0: Contract And Terminology
 
-### Reuse
+- Adopt the recursive-loop contract, context map, and ADR.
+- Use Attempt terminology exclusively, without aliases.
+- Define language-neutral schemas and fixtures for Run, Attempt, Evaluation,
+  Decision, Continuation Analysis, assessment, and consumption.
+- Freeze closed enums, CLI help, exit codes, and policy precedence.
 
-- Provider specifications and adapters.
-- Deep-research skill scripts and their tests where their behavior fits the new
-  source or research interfaces.
-- Policy concepts and conservative defaults.
-- Run, candidate, evaluation, cost, lineage, decision, and report terminology.
-- OKF frontmatter helpers and legacy bundle import logic.
-- Source URL and manifest hardening tests.
+### Phase 1: File-Backed Run Engine
 
-### Migrate
+- Implement standalone Run storage and optional Job projections.
+- Implement Baseline, Focus, evaluator, policy, assessment, budget, authorization,
+  and Promotion Target resolution.
+- Implement SQLite cache rebuild from canonical files.
+- Implement validated state transitions and atomic writes.
 
-- SQLite canonical records into version-controlled run files.
-- Deep-research operational skills into canonical `.agent/skills` packages.
-- Research facts embedded in skills into job research concepts.
-- Root static site content and assets into `www/`.
-- Python CLI behavioral tests into language-neutral interface fixtures and
-  TypeScript CLI tests.
+### Phase 2: Assessment And Execution
 
-### Replace
+- Implement deterministic probes and agentic assessment skills.
+- Implement execution adapters and environment verification.
+- Implement pre-execution constraints and authoritative post-diff checks.
 
-- Target-local registry as canonical state.
-- `init --repo` as the primary initialization interface.
-- Report-line heuristics as the main derivation mechanism.
-- Root-level copy-based Pages deployment.
-- PyPI as the primary CLI distribution channel.
+### Phase 3: Evaluation And Decisions
 
-### Preserve During Transition
+- Implement pinned evaluator loading and typed Evaluation records.
+- Implement eligibility computation, human preference, calibration, and holdouts.
+- Implement typed Decisions and explicit surface promotion.
 
-- Existing Python commands until npm equivalents reach tested parity.
-- Legacy provider benchmark commands for comparison and regression testing.
-- Existing OKF report bundles as importable historical evidence.
-- PyPI and MCP workflows until an explicit compatibility decision is made.
+### Phase 4: Continuation Controller
 
-## 16. Delivery Plan
+- Implement typed Continuation Input and BAML output.
+- Implement hypotheses, closed recommendations, focus resolution, authorization,
+  eligibility, freshness, and atomic consumption.
+- Implement child Runs, root budgets, repetition, cycling, and diffusion detection.
+- Evaluate Continuation Policies on frozen historical Run trees.
 
-### Phase 0: Contract And Baseline
+### Phase 5: Research And Knowledge
 
-- Vendor OKF v0.2 with provenance and license metadata.
-- Define job, run, resource, observation, and graph schemas.
-- Freeze CLI help text and exit-code conventions.
-- Repair the stale provider-source audit.
-- Add architecture decisions for control branches, worktrees, and cache status.
+- Implement unified source adapters, derivation identity, and BAML clients.
+- Implement explicit knowledge graph construction and bounded Research Execution.
+- Pin research evidence into Runs by Control commit and path.
 
-### Phase 1: npm CLI And Job Persistence
+### Phase 6: Distribution And Dogfooding
 
-- Create npm package and TypeScript CLI skeleton.
-- Implement `init` in split-control and Ouroboros modes.
-- Implement file-backed job/run store and SQLite rebuild.
-- Implement Git LFS detection and fallback note.
-- Add end-to-end Git worktree tests.
+- Publish the npm CLI and skills.
+- Build and deploy the Remix website.
+- Run ClimbHill against itself across task, learning, and alignment Focuses.
+- Use historical Run trees to improve the Continuation Policy through a
+  `learning:workflow` Run.
 
-### Phase 2: Ingestion And Derivation
-
-- Define source adapter interface.
-- Implement local, PDF, webpage, YouTube, and arXiv adapters.
-- Add BAML project and default Bloom derivation profile.
-- Generate TypeScript and Python clients.
-- Implement idempotent `add` and `derive`.
-
-### Phase 3: Graph
-
-- Define ontology, identity-resolution, conflict, and provenance concepts.
-- Implement idempotent `graph build` and `graph inspect`.
-- Add reconciliation fixtures for aliases, ambiguous identities, supporting
-  claims, and contradictions.
-
-### Phase 4: Research And Recursive Improvement
-
-- Implement bounded BAML research loop and local-only mode.
-- Integrate source discovery with `add` and `derive`.
-- Enforce live cost and wall-time budgets.
-- Persist partial and resumable runs.
-- Migrate candidate evaluation and reflection to the file-backed run model.
-
-### Phase 5: Distribution And Dogfooding
-
-- Publish the CLI through npm.
-- Package canonical skills for `npx skills`.
-- Build and deploy the Remix `www/` site.
-- Run `sota-deep-research-agent` against ClimbHill in Ouroboros mode.
-- Use the resulting research and evaluations to improve ClimbHill's own BAML
-  research functions and skills.
-
-## 17. Risks And Mitigations
+## 18. Risks And Mitigations
 
 | Risk | Mitigation |
 | --- | --- |
-| Control branch and candidate branch operations interfere | Use separate worktrees, distinct branch namespaces, and integration tests against temporary repositories. |
-| Generated knowledge loses evidence context | Require resource IDs and locators in BAML output; reject invalid observations before writing. |
-| Entity resolution over-merges concepts | Preserve observations, confidence, rationale, and unresolved alternatives; never delete source-local evidence. |
-| Paid research exceeds expectations | Enforce live cost and wall-time budgets and persist partial results. |
-| Raw evidence makes Git repositories too large | Use Git LFS by default and documented ignore fallback. |
-| BAML-generated clients drift | Pin generator versions and fail CI on generated diffs. |
-| npm rewrite regresses working Python behavior | Keep language-neutral fixtures and retain Python implementation until tested parity. |
-| OKF upstream changes | Vendor a pinned specification and make upgrades explicit migrations. |
-| Self-improvement corrupts its own control state | Keep control and implementation worktrees separate; require policy and human promotion gates. |
+| Attempt changes its evaluator or authority | Pin evaluator/policy outside Focus and verify the actual diff after execution. |
+| Agentic recommendation smuggles scope | Resolve semantic Focus and executable paths deterministically. |
+| Authorized action is stale or unaffordable | Compute execution eligibility separately immediately before atomic claim. |
+| Continuation Policy cycles or diffuses | Track tree-level progress, repetition, cycling, diffusion, depth, cost, and runtime. |
+| Alignment rewards evaluator gaming | Require external human and hidden holdout evidence; prohibit self-evaluation. |
+| Hidden holdouts leak into optimization | Expose typed results through evaluator adapters, never raw cases. |
+| Worktree assumptions break repositories | Assess capabilities and select among multiple execution adapters. |
+| Duplicate side effects after retry | Use immutable consumption keys and compare-and-set claims. |
+| Control state becomes a second VCS | Use ordinary Git commits/branches and semantic metadata only. |
+| Optional Job becomes hidden engine state | Copy defaults into Run and require standalone Run audit tests. |
+| Paid work exceeds expectations | Enforce local and root budgets continuously while preserving partial state. |
+| Generated clients drift | Pin generators and fail CI on generated output mismatch. |
 
-## 18. Remaining Product Decisions
-
-These decisions are not blockers for writing schemas and the Phase 1 skeleton,
-but must be resolved before their affected phase ships:
+## 19. Remaining Product Decisions
 
 - Exact npm package name and supported Node versions.
 - Default model/provider resolution and credential configuration.
-- Source adapter plugin manifest and third-party installation mechanism.
-- Default API-cost and wall-time budget values.
-- Run resume and cancellation commands.
-- Control-branch retention, publication, and merge policy.
-- Whether generated BAML clients are committed or generated only in package and
-  CI builds.
-- Minimum Git LFS version and large-file threshold.
-- Exact ontology reconciliation model and user correction workflow.
+- Source adapter plugin manifest and installation mechanism.
+- Default cost, runtime, depth, and Attempt budgets.
+- Exact machine-fingerprint fields and assessment freshness rules.
+- Control ref retention and publication policy.
+- Whether generated BAML clients are committed or produced during package/CI
+  builds.
+- Exact ontology reconciliation and user correction workflow.
+- Authenticated Decision evidence for shared or hosted workspaces.
 
-## 19. MVP Release Criteria
+## 20. MVP Release Criteria
 
-The target MVP is complete when all of the following are true:
+The MVP is complete only when:
 
-- The CLI installs from npm and exposes documented commands.
-- `init` passes split-control and Ouroboros end-to-end tests.
-- One source of each MVP type can be added and represented as an OKF resource.
-- Default BAML derivation generates valid, cited, source-local observations.
-- Identical derivations and graph builds are idempotent.
-- The graph builder preserves deduplication rationale and conflicts.
-- Research supports external discovery, local-only operation, live budgets, and
-  resumable partial output.
-- Recursive run history is inspectable without SQLite.
-- Skills install through `npx skills` and live under `.agent/skills` in target
-  repositories.
-- The pinned Remix site builds from `www/` and deploys to `climbhill.ai`.
-- ClimbHill successfully completes a bounded Ouroboros run against itself.
+- The CLI installs from npm and exposes `assess`, `run`, `status`, and `decide`.
+- A standalone Run works without a Job in split-control and Ouroboros modes.
+- The four engine concepts have validated file-backed schemas and state machines.
+- Task, every learning subtype, and alignment use the same controller contract.
+- Assessment selects a safe execution adapter without assuming worktrees.
+- Evaluation Strategies are pinned and cannot overlap mutable Focus paths.
+- Continuation recommendations use the closed typed action union.
+- Authorization and execution eligibility are independently inspectable.
+- Recommendation consumption is stale-safe and at-most-once.
+- Promotion is human-approved and advances an explicit surface.
+- All adversarial acceptance scenarios pass.
+- Research ingestion, derivation, graph construction, and bounded execution produce
+  cited, reusable Control Repository evidence.
+- Canonical state remains inspectable and resumable without SQLite.
+- ClimbHill completes a bounded self-improvement Run against its own repository.

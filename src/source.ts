@@ -116,7 +116,7 @@ export const sourceAdapters: SourceAdapter[] = [new YouTubeAdapter(), new ArxivA
 
 export async function addSource(root: string, input: string, explicitType?: SourceType, adapters: SourceAdapter[] = sourceAdapters): Promise<{ resource: ResourceVersion; duplicate: boolean }> {
   const type = explicitType || detectType(input);
-  const adapter = adapters.find((candidate) => candidate.type === type && candidate.supports(input));
+  const adapter = adapters.find((adapter) => adapter.type === type && adapter.supports(input));
   if (!adapter) throw new Error(`no ${type} adapter accepts ${input}`);
   const retrieved = await adapter.retrieve(input);
   const contentHash = hash(retrieved.bytes);

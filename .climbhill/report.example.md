@@ -11,11 +11,11 @@ Describe the attempted improvement goal.
 - Base commit:
 - Policy snapshot:
 
-## Candidates
+## Attempts
 
-| Candidate | Branch | Summary | Policy | Tests | Recommendation |
+| Attempt | Branch | Summary | Policy | Tests | Recommendation |
 |-----------|--------|---------|--------|-------|----------------|
-| candidate-001 | | | | | |
+| attempt-001 | | | | | |
 
 ## Costs
 
@@ -38,4 +38,4 @@ Describe the attempted improvement goal.
 
 ## Recommendation
 
-Promote, reject, or run another candidate loop.
+Promote, reject, or run another attempt loop.

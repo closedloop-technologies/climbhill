@@ -21,7 +21,7 @@ Use this skill before touching paths that are denied or approval-required by Cli
 3. If any path is denied, stop and propose an alternative.
 4. If any path requires approval, ask for human approval before editing.
 5. For approved protected edits, keep changes minimal and document why they are necessary.
-6. Record the policy check result in the candidate report.
+6. Record the policy check result in the attempt report.
 
 ## Outputs
 

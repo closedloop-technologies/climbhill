@@ -1,6 +1,7 @@
-# Repo Alignment
+# Repository Preparedness
 
-A repository is ClimbHill-aligned when coding agents have enough structure to improve it safely.
+Repository preparedness is the shallow check that expected support files exist. It is
+not an Alignment Focus and does not establish execution readiness by itself.
 
 ## Expected Files
 
@@ -15,7 +16,7 @@ A repository is ClimbHill-aligned when coding agents have enough structure to im
 - `.agent/skills/`
 - `resources/`
 
-## Initialization Rules
+## Preparation Rules
 
 ClimbHill should:
 
@@ -24,3 +25,6 @@ ClimbHill should:
 - Identify known install, lint, typecheck, test, and build commands.
 - Propose conservative policy defaults.
 - Record unknowns instead of guessing.
+
+`climbhill prepare` performs this file-presence check. `climbhill assess` is the
+target command for evidence-backed setup, evaluation, isolation, and policy readiness.

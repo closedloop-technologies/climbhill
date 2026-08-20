@@ -8,7 +8,7 @@ export async function createRun(root: string, worktree: string, values: {
   kind: RunRecord["kind"];
   inputs: Record<string, unknown>;
   parentRun?: string;
-  parentCandidate?: string;
+  parentAttempt?: string;
 }, targetRepository = worktree): Promise<RunRecord> {
   const stamp = now();
   const id = `${stamp.slice(0, 10).replaceAll("-", "")}-${values.kind}-${shortId()}`;
@@ -17,12 +17,12 @@ export async function createRun(root: string, worktree: string, values: {
   const run: RunRecord = {
     schema: RUN_SCHEMA, id, kind: values.kind, status: "running", startedAt: stamp, updatedAt: stamp,
     targetCommit, controlCommit: commit, researchSnapshotCommit: commit, inputs: values.inputs, outputs: [], models: [], prompts: [],
-    toolCalls: [], costs: { apiUsd: 0, wallTimeSeconds: 0 }, candidates: [], evaluations: [], decisions: [], reflections: [],
+    toolCalls: [], costs: { apiUsd: 0, wallTimeSeconds: 0 }, attempts: [], evaluations: [], decisions: [], reflections: [],
     ...(values.parentRun ? { parentRun: values.parentRun } : {}),
-    ...(values.parentCandidate ? { parentCandidate: values.parentCandidate } : {}),
+    ...(values.parentAttempt ? { parentAttempt: values.parentAttempt } : {}),
   };
   const directory = join(root, "runs", id);
-  await mkdir(join(directory, "candidates"), { recursive: true });
+  await mkdir(join(directory, "attempts"), { recursive: true });
   await mkdir(join(directory, "evaluations"), { recursive: true });
   await Promise.all([
     atomicWrite(join(directory, "plan.md"), "# Plan\n\nPending.\n"),

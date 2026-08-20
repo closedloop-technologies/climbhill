@@ -8,8 +8,8 @@ import type { JobRecord, RunRecord } from "./types.js";
 
 const execAsync = promisify(exec);
 
-export interface CandidateRecord {
-  schema: "climbhill.candidate/v1";
+export interface AttemptRecord {
+  schema: "climbhill.attempt/v1";
   id: string;
   runId: string;
   status: "planned" | "evaluated" | "rejected" | "promotable";
@@ -18,7 +18,7 @@ export interface CandidateRecord {
   baseCommit: string;
   headCommit?: string;
   patchPath?: string;
-  parentCandidate?: string;
+  parentAttempt?: string;
   createdAt: string;
 }
 
@@ -26,7 +26,7 @@ export interface EvaluationRecord {
   schema: "climbhill.evaluation/v1";
   id: string;
   runId: string;
-  candidateId: string;
+  attemptId: string;
   command: string;
   status: "passed" | "failed";
   exitCode: number;
@@ -40,26 +40,26 @@ export async function loadRun(root: string, id: string): Promise<RunRecord> {
   return readYaml<RunRecord>(join(root, "runs", id, "run.yaml"));
 }
 
-export async function planImprovement(root: string, worktree: string, targetRepository: string, values: { goal: string; candidates: number; parentRun?: string; parentCandidate?: string }): Promise<RunRecord> {
-  if (!Number.isInteger(values.candidates) || values.candidates < 1) throw new Error("--candidates must be a positive integer");
-  let run = await createRun(root, worktree, { kind: "improvement", inputs: { goal: values.goal }, parentRun: values.parentRun, parentCandidate: values.parentCandidate }, targetRepository);
-  const candidateIds: string[] = [];
-  for (let index = 1; index <= values.candidates; index += 1) {
-    const id = `candidate-${shortId()}`;
-    const candidate: CandidateRecord = { schema: "climbhill.candidate/v1", id, runId: run.id, status: "planned", branch: `climbhill/run-${run.id}/${id}`, summary: `Candidate ${index}: ${values.goal}`, baseCommit: run.targetCommit, ...(values.parentCandidate ? { parentCandidate: values.parentCandidate } : {}), createdAt: now() };
-    await writeYaml(join(root, "runs", run.id, "candidates", `${id}.yaml`), candidate);
-    candidateIds.push(id);
+export async function planImprovement(root: string, worktree: string, targetRepository: string, values: { goal: string; attempts: number; parentRun?: string; parentAttempt?: string }): Promise<RunRecord> {
+  if (!Number.isInteger(values.attempts) || values.attempts < 1) throw new Error("--attempts must be a positive integer");
+  let run = await createRun(root, worktree, { kind: "improvement", inputs: { goal: values.goal }, parentRun: values.parentRun, parentAttempt: values.parentAttempt }, targetRepository);
+  const attemptIds: string[] = [];
+  for (let index = 1; index <= values.attempts; index += 1) {
+    const id = `attempt-${shortId()}`;
+    const attempt: AttemptRecord = { schema: "climbhill.attempt/v1", id, runId: run.id, status: "planned", branch: `climbhill/run-${run.id}/${id}`, summary: `Attempt ${index}: ${values.goal}`, baseCommit: run.targetCommit, ...(values.parentAttempt ? { parentAttempt: values.parentAttempt } : {}), createdAt: now() };
+    await writeYaml(join(root, "runs", run.id, "attempts", `${id}.yaml`), attempt);
+    attemptIds.push(id);
   }
-  await atomicWrite(join(root, "runs", run.id, "plan.md"), `# Plan\n\nGoal: ${values.goal}\n\n${candidateIds.map((id) => `- ${id}`).join("\n")}\n`);
-  run = await updateRun(root, run, { candidates: candidateIds });
+  await atomicWrite(join(root, "runs", run.id, "plan.md"), `# Plan\n\nGoal: ${values.goal}\n\n${attemptIds.map((id) => `- ${id}`).join("\n")}\n`);
+  run = await updateRun(root, run, { attempts: attemptIds });
   return run;
 }
 
-export async function evaluateCandidate(root: string, targetRepository: string, runId: string, candidateId: string, command: string, maxWallTimeSeconds: number): Promise<EvaluationRecord> {
+export async function evaluateAttempt(root: string, targetRepository: string, runId: string, attemptId: string, command: string, maxWallTimeSeconds: number): Promise<EvaluationRecord> {
   let run = await loadRun(root, runId);
-  const candidatePath = join(root, "runs", runId, "candidates", `${candidateId}.yaml`);
-  const candidate = await readYaml<CandidateRecord>(candidatePath);
-  if (candidate.runId !== runId) throw new Error("candidate does not belong to run");
+  const attemptPath = join(root, "runs", runId, "attempts", `${attemptId}.yaml`);
+  const attempt = await readYaml<AttemptRecord>(attemptPath);
+  if (attempt.runId !== runId) throw new Error("attempt does not belong to run");
   const startedAt = now();
   const started = Date.now();
   let stdout = ""; let stderr = ""; let exitCode = 0;
@@ -73,35 +73,35 @@ export async function evaluateCandidate(root: string, targetRepository: string, 
   const id = `evaluation-${shortId()}`;
   const relativeLogs = `evaluations/${id}.log`;
   await atomicWrite(join(root, "runs", runId, relativeLogs), `$ ${command}\n\n${stdout}${stderr ? `\n[stderr]\n${stderr}` : ""}\n`);
-  const evaluation: EvaluationRecord = { schema: "climbhill.evaluation/v1", id, runId, candidateId, command, status: exitCode === 0 ? "passed" : "failed", exitCode, startedAt, completedAt: now(), wallTimeSeconds: (Date.now() - started) / 1000, logsPath: relativeLogs };
+  const evaluation: EvaluationRecord = { schema: "climbhill.evaluation/v1", id, runId, attemptId, command, status: exitCode === 0 ? "passed" : "failed", exitCode, startedAt, completedAt: now(), wallTimeSeconds: (Date.now() - started) / 1000, logsPath: relativeLogs };
   await writeYaml(join(root, "runs", runId, "evaluations", `${id}.yaml`), evaluation);
-  candidate.status = exitCode === 0 ? "promotable" : "evaluated";
-  await writeYaml(candidatePath, candidate);
+  attempt.status = exitCode === 0 ? "promotable" : "evaluated";
+  await writeYaml(attemptPath, attempt);
   run = await updateRun(root, run, { evaluations: [...run.evaluations, id], costs: { ...run.costs, wallTimeSeconds: run.costs.wallTimeSeconds + evaluation.wallTimeSeconds } });
   return evaluation;
 }
 
-export async function compareCandidates(root: string, runId: string): Promise<Array<{ candidate: CandidateRecord; passed: number; failed: number }>> {
+export async function compareAttempts(root: string, runId: string): Promise<Array<{ attempt: AttemptRecord; passed: number; failed: number }>> {
   const run = await loadRun(root, runId);
   const evaluations = await Promise.all((await readdir(join(root, "runs", runId, "evaluations"))).filter((name) => name.endsWith(".yaml")).map((name) => readYaml<EvaluationRecord>(join(root, "runs", runId, "evaluations", name))));
-  const rows = await Promise.all(run.candidates.map(async (id) => {
-    const candidate = await readYaml<CandidateRecord>(join(root, "runs", runId, "candidates", `${id}.yaml`));
-    const own = evaluations.filter((value) => value.candidateId === id);
-    return { candidate, passed: own.filter((value) => value.status === "passed").length, failed: own.filter((value) => value.status === "failed").length };
+  const rows = await Promise.all(run.attempts.map(async (id) => {
+    const attempt = await readYaml<AttemptRecord>(join(root, "runs", runId, "attempts", `${id}.yaml`));
+    const own = evaluations.filter((value) => value.attemptId === id);
+    return { attempt, passed: own.filter((value) => value.status === "passed").length, failed: own.filter((value) => value.status === "failed").length };
   }));
-  return rows.sort((a, b) => b.passed - a.passed || a.failed - b.failed || a.candidate.id.localeCompare(b.candidate.id));
+  return rows.sort((a, b) => b.passed - a.passed || a.failed - b.failed || a.attempt.id.localeCompare(b.attempt.id));
 }
 
-export async function attachCandidatePatch(root: string, runId: string, candidateId: string, patchFile: string, headCommit?: string): Promise<string> {
-  const candidatePath = join(root, "runs", runId, "candidates", `${candidateId}.yaml`);
-  const candidate = await readYaml<CandidateRecord>(candidatePath);
-  if (candidate.runId !== runId) throw new Error("candidate does not belong to run");
+export async function attachAttemptPatch(root: string, runId: string, attemptId: string, patchFile: string, headCommit?: string): Promise<string> {
+  const attemptPath = join(root, "runs", runId, "attempts", `${attemptId}.yaml`);
+  const attempt = await readYaml<AttemptRecord>(attemptPath);
+  if (attempt.runId !== runId) throw new Error("attempt does not belong to run");
   const patch = await readFile(resolve(patchFile));
-  const relative = `candidates/${candidateId}.patch`;
+  const relative = `attempts/${attemptId}.patch`;
   await atomicWrite(join(root, "runs", runId, relative), patch);
-  candidate.patchPath = relative;
-  if (headCommit) candidate.headCommit = headCommit;
-  await writeYaml(candidatePath, candidate);
+  attempt.patchPath = relative;
+  if (headCommit) attempt.headCommit = headCommit;
+  await writeYaml(attemptPath, attempt);
   return relative;
 }
 
@@ -113,23 +113,23 @@ export async function recordReflection(root: string, runId: string, text: string
   return id;
 }
 
-export async function decideCandidate(root: string, runId: string, candidateId: string, decision: "promote" | "reject", rationale: string, approved: boolean): Promise<void> {
+export async function decideAttempt(root: string, runId: string, attemptId: string, decision: "promote" | "reject", rationale: string, approved: boolean): Promise<void> {
   let run = await loadRun(root, runId);
   const job = await readYaml<JobRecord>(join(root, "job.yaml"));
   if (decision === "promote" && !approved) throw new Error("promotion requires explicit --approve");
-  const candidatePath = join(root, "runs", runId, "candidates", `${candidateId}.yaml`);
-  const candidate = await readYaml<CandidateRecord>(candidatePath);
+  const attemptPath = join(root, "runs", runId, "attempts", `${attemptId}.yaml`);
+  const attempt = await readYaml<AttemptRecord>(attemptPath);
   const evaluations = await Promise.all(run.evaluations.map((id) => readYaml<EvaluationRecord>(join(root, "runs", runId, "evaluations", `${id}.yaml`))));
-  const own = evaluations.filter((value) => value.candidateId === candidateId);
+  const own = evaluations.filter((value) => value.attemptId === attemptId);
   if (decision === "promote" && (!own.length || own.some((value) => value.status !== "passed"))) throw new Error("promotion requires at least one evaluation and no failed evaluations");
   if (decision === "promote") {
     const missing = job.policy.requiredEvaluations.filter((requiredCommand) => !own.some((value) => value.status === "passed" && value.command === requiredCommand));
     if (missing.length) throw new Error(`required evaluations have not passed: ${missing.join(", ")}`);
   }
-  candidate.status = decision === "promote" ? "promotable" : "rejected";
-  await writeYaml(candidatePath, candidate);
+  attempt.status = decision === "promote" ? "promotable" : "rejected";
+  await writeYaml(attemptPath, attempt);
   const decisionId = `decision-${shortId()}`;
-  await atomicWrite(join(root, "runs", runId, "decision.md"), `# Decision\n\n- ID: ${decisionId}\n- Candidate: ${candidateId}\n- Decision: ${decision}\n- Human approved: ${approved}\n\n${rationale}\n`);
+  await atomicWrite(join(root, "runs", runId, "decision.md"), `# Decision\n\n- ID: ${decisionId}\n- Attempt: ${attemptId}\n- Decision: ${decision}\n- Human approved: ${approved}\n\n${rationale}\n`);
   run = await updateRun(root, run, { status: decision === "promote" ? "completed" : "rejected", completedAt: now(), stoppingReason: decision, decisions: [...run.decisions, decisionId] });
 }
 

@@ -1,25 +1,25 @@
 # MCP Tool Surface
 
-The initial MCP server should expose a small, understandable set of tools:
+The MCP server is an agent-facing adapter over the same interfaces as the CLI.
+The target tool surface is:
 
-- `climbhill.repo.inspect`
-- `climbhill.repo.align`
-- `climbhill.policy.read`
-- `climbhill.policy.check_patch`
-- `climbhill.resources.search`
-- `climbhill.resources.add`
+- `climbhill.assess`
 - `climbhill.runs.create`
 - `climbhill.runs.get`
 - `climbhill.runs.list`
-- `climbhill.candidates.register`
-- `climbhill.candidates.attach_patch`
-- `climbhill.candidates.evaluate`
-- `climbhill.candidates.compare`
-- `climbhill.candidates.record_lineage`
-- `climbhill.costs.record`
-- `climbhill.history.sample`
-- `climbhill.reports.generate`
+- `climbhill.runs.status`
+- `climbhill.attempts.create`
+- `climbhill.attempts.attach_patch`
+- `climbhill.attempts.record_lineage`
+- `climbhill.evaluations.record`
+- `climbhill.continuation.analyze`
 - `climbhill.decisions.record`
-- `climbhill.issues.propose`
+- `climbhill.policy.explain`
+- `climbhill.reports.generate`
+- `climbhill.resources.search`
+- `climbhill.resources.add`
 
-The tool surface should remain small enough for agents to understand but complete enough to support the full improvement loop.
+The engine, not the calling agent, resolves writable paths, computes promotion
+eligibility, intersects authorization, checks freshness, and consumes
+recommendations. Tool inputs never grant authority merely by requesting a path,
+Focus, evaluator, or budget.

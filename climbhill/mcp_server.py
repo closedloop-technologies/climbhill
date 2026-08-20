@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .alignment import initialize_repo, inspect_repo
+from .preparedness import initialize_repo, inspect_preparedness
 from .cli import current_commit, registry_path
 from .policy import check_paths, load_policy, policy_allows_promotion
 from .registry import Registry
@@ -33,35 +33,24 @@ def _repo(repo: str) -> Path:
     return Path(repo).resolve()
 
 
-@mcp.tool(name="climbhill.repo.inspect")
-def repo_inspect(repo: str = ".") -> Dict[str, Any]:
-    """Inspect whether a repository has ClimbHill alignment files."""
-    report = inspect_repo(_repo(repo))
-    return {
-        "repo_path": str(report.repo_path),
-        "aligned": report.is_aligned,
-        "present": report.present,
-        "missing": report.missing,
-        "git_remote": report.git_remote,
-        "current_commit": report.current_commit,
-    }
-
-
-@mcp.tool(name="climbhill.repo.align")
-def repo_align(repo: str = ".", apply: bool = False) -> Dict[str, Any]:
-    """Report or create missing ClimbHill alignment files."""
+@mcp.tool(name="climbhill.repo.prepare")
+def repo_prepare(repo: str = ".", apply: bool = False) -> Dict[str, Any]:
+    """Report or create missing ClimbHill repository support files."""
     repo_path = _repo(repo)
-    before = inspect_repo(repo_path)
+    before = inspect_preparedness(repo_path)
     created: List[str] = []
     if apply and before.missing:
         created = [str(path.relative_to(repo_path)) for path in initialize_repo(repo_path)]
-    after = inspect_repo(repo_path)
+    after = inspect_preparedness(repo_path)
     return {
         "repo_path": str(repo_path),
         "applied": apply,
         "created": created,
-        "aligned": after.is_aligned,
+        "prepared": after.is_prepared,
+        "present": after.present,
         "missing": after.missing,
+        "git_remote": after.git_remote,
+        "current_commit": after.current_commit,
     }
 
 
@@ -133,8 +122,8 @@ def runs_get(run_id: int, repo: str = ".", registry: Optional[str] = None) -> Di
         store.close()
 
 
-@mcp.tool(name="climbhill.candidates.register")
-def candidates_register(
+@mcp.tool(name="climbhill.attempts.register")
+def attempts_register(
     run_id: int,
     summary: str,
     repo: str = ".",
@@ -145,12 +134,12 @@ def candidates_register(
     patch_path: str = "",
     status: str = "registered",
 ) -> Dict[str, Any]:
-    """Register a candidate improvement attempt."""
+    """Register an improvement Attempt."""
     repo_path = _repo(repo)
     database = registry_path(repo_path, registry)
     store = Registry(database)
     try:
-        candidate_id = store.register_candidate(
+        attempt_id = store.register_attempt(
             run_id,
             summary,
             branch=branch,
@@ -159,39 +148,39 @@ def candidates_register(
             patch_path=patch_path,
             status=status,
         )
-        return {"candidate_id": candidate_id, "registry": str(database)}
+        return {"attempt_id": attempt_id, "registry": str(database)}
     finally:
         store.close()
 
 
-@mcp.tool(name="climbhill.candidates.attach_patch")
-def candidates_attach_patch(
-    candidate_id: int,
+@mcp.tool(name="climbhill.attempts.attach_patch")
+def attempts_attach_patch(
+    attempt_id: int,
     patch_path: str,
     repo: str = ".",
     registry: Optional[str] = None,
     head_commit: str = "",
     status: str = "patched",
 ) -> Dict[str, Any]:
-    """Attach a patch path and optional head commit to a candidate."""
+    """Attach a patch path and optional head commit to an Attempt."""
     repo_path = _repo(repo)
     database = registry_path(repo_path, registry)
     store = Registry(database)
     try:
-        store.attach_candidate_patch(
-            candidate_id,
+        store.attach_attempt_patch(
+            attempt_id,
             patch_path=patch_path,
             head_commit=head_commit,
             status=status,
         )
-        return {"candidate_id": candidate_id, "registry": str(database), "patch_path": patch_path}
+        return {"attempt_id": attempt_id, "registry": str(database), "patch_path": patch_path}
     finally:
         store.close()
 
 
-@mcp.tool(name="climbhill.candidates.evaluate")
-def candidates_evaluate(
-    candidate_id: int,
+@mcp.tool(name="climbhill.attempts.evaluate")
+def attempts_evaluate(
+    attempt_id: int,
     evaluation_type: str,
     status: str,
     repo: str = ".",
@@ -201,13 +190,13 @@ def candidates_evaluate(
     logs_path: str = "",
     failure_reason: str = "",
 ) -> Dict[str, Any]:
-    """Record a candidate evaluation result."""
+    """Record an Attempt evaluation result."""
     repo_path = _repo(repo)
     database = registry_path(repo_path, registry)
     store = Registry(database)
     try:
         evaluation_id = store.record_evaluation(
-            candidate_id,
+            attempt_id,
             evaluation_type,
             status,
             command=command,
@@ -220,24 +209,24 @@ def candidates_evaluate(
         store.close()
 
 
-@mcp.tool(name="climbhill.candidates.record_lineage")
-def candidates_record_lineage(
-    candidate_id: int,
+@mcp.tool(name="climbhill.attempts.record_lineage")
+def attempts_record_lineage(
+    attempt_id: int,
     relationship: str,
     repo: str = ".",
     registry: Optional[str] = None,
-    related_candidate_id: Optional[int] = None,
+    related_attempt_id: Optional[int] = None,
     note: str = "",
 ) -> Dict[str, Any]:
-    """Record an explicit candidate lineage relationship."""
+    """Record an explicit attempt lineage relationship."""
     repo_path = _repo(repo)
     database = registry_path(repo_path, registry)
     store = Registry(database)
     try:
         lineage_id = store.record_lineage(
-            candidate_id,
+            attempt_id,
             relationship,
-            related_candidate_id=related_candidate_id,
+            related_attempt_id=related_attempt_id,
             note=note,
         )
         return {"lineage_id": lineage_id, "registry": str(database)}
@@ -250,7 +239,7 @@ def costs_record(
     repo: str = ".",
     registry: Optional[str] = None,
     run_id: Optional[int] = None,
-    candidate_id: Optional[int] = None,
+    attempt_id: Optional[int] = None,
     agent: str = "",
     model: str = "",
     input_tokens: Optional[int] = None,
@@ -259,14 +248,14 @@ def costs_record(
     wall_clock_seconds: Optional[float] = None,
     estimated_usd: Optional[float] = None,
 ) -> Dict[str, Any]:
-    """Record run or candidate cost information."""
+    """Record run or attempt cost information."""
     repo_path = _repo(repo)
     database = registry_path(repo_path, registry)
     store = Registry(database)
     try:
         cost_id = store.record_cost(
             run_id=run_id,
-            candidate_id=candidate_id,
+            attempt_id=attempt_id,
             agent=agent,
             model=model,
             input_tokens=input_tokens,
@@ -280,34 +269,18 @@ def costs_record(
         store.close()
 
 
-@mcp.tool(name="climbhill.candidates.compare")
-def candidates_compare(run_id: int, repo: str = ".", registry: Optional[str] = None) -> Dict[str, Any]:
-    """Compare candidates in a run using recorded failing evaluations as the first signal."""
+@mcp.tool(name="climbhill.attempts.compare")
+def attempts_compare(run_id: int, repo: str = ".", registry: Optional[str] = None) -> Dict[str, Any]:
+    """Compare Attempts in a Run using recorded evaluation outcomes."""
     repo_path = _repo(repo)
     database = registry_path(repo_path, registry)
     store = Registry(database)
     try:
-        candidates = store.list_candidates(run_id)
-        evaluations = store.list_evaluations_for_candidates(candidate.id for candidate in candidates)
-        failures = {}
-        for evaluation in evaluations:
-            if evaluation["status"] != "passed":
-                failures.setdefault(evaluation["candidate_id"], 0)
-                failures[evaluation["candidate_id"]] += 1
-        ranked = sorted(
-            candidates,
-            key=lambda candidate: (failures.get(candidate.id, 0), candidate.id),
-        )
+        ranked = store.compare_attempts(run_id)
         return {
             "registry": str(database),
-            "candidates": [
-                {
-                    **candidate.__dict__,
-                    "failing_evaluations": failures.get(candidate.id, 0),
-                }
-                for candidate in ranked
-            ],
-            "recommended_candidate_id": ranked[0].id if ranked else None,
+            "attempts": ranked,
+            "recommended_attempt_id": ranked[0]["id"] if ranked else None,
         }
     finally:
         store.close()
@@ -315,7 +288,7 @@ def candidates_compare(run_id: int, repo: str = ".", registry: Optional[str] = N
 
 @mcp.tool(name="climbhill.history.sample")
 def history_sample(query: str = "", repo: str = ".", registry: Optional[str] = None, limit: int = 5) -> Dict[str, Any]:
-    """Sample recent historical candidates, optionally filtered by summary text."""
+    """Sample recent historical attempts, optionally filtered by summary text."""
     repo_path = _repo(repo)
     database = registry_path(repo_path, registry)
     store = Registry(database)
@@ -323,10 +296,10 @@ def history_sample(query: str = "", repo: str = ".", registry: Optional[str] = N
         matches = []
         query_lower = query.lower()
         for run in store.list_runs():
-            for candidate in store.list_candidates(run.id):
-                if query_lower and query_lower not in candidate.summary.lower() and query_lower not in run.goal.lower():
+            for attempt in store.list_attempts(run.id):
+                if query_lower and query_lower not in attempt.summary.lower() and query_lower not in run.goal.lower():
                     continue
-                matches.append({"run": run.__dict__, "candidate": candidate.__dict__})
+                matches.append({"run": run.__dict__, "attempt": attempt.__dict__})
                 if len(matches) >= limit:
                     return {"registry": str(database), "matches": matches}
         return {"registry": str(database), "matches": matches}
@@ -402,7 +375,7 @@ def decisions_record(
     decision_type: str,
     repo: str = ".",
     registry: Optional[str] = None,
-    candidate_id: Optional[int] = None,
+    attempt_id: Optional[int] = None,
     rationale: str = "",
     actor: str = "",
 ) -> Dict[str, Any]:
@@ -414,7 +387,7 @@ def decisions_record(
         decision_id = store.record_decision(
             run_id,
             decision_type,
-            candidate_id=candidate_id,
+            attempt_id=attempt_id,
             rationale=rationale,
             actor=actor,
         )
@@ -433,7 +406,7 @@ def issues_propose(
     priority: str = "",
     evidence: str = "",
     source_run_ids: str = "",
-    source_candidate_ids: str = "",
+    source_attempt_ids: str = "",
 ) -> Dict[str, Any]:
     """Store a GitHub issue proposal from meta-analysis."""
     repo_path = _repo(repo)
@@ -447,7 +420,7 @@ def issues_propose(
             priority=priority,
             evidence=evidence,
             source_run_ids=source_run_ids,
-            source_candidate_ids=source_candidate_ids,
+            source_attempt_ids=source_attempt_ids,
         )
         return {"issue_proposal_id": issue_id, "registry": str(database)}
     finally:
@@ -459,7 +432,7 @@ def main() -> None:
 
 
 def smoke_main() -> int:
-    report = repo_inspect(".")
+    report = repo_prepare(".")
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0
 
