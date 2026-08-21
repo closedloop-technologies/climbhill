@@ -1,35 +1,34 @@
 # Reporting
 
-Reports help humans understand what happened during a run.
+Reports make a Run tree reviewable without requiring transient chat logs.
 
-## Run Report Questions
+## Required Questions
 
-1. What goal was attempted?
-2. What repo state was used?
-3. What policy was active?
-4. Which resources and skills were used?
-5. How many candidates were attempted?
-6. What did each candidate change?
-7. Which candidates passed or failed checks?
-8. What did the system spend?
-9. Which candidate is recommended?
-10. What are the risks?
-11. What should a human review?
-12. What should happen next?
+1. What objective and Baseline were used?
+2. What Focus, Evaluation Strategy, policy, assessment, and Authorization Envelope
+   were pinned?
+3. Which Attempts were made and what did each change?
+4. Which Evaluations executed, and what were their verdicts and evidence?
+5. What did the Run and root tree spend?
+6. Which hypotheses and Continuation Analyses affected the next action?
+7. What authorization and execution-eligibility results were computed?
+8. Which Attempt, if any, is promotion-eligible?
+9. What Decisions were recorded and what surface did promotion advance?
+10. What risks, no-progress signatures, and next actions remain?
 
-Reports should be concise enough for review but detailed enough to audit the run.
+## Report Sections
 
-The current Markdown report generator includes:
+- Objective and Baseline
+- Focus and Promotion Target
+- Assessment and execution adapter
+- Policy and authorization
+- Attempt table and lineage
+- Evaluation table grouped by evaluator and cohort
+- Costs and root budgets
+- Continuation Analysis summary
+- Authorization and eligibility
+- Decisions
+- Risks and next action
 
-- Goal
-- Repo state
-- Policy summary
-- Candidate table
-- Evaluation table
-- Candidate comparison
-- Costs
-- Candidate lineage
-- Human decisions
-- Risks
-- Recommendation
-- Next actions
+Reports are derived views. Canonical Run, Attempt, Evaluation, Decision, analysis,
+and consumption files remain authoritative.

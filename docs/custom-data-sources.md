@@ -89,7 +89,7 @@ document to a staging directory and write a sidecar metadata file:
 }
 ```
 
-When using the Google Drive connector, first search/read the candidate files,
+When using the Google Drive connector, first search/read the matching files,
 then ask the research agent to cite file IDs and headings. Do not cite only
 generic phrases such as "the document says"; cite the document title and stable
 file ID.

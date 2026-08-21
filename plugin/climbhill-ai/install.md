@@ -5,7 +5,7 @@ This is a repository-local plugin package.
 1. Install the ClimbHill.ai plugin in Codex.
 2. Start the local ClimbHill MCP server.
 3. Run `climbhill init` in a target repository.
-4. Use the provided skills to run bounded candidate improvement loops.
+4. Use the provided skills to run bounded attempt improvement loops.
 
 The plugin MCP config launches:
 

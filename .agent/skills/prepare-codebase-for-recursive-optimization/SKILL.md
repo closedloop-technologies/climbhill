@@ -1,9 +1,9 @@
 ---
-name: climbhill-repo-alignment
-description: Align a repository with goals, agent guidance, policies, evaluations, resources, and protected surfaces for repeated safe improvement. Use when setting up or auditing ClimbHill repository structure.
+name: prepare-codebase-for-recursive-optimization
+description: Prepare a repository for controlled recursive optimization by defining goals, agent guidance, policies, evaluations, resources, and protected surfaces. Use when a codebase lacks ClimbHill support files.
 ---
 
-# ClimbHill Repo Alignment
+# Prepare a Codebase for Recursive Optimization
 
 Use this skill when a repository needs enough structure for coding agents to improve it safely over repeated loops.
 
@@ -19,15 +19,15 @@ Use this skill when a repository needs enough structure for coding agents to imp
 1. Inspect the repository tree, README, package metadata, tests, CI, and existing agent guidance.
 2. Identify the repo goal, public API, protected surfaces, test strategy, and deployment path.
 3. Check whether these files exist: `goal.md`, `AGENTS.md`, `README.md`, `docs/architecture.md` or `ARCHITECTURE.md`, `TESTING.md`, `EVALS.md`, `.climbhill/policy.yaml`, `.climbhill/eval.yaml`, `.agent/skills/`, and `resources/`.
-4. Propose missing alignment files before creating them.
+4. Propose missing repository support files before creating them.
 5. Avoid overwriting existing files unless the human explicitly approves.
 6. Write conservative policy defaults: protect tests, evals, CI, migrations, infra, lockfiles, and security-sensitive paths.
-7. Record assumptions and unknowns in the alignment report.
+7. Record assumptions and unknowns in the preparedness report.
 
 ## Outputs
 
-- Alignment gap summary
-- Created or proposed alignment files
+- Preparedness gap summary
+- Created or proposed repository support files
 - Known commands
 - Protected surfaces
 - Follow-up issues or questions

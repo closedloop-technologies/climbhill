@@ -10,7 +10,7 @@ import { now } from "./io.js";
 import { runResearch } from "./research.js";
 import { validateOkf } from "./okf-validator.js";
 import type { SourceType } from "./types.js";
-import { attachCandidatePatch, compareCandidates, decideCandidate, evaluateCandidate, loadRun, planImprovement, promoteSkill, recordReflection } from "./improvement.js";
+import { attachAttemptPatch, compareAttempts, decideAttempt, evaluateAttempt, loadRun, planImprovement, promoteSkill, recordReflection } from "./improvement.js";
 import { classifyPaths, updateBudgets } from "./policy.js";
 import { modelCost, OPENAI_MODEL, OPENAI_PRICING } from "./model-cost.js";
 
@@ -23,11 +23,11 @@ Usage:
   climbhill derive [--resource <id>] [--append-prompt <text>] [--prompt-file <path>]
   climbhill graph build|inspect
   climbhill research <question> [--resume <run-id>] [--local-only] [--max-api-cost <usd>] [--max-wall-time <seconds>]
-  climbhill run --goal <text> [--candidates <count>] [--parent-run <id>] [--parent-candidate <id>]
-  climbhill evaluate --run <id> --candidate <id> --command <command>
+  climbhill run --goal <text> [--attempts <count>] [--parent-run <id>] [--parent-attempt <id>]
+  climbhill evaluate --run <id> --attempt <id> --command <command>
   climbhill compare --run <id>
-  climbhill candidate attach-patch --run <id> --candidate <id> --patch <file> [--head-commit <sha>]
-  climbhill decision --run <id> --candidate <id> --decision promote|reject --rationale <text> [--approve]
+  climbhill attempt attach-patch --run <id> --attempt <id> --patch <file> [--head-commit <sha>]
+  climbhill decision --run <id> --attempt <id> --decision promote|reject --rationale <text> [--approve]
   climbhill reflect --run <id> --text <reflection>
   climbhill skill promote <directory> --run <id> --concept <ids> --evaluation <ids> --approve
   climbhill policy set-budgets [--max-api-cost <usd>] [--max-wall-time <seconds>] --rationale <text> [--approve]
@@ -166,28 +166,28 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
   }
   if (command === "run") {
     const job = await context(args);
-    const run = await planImprovement(job.root, job.worktree, job.targetRepository, { goal: required(args, "goal"), candidates: numberOption(args, "candidates", 1), parentRun: option(args, "parent-run"), parentCandidate: option(args, "parent-candidate") });
-    console.log(`${run.id}\n${run.candidates.join("\n")}`); return 0;
+    const run = await planImprovement(job.root, job.worktree, job.targetRepository, { goal: required(args, "goal"), attempts: numberOption(args, "attempts", 1), parentRun: option(args, "parent-run"), parentAttempt: option(args, "parent-attempt") });
+    console.log(`${run.id}\n${run.attempts.join("\n")}`); return 0;
   }
   if (command === "evaluate") {
     const job = await context(args);
-    const evaluation = await evaluateCandidate(job.root, job.targetRepository, required(args, "run"), required(args, "candidate"), required(args, "command"), numberOption(args, "max-wall-time", job.job.budgets.maxWallTimeSeconds));
+    const evaluation = await evaluateAttempt(job.root, job.targetRepository, required(args, "run"), required(args, "attempt"), required(args, "command"), numberOption(args, "max-wall-time", job.job.budgets.maxWallTimeSeconds));
     console.log(`${evaluation.id}: ${evaluation.status}`); return evaluation.status === "passed" ? 0 : 2;
   }
   if (command === "compare") {
     const job = await context(args);
-    for (const row of await compareCandidates(job.root, required(args, "run"))) console.log(`${row.candidate.id}\t${row.passed}\t${row.failed}\t${row.candidate.status}\t${row.candidate.summary}`);
+    for (const row of await compareAttempts(job.root, required(args, "run"))) console.log(`${row.attempt.id}\t${row.passed}\t${row.failed}\t${row.attempt.status}\t${row.attempt.summary}`);
     return 0;
   }
-  if (command === "candidate" && args.positional[0] === "attach-patch") {
+  if (command === "attempt" && args.positional[0] === "attach-patch") {
     const job = await context(args);
-    console.log(await attachCandidatePatch(job.root, required(args, "run"), required(args, "candidate"), required(args, "patch"), option(args, "head-commit"))); return 0;
+    console.log(await attachAttemptPatch(job.root, required(args, "run"), required(args, "attempt"), required(args, "patch"), option(args, "head-commit"))); return 0;
   }
   if (command === "decision") {
     const decision = required(args, "decision");
     if (decision !== "promote" && decision !== "reject") throw new Error("--decision must be promote or reject");
     const job = await context(args);
-    await decideCandidate(job.root, required(args, "run"), required(args, "candidate"), decision, required(args, "rationale"), args.options.has("approve"));
+    await decideAttempt(job.root, required(args, "run"), required(args, "attempt"), decision, required(args, "rationale"), args.options.has("approve"));
     console.log(`Recorded ${decision} decision`); return 0;
   }
   if (command === "reflect") {
@@ -205,7 +205,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     const changes: Partial<typeof job.job.budgets> = {};
     if (args.options.has("max-api-cost")) changes.maxApiCostUsd = numberOption(args, "max-api-cost", job.job.budgets.maxApiCostUsd);
     if (args.options.has("max-wall-time")) changes.maxWallTimeSeconds = numberOption(args, "max-wall-time", job.job.budgets.maxWallTimeSeconds);
-    if (args.options.has("max-candidate-concurrency")) changes.maxCandidateConcurrency = numberOption(args, "max-candidate-concurrency", job.job.budgets.maxCandidateConcurrency);
+    if (args.options.has("max-attempt-concurrency")) changes.maxAttemptConcurrency = numberOption(args, "max-attempt-concurrency", job.job.budgets.maxAttemptConcurrency);
     if (args.options.has("max-research-concurrency")) changes.maxResearchConcurrency = numberOption(args, "max-research-concurrency", job.job.budgets.maxResearchConcurrency);
     await updateBudgets(job.root, job.job, changes, required(args, "rationale"), args.options.has("approve"));
     console.log("Recorded budget policy decision"); return 0;

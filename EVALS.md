@@ -1,39 +1,39 @@
 # Evaluation Strategy
 
-ClimbHill evaluates candidates before promotion. A candidate is not better merely because it produced a diff.
+ClimbHill evaluates Attempts before promotion. Producing a diff is not evidence
+that an Attempt is better.
 
-## MVP Evaluation Types
+## Evaluation Surfaces
 
-- Unit tests
-- Integration tests
-- Type checks
-- Lint checks
-- Build checks
-- Static analysis
-- Rubric-based review
-- Human review
-- Regression checks
+- Task Attempts use tests, builds, benchmarks, rubrics, and human preference.
+- Learning Attempts use frozen tasks and calibration/holdout suites.
+- Alignment Attempts use human judgments, false-positive/negative cases, ranking
+  stability, evaluator variance, cost, redundancy, and hidden holdouts.
 
-## Candidate Report Requirements
+Every Evaluation identifies its evaluator by Control commit, path, and content
+hash. The evaluator must be outside the Run's mutable Focus.
 
-Each candidate evaluation should record:
+## Record Requirements
 
-- Candidate ID
-- Evaluation type
-- Command or rubric
-- Status
-- Score when applicable
-- Log path
-- Started and finished timestamps
-- Failure reason when applicable
+Each Evaluation records:
+
+- Run and Attempt IDs;
+- evaluator identity and capability;
+- execution state and quality verdict separately;
+- requiredness, criteria, and score when applicable;
+- trusted evidence summary and raw artifact paths;
+- environment fingerprint;
+- start and finish timestamps;
+- execution error or failure reason when applicable.
+
+Pending, running, errored, cancelled, inconclusive, and skipped Evaluations are not
+ordinary failures.
 
 ## Promotion Gate
 
-By default, a promoted candidate must have:
+Promotion eligibility requires a promotable commit, Focus-compliant diff,
+successful post-execution policy verification, every required Evaluation passing
+under the pinned strategy, current baseline and budget, no unresolved approvals,
+and a human Decision.
 
-- Passing required commands.
-- No policy violations.
-- Recorded risk notes.
-- Recorded cost summary.
-- Human approval.
-- A branch or patch path suitable for PR review.
+Eligibility is computed at an Evidence Snapshot and is not an Attempt status.

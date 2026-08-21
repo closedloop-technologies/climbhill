@@ -20,7 +20,7 @@
   "interface": {
     "displayName": "ClimbHill.ai",
     "shortDescription": "Run controlled recursive repo-improvement loops.",
-    "longDescription": "ClimbHill.ai provides Codex workflows for aligning repositories, enforcing edit policy, recording candidates, comparing attempts, generating reports, and preserving human promotion gates.",
+    "longDescription": "ClimbHill.ai provides Codex workflows for preparing repositories, enforcing edit policy, recording Attempts, comparing results, generating reports, and preserving human promotion gates.",
     "developerName": "ClimbHill.ai Contributors",
     "category": "Productivity",
     "capabilities": [
@@ -29,9 +29,9 @@
     ],
     "websiteURL": "https://climbhill.ai",
     "defaultPrompt": [
-      "Align this repo for ClimbHill.ai.",
+      "Assess this repo for ClimbHill.ai execution readiness.",
       "Run a bounded improvement loop.",
-      "Generate a candidate report."
+      "Generate an Attempt report."
     ],
     "brandColor": "#07523b"
   },

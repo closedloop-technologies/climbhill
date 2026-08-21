@@ -10,12 +10,12 @@ def generate_markdown_report(registry: Registry, run_id: int, output_path: Path)
     if run is None:
         raise KeyError(f"Run {run_id} was not found.")
 
-    candidates = registry.list_candidates(run_id)
-    evaluations = registry.list_evaluations_for_candidates(candidate.id for candidate in candidates)
+    attempts = registry.list_attempts(run_id)
+    evaluations = registry.list_evaluations_for_attempts(attempt.id for attempt in attempts)
     costs = registry.list_costs(run_id)
     decisions = registry.list_decisions(run_id)
     lineage = registry.list_lineage(run_id)
-    comparison = registry.compare_candidates(run_id)
+    comparison = registry.compare_attempts(run_id)
 
     lines = [
         f"# ClimbHill Run {run.id} Report",
@@ -35,33 +35,33 @@ def generate_markdown_report(registry: Registry, run_id: int, output_path: Path)
         "",
         "- Protected files require policy checks before promotion.",
         "- Tests, evals, CI workflows, infrastructure, security-sensitive code, and policy relaxation require human approval by default.",
-        "- A candidate is not promotion-ready until required checks pass and a human decision is recorded.",
+        "- An Attempt is not promotion-ready until required checks pass and a human decision is recorded.",
         "",
-        "## Candidates",
+        "## Attempts",
         "",
     ]
 
-    if candidates:
+    if attempts:
         lines.extend(
             [
-                "| Candidate | Status | Branch | Head Commit | Summary |",
+                "| Attempt | Status | Branch | Head Commit | Summary |",
                 "|-----------|--------|--------|-------------|---------|",
             ]
         )
-        for candidate in candidates:
+        for attempt in attempts:
             lines.append(
                 "| "
-                f"{candidate.id} | {candidate.status} | {candidate.branch or '-'} | "
-                f"{candidate.head_commit or '-'} | {candidate.summary} |"
+                f"{attempt.id} | {attempt.status} | {attempt.branch or '-'} | "
+                f"{attempt.head_commit or '-'} | {attempt.summary} |"
             )
     else:
-        lines.append("No candidates were registered.")
+        lines.append("No attempts were registered.")
 
     lines.extend(["", "## Evaluations", ""])
     if evaluations:
         lines.extend(
             [
-                "| Candidate | Type | Status | Score | Command | Failure Reason |",
+                "| Attempt | Type | Status | Score | Command | Failure Reason |",
                 "|-----------|------|--------|-------|---------|----------------|",
             ]
         )
@@ -69,28 +69,28 @@ def generate_markdown_report(registry: Registry, run_id: int, output_path: Path)
             score = "" if evaluation["score"] is None else str(evaluation["score"])
             lines.append(
                 "| "
-                f"{evaluation['candidate_id']} | {evaluation['type']} | {evaluation['status']} | "
+                f"{evaluation['attempt_id']} | {evaluation['type']} | {evaluation['status']} | "
                 f"{score or '-'} | {evaluation['command'] or '-'} | {evaluation['failure_reason'] or '-'} |"
             )
     else:
         lines.append("No evaluations were recorded.")
 
-    lines.extend(["", "## Candidate Comparison", ""])
+    lines.extend(["", "## Attempt Comparison", ""])
     if comparison:
         lines.extend(
             [
-                "| Rank | Candidate | Passing Evaluations | Failing Evaluations | Summary |",
+                "| Rank | Attempt | Passing Evaluations | Failing Evaluations | Summary |",
                 "|------|-----------|---------------------|---------------------|---------|",
             ]
         )
-        for index, candidate in enumerate(comparison, start=1):
+        for index, attempt in enumerate(comparison, start=1):
             lines.append(
                 "| "
-                f"{index} | {candidate['id']} | {candidate['passing_evaluations']} | "
-                f"{candidate['failing_evaluations']} | {candidate['summary']} |"
+                f"{index} | {attempt['id']} | {attempt['passing_evaluations']} | "
+                f"{attempt['failing_evaluations']} | {attempt['summary']} |"
             )
     else:
-        lines.append("No candidates are available to compare.")
+        lines.append("No attempts are available to compare.")
 
     lines.extend(["", "## Costs", ""])
     if costs:
@@ -101,7 +101,7 @@ def generate_markdown_report(registry: Registry, run_id: int, output_path: Path)
             ]
         )
         for cost in costs:
-            scope = f"candidate {cost.candidate_id}" if cost.candidate_id else f"run {cost.run_id}"
+            scope = f"attempt {cost.attempt_id}" if cost.attempt_id else f"run {cost.run_id}"
             lines.append(
                 "| "
                 f"{scope} | {cost.agent or '-'} | {cost.model or '-'} | "
@@ -114,47 +114,47 @@ def generate_markdown_report(registry: Registry, run_id: int, output_path: Path)
     else:
         lines.append("No costs were recorded.")
 
-    lines.extend(["", "## Candidate Lineage", ""])
+    lines.extend(["", "## Attempt Lineage", ""])
     if lineage:
         lines.extend(
             [
-                "| Candidate | Relationship | Related Candidate | Note |",
+                "| Attempt | Relationship | Related Attempt | Note |",
                 "|-----------|--------------|-------------------|------|",
             ]
         )
         for item in lineage:
             lines.append(
                 "| "
-                f"{item.candidate_id} | {item.relationship} | {item.related_candidate_id or '-'} | "
+                f"{item.attempt_id} | {item.relationship} | {item.related_attempt_id or '-'} | "
                 f"{item.note or '-'} |"
             )
     else:
-        lines.append("No candidate lineage was recorded.")
+        lines.append("No attempt lineage was recorded.")
 
     lines.extend(["", "## Human Decisions", ""])
     if decisions:
         lines.extend(
             [
-                "| Decision | Candidate | Actor | Rationale | Created |",
+                "| Decision | Attempt | Actor | Rationale | Created |",
                 "|----------|-----------|-------|-----------|---------|",
             ]
         )
         for decision in decisions:
             lines.append(
                 "| "
-                f"{decision.decision_type} | {decision.candidate_id or '-'} | "
+                f"{decision.decision_type} | {decision.attempt_id or '-'} | "
                 f"{decision.actor or '-'} | {decision.rationale or '-'} | {decision.created_at} |"
             )
     else:
         lines.append("No human decisions were recorded.")
 
-    recommendation = "Review candidates and record a human promotion or rejection decision."
+    recommendation = "Review attempts and record a human promotion or rejection decision."
     if comparison:
         best = comparison[0]
         if best["failing_evaluations"] == 0 and best["passing_evaluations"] > 0:
-            recommendation = f"Candidate {best['id']} is the highest-ranked candidate without recorded failing evaluations."
+            recommendation = f"Attempt {best['id']} is the highest-ranked attempt without recorded failing evaluations."
         else:
-            recommendation = "No candidate is ready for promotion; all evaluated candidates have failures."
+            recommendation = "No attempt is ready for promotion; all evaluated attempts have failures."
 
     lines.extend(
         [
@@ -173,7 +173,7 @@ def generate_markdown_report(registry: Registry, run_id: int, output_path: Path)
             "## Next Actions",
             "",
             "- Record a human decision.",
-            "- Promote the chosen candidate to a PR-ready branch or reject all candidates with reasons.",
+            "- Promote the chosen attempt to a PR-ready branch or reject all attempts with reasons.",
             "- Run meta-analysis if repeated failures reveal missing docs, weak tests, or policy gaps.",
             "",
         ]

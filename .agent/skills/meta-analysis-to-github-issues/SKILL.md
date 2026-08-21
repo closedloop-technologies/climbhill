@@ -11,7 +11,7 @@ Use this skill to convert experiment-tree findings into concrete GitHub issue pr
 
 - Experiment-tree analysis
 - Run IDs
-- Candidate IDs
+- Attempt IDs
 - Failure evidence
 - Relevant resources or reports
 
@@ -20,7 +20,7 @@ Use this skill to convert experiment-tree findings into concrete GitHub issue pr
 1. Select only findings with concrete evidence.
 2. Write one issue per actionable repo improvement.
 3. Include problem, evidence, suggested implementation, acceptance criteria, risk level, and labels.
-4. Link or name the source run IDs and candidate IDs.
+4. Link or name the source run IDs and attempt IDs.
 5. Store the issue proposal in the registry.
 6. Export issue proposal Markdown for human review.
 

@@ -12,29 +12,25 @@ with YAML frontmatter. Every non-reserved Markdown file is a concept and must
 have a non-empty `type`; `index.md` and `log.md` are reserved filenames.
 
 For a research workspace, keep the conformant OKF bundle separate from its
-non-OKF control artifacts. The selected control repository owns the job data:
+non-OKF control artifacts. The selected control repository owns the evidence:
 
 ```text
 <control-repository>/
 └── .climbhill/
-    └── <job-slug>-<uuid-suffix>/
-        ├── job.yaml             # target, control, objective, and budgets
-        ├── research/
-        │   ├── raw/             # immutable evidence; not an OKF bundle
-        │   └── okf/             # conformant, versionable knowledge bundle
-        │       ├── index.md
-        │       ├── log.md
-        │       ├── resources/
-        │       ├── observations/
-        │       ├── entities/
-        │       ├── claims/
-        │       ├── relationships/
-        │       ├── topics/
-        │       ├── reports/
-        │       └── method.md
-        ├── runs/                # recursive plans, candidates, and decisions
-        └── cache/
-            └── registry.sqlite  # rebuildable query cache; not canonical
+    └── research/
+        ├── raw/             # immutable evidence; not an OKF bundle
+        ├── okf/             # conformant, versionable knowledge bundle
+        │   ├── index.md
+        │   ├── log.md
+        │   ├── resources/
+        │   ├── observations/
+        │   ├── entities/
+        │   ├── claims/
+        │   ├── relationships/
+        │   ├── topics/
+        │   ├── reports/
+        │   └── method.md
+        └── snapshots/       # immutable manifests pinned by Runs
 ```
 
 `raw/` is deliberately immutable evidence, rather than an OKF concept tree:
@@ -68,34 +64,28 @@ retrieval metadata. Store hashes and retrieval-specific fields as producer
 extensions: OKF allows unknown frontmatter keys and requires consumers to
 preserve them.
 
-## Job and CLI Contract
+## Run and CLI Contract
 
-`climbhill init` initializes one globally unique job for one target Git
-repository. The human-readable job slug receives a UUID-style suffix. Its
-storage interface is:
+Research does not require a Job. `climbhill init` creates repository support
+files, while `climbhill add`, `climbhill derive`, `climbhill graph build`, and
+`climbhill research` populate the control repository's research workspace.
+A standalone Run pins a research snapshot by control commit plus manifest path.
+An optional Job may supply defaults or group descendant Runs, but it does not
+own the evidence or participate in engine correctness.
 
-```text
-climbhill init --target <repo> --control <repo> --location <worktree-base> --job <slug>
-```
+The target repository contains the Focus being optimized. The control
+repository contains Run records, evaluation definitions, policy, and research.
+Those roles may point to the same Git repository or different repositories.
+Their identities are Git commits and repository-relative paths, never local
+checkout paths.
 
-`--target` selects the repository being improved. `--control` selects the Git
-repository that persists `.climbhill/<job-id>/`. `--location` selects the local
-base directory for the control worktree and is not committed as part of the
-portable job identity.
+Initialization does not create a worktree. `climbhill assess` records whether
+worktrees, isolated clones, containers, sequential in-place execution, or
+manual execution are supported. Each Run pins the selected execution adapter.
 
-When target and control are different repositories, the second repository is
-the independent control plane. When they resolve to the same Git repository,
-ClimbHill operates in recursive self-control (Ouroboros) mode: it creates the
-long-lived branch `climbhill/<job-id>` and checks it out in a separate worktree
-under `<location>/<job-id>/`. Research, runs, and other control state are committed
-on that branch under `.climbhill/<job-id>/`, while the primary target worktree
-remains on its implementation branch. The target records the portable job ID,
-control repository identity, and control branch, never the absolute worktree
-path.
-
-The version-controlled filesystem is canonical. `cache/registry.sqlite` is a
-rebuildable local index and should be ignored by Git rather than treated as the
-source of truth for recursive history.
+The version-controlled filesystem is canonical. Any SQLite registry is a
+rebuildable local index and must not be treated as the source of truth for
+recursive history.
 
 The primary workflow is deliberately explicit:
 
@@ -120,7 +110,7 @@ climbhill init -> climbhill add -> climbhill derive -> climbhill graph build -> 
   new retrieval. API-cost and wall-time budgets stop cleanly rather than
   discarding work in progress.
 
-The control repository configures `.climbhill/<job-id>/research/raw/**` for Git
+The control repository configures `.climbhill/research/raw/**` for Git
 LFS when Git LFS is available. When it is unavailable, initialization adds the
 raw directory to `.gitignore` and writes a visible note explaining that raw
 evidence is local only and how to switch to Git LFS later. Users may delete
@@ -195,7 +185,7 @@ not to inflate the confidence of a statement:
 | Apply | procedures, workflows, implementation steps | preserve ordering and prerequisites |
 | Analyze | relationships, comparisons, assumptions, causal claims | represent links to supporting claims separately |
 | Evaluate | tips, best practices, tradeoffs, limitations | retain attribution; do not promote advice to fact |
-| Create | research gaps, follow-up questions, synthesis/report candidates | mark as agent-derived and cite the supporting concepts |
+| Create | research gaps, follow-up questions, proposed syntheses and reports | mark as agent-derived and cite the supporting concepts |
 
 This turns the existing YouTube instruction into an OKF-compatible contract:
 extract entities and relationships; key facts and opinions; procedural

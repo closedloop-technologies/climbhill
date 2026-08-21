@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS runs (
     created_at TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS candidates (
+CREATE TABLE IF NOT EXISTS attempts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     run_id INTEGER NOT NULL,
     summary TEXT NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS candidates (
 
 CREATE TABLE IF NOT EXISTS evaluations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    candidate_id INTEGER NOT NULL,
+    attempt_id INTEGER NOT NULL,
     type TEXT NOT NULL,
     command TEXT,
     status TEXT NOT NULL,
@@ -40,13 +40,13 @@ CREATE TABLE IF NOT EXISTS evaluations (
     logs_path TEXT,
     failure_reason TEXT,
     created_at TEXT NOT NULL,
-    FOREIGN KEY(candidate_id) REFERENCES candidates(id)
+    FOREIGN KEY(attempt_id) REFERENCES attempts(id)
 );
 
 CREATE TABLE IF NOT EXISTS costs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     run_id INTEGER,
-    candidate_id INTEGER,
+    attempt_id INTEGER,
     agent TEXT,
     model TEXT,
     input_tokens INTEGER,
@@ -54,27 +54,32 @@ CREATE TABLE IF NOT EXISTS costs (
     tool_calls INTEGER,
     wall_clock_seconds REAL,
     estimated_usd REAL,
-    created_at TEXT NOT NULL
+    created_at TEXT NOT NULL,
+    FOREIGN KEY(run_id) REFERENCES runs(id),
+    FOREIGN KEY(attempt_id) REFERENCES attempts(id)
 );
 
-CREATE TABLE IF NOT EXISTS candidate_lineage (
+CREATE TABLE IF NOT EXISTS attempt_lineage (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    candidate_id INTEGER NOT NULL,
+    attempt_id INTEGER NOT NULL,
     relationship TEXT NOT NULL,
-    related_candidate_id INTEGER,
+    related_attempt_id INTEGER,
     note TEXT,
     created_at TEXT NOT NULL,
-    FOREIGN KEY(candidate_id) REFERENCES candidates(id)
+    FOREIGN KEY(attempt_id) REFERENCES attempts(id),
+    FOREIGN KEY(related_attempt_id) REFERENCES attempts(id)
 );
 
 CREATE TABLE IF NOT EXISTS decisions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     run_id INTEGER NOT NULL,
-    candidate_id INTEGER,
+    attempt_id INTEGER,
     decision_type TEXT NOT NULL,
     rationale TEXT,
     actor TEXT,
-    created_at TEXT NOT NULL
+    created_at TEXT NOT NULL,
+    FOREIGN KEY(run_id) REFERENCES runs(id),
+    FOREIGN KEY(attempt_id) REFERENCES attempts(id)
 );
 
 CREATE TABLE IF NOT EXISTS reports (
@@ -84,7 +89,8 @@ CREATE TABLE IF NOT EXISTS reports (
     format TEXT NOT NULL,
     summary TEXT,
     recommendation TEXT,
-    created_at TEXT NOT NULL
+    created_at TEXT NOT NULL,
+    FOREIGN KEY(run_id) REFERENCES runs(id)
 );
 
 CREATE TABLE IF NOT EXISTS issue_proposals (
@@ -95,7 +101,7 @@ CREATE TABLE IF NOT EXISTS issue_proposals (
     priority TEXT,
     evidence TEXT,
     source_run_ids TEXT,
-    source_candidate_ids TEXT,
+    source_attempt_ids TEXT,
     created_at TEXT NOT NULL
 );
 """
@@ -116,7 +122,7 @@ class RunRecord:
 
 
 @dataclass(frozen=True)
-class CandidateRecord:
+class AttemptRecord:
     id: int
     run_id: int
     summary: str
@@ -132,7 +138,7 @@ class CandidateRecord:
 class CostRecord:
     id: int
     run_id: int | None
-    candidate_id: int | None
+    attempt_id: int | None
     agent: str
     model: str
     input_tokens: int | None
@@ -146,9 +152,9 @@ class CostRecord:
 @dataclass(frozen=True)
 class LineageRecord:
     id: int
-    candidate_id: int
+    attempt_id: int
     relationship: str
-    related_candidate_id: int | None
+    related_attempt_id: int | None
     note: str
     created_at: str
 
@@ -157,7 +163,7 @@ class LineageRecord:
 class DecisionRecord:
     id: int
     run_id: int
-    candidate_id: int | None
+    attempt_id: int | None
     decision_type: str
     rationale: str
     actor: str
@@ -173,7 +179,7 @@ class IssueProposalRecord:
     priority: str
     evidence: str
     source_run_ids: str
-    source_candidate_ids: str
+    source_attempt_ids: str
     created_at: str
 
 
@@ -183,6 +189,7 @@ class Registry:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.connection = sqlite3.connect(self.path)
         self.connection.row_factory = sqlite3.Row
+        self.connection.execute("PRAGMA foreign_keys = ON")
         self.connection.executescript(SCHEMA)
         self.connection.commit()
 
@@ -207,7 +214,7 @@ class Registry:
         rows = self.connection.execute("SELECT * FROM runs ORDER BY id").fetchall()
         return [RunRecord(**dict(row)) for row in rows]
 
-    def register_candidate(
+    def register_attempt(
         self,
         run_id: int,
         summary: str,
@@ -220,7 +227,7 @@ class Registry:
     ) -> int:
         cursor = self.connection.execute(
             """
-            INSERT INTO candidates(
+            INSERT INTO attempts(
                 run_id, summary, branch, base_commit, head_commit, patch_path, status, created_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
@@ -229,39 +236,39 @@ class Registry:
         self.connection.commit()
         return int(cursor.lastrowid)
 
-    def list_candidates(self, run_id: int) -> List[CandidateRecord]:
+    def list_attempts(self, run_id: int) -> List[AttemptRecord]:
         rows = self.connection.execute(
-            "SELECT * FROM candidates WHERE run_id = ? ORDER BY id", (run_id,)
+            "SELECT * FROM attempts WHERE run_id = ? ORDER BY id", (run_id,)
         ).fetchall()
-        return [CandidateRecord(**dict(row)) for row in rows]
+        return [AttemptRecord(**dict(row)) for row in rows]
 
-    def get_candidate(self, candidate_id: int) -> Optional[CandidateRecord]:
-        row = self.connection.execute("SELECT * FROM candidates WHERE id = ?", (candidate_id,)).fetchone()
+    def get_attempt(self, attempt_id: int) -> Optional[AttemptRecord]:
+        row = self.connection.execute("SELECT * FROM attempts WHERE id = ?", (attempt_id,)).fetchone()
         if row is None:
             return None
-        return CandidateRecord(**dict(row))
+        return AttemptRecord(**dict(row))
 
-    def attach_candidate_patch(
+    def attach_attempt_patch(
         self,
-        candidate_id: int,
+        attempt_id: int,
         *,
         patch_path: str,
         head_commit: str = "",
         status: str | None = None,
     ) -> None:
-        candidate = self.get_candidate(candidate_id)
-        if candidate is None:
-            raise KeyError(f"Candidate {candidate_id} was not found.")
-        new_status = status if status is not None else candidate.status
+        attempt = self.get_attempt(attempt_id)
+        if attempt is None:
+            raise KeyError(f"Attempt {attempt_id} was not found.")
+        new_status = status if status is not None else attempt.status
         self.connection.execute(
-            "UPDATE candidates SET patch_path = ?, head_commit = ?, status = ? WHERE id = ?",
-            (patch_path, head_commit, new_status, candidate_id),
+            "UPDATE attempts SET patch_path = ?, head_commit = ?, status = ? WHERE id = ?",
+            (patch_path, head_commit, new_status, attempt_id),
         )
         self.connection.commit()
 
     def record_evaluation(
         self,
-        candidate_id: int,
+        attempt_id: int,
         evaluation_type: str,
         status: str,
         *,
@@ -273,10 +280,10 @@ class Registry:
         cursor = self.connection.execute(
             """
             INSERT INTO evaluations(
-                candidate_id, type, command, status, score, logs_path, failure_reason, created_at
+                attempt_id, type, command, status, score, logs_path, failure_reason, created_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (candidate_id, evaluation_type, command, status, score, logs_path, failure_reason, utc_now()),
+            (attempt_id, evaluation_type, command, status, score, logs_path, failure_reason, utc_now()),
         )
         self.connection.commit()
         return int(cursor.lastrowid)
@@ -286,34 +293,34 @@ class Registry:
         run_id: int,
         decision_type: str,
         *,
-        candidate_id: int | None = None,
+        attempt_id: int | None = None,
         rationale: str = "",
         actor: str = "",
     ) -> int:
         cursor = self.connection.execute(
             """
-            INSERT INTO decisions(run_id, candidate_id, decision_type, rationale, actor, created_at)
+            INSERT INTO decisions(run_id, attempt_id, decision_type, rationale, actor, created_at)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (run_id, candidate_id, decision_type, rationale, actor, utc_now()),
+            (run_id, attempt_id, decision_type, rationale, actor, utc_now()),
         )
         self.connection.commit()
         return int(cursor.lastrowid)
 
-    def list_evaluations_for_candidates(self, candidate_ids: Iterable[int]) -> List[sqlite3.Row]:
-        ids = list(candidate_ids)
+    def list_evaluations_for_attempts(self, attempt_ids: Iterable[int]) -> List[sqlite3.Row]:
+        ids = list(attempt_ids)
         if not ids:
             return []
         placeholders = ",".join("?" for _ in ids)
         return self.connection.execute(
-            f"SELECT * FROM evaluations WHERE candidate_id IN ({placeholders}) ORDER BY id", ids
+            f"SELECT * FROM evaluations WHERE attempt_id IN ({placeholders}) ORDER BY id", ids
         ).fetchall()
 
     def record_cost(
         self,
         *,
         run_id: int | None = None,
-        candidate_id: int | None = None,
+        attempt_id: int | None = None,
         agent: str = "",
         model: str = "",
         input_tokens: int | None = None,
@@ -325,13 +332,13 @@ class Registry:
         cursor = self.connection.execute(
             """
             INSERT INTO costs(
-                run_id, candidate_id, agent, model, input_tokens, output_tokens,
+                run_id, attempt_id, agent, model, input_tokens, output_tokens,
                 tool_calls, wall_clock_seconds, estimated_usd, created_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 run_id,
-                candidate_id,
+                attempt_id,
                 agent,
                 model,
                 input_tokens,
@@ -347,19 +354,19 @@ class Registry:
 
     def record_lineage(
         self,
-        candidate_id: int,
+        attempt_id: int,
         relationship: str,
         *,
-        related_candidate_id: int | None = None,
+        related_attempt_id: int | None = None,
         note: str = "",
     ) -> int:
         cursor = self.connection.execute(
             """
-            INSERT INTO candidate_lineage(
-                candidate_id, relationship, related_candidate_id, note, created_at
+            INSERT INTO attempt_lineage(
+                attempt_id, relationship, related_attempt_id, note, created_at
             ) VALUES (?, ?, ?, ?, ?)
             """,
-            (candidate_id, relationship, related_candidate_id, note, utc_now()),
+            (attempt_id, relationship, related_attempt_id, note, utc_now()),
         )
         self.connection.commit()
         return int(cursor.lastrowid)
@@ -367,11 +374,11 @@ class Registry:
     def list_lineage(self, run_id: int) -> List[LineageRecord]:
         rows = self.connection.execute(
             """
-            SELECT candidate_lineage.*
-            FROM candidate_lineage
-            JOIN candidates ON candidates.id = candidate_lineage.candidate_id
-            WHERE candidates.run_id = ?
-            ORDER BY candidate_lineage.id
+            SELECT attempt_lineage.*
+            FROM attempt_lineage
+            JOIN attempts ON attempts.id = attempt_lineage.attempt_id
+            WHERE attempts.run_id = ?
+            ORDER BY attempt_lineage.id
             """,
             (run_id,),
         ).fetchall()
@@ -379,8 +386,8 @@ class Registry:
 
     def list_costs(self, run_id: int) -> List[CostRecord]:
         rows = self.connection.execute(
-            "SELECT * FROM costs WHERE run_id = ? OR candidate_id IN "
-            "(SELECT id FROM candidates WHERE run_id = ?) ORDER BY id",
+            "SELECT * FROM costs WHERE run_id = ? OR attempt_id IN "
+            "(SELECT id FROM attempts WHERE run_id = ?) ORDER BY id",
             (run_id, run_id),
         ).fetchall()
         return [CostRecord(**dict(row)) for row in rows]
@@ -408,32 +415,32 @@ class Registry:
         rows = self.connection.execute("SELECT * FROM issue_proposals ORDER BY id").fetchall()
         return [IssueProposalRecord(**dict(row)) for row in rows]
 
-    def compare_candidates(self, run_id: int) -> List[dict]:
-        candidates = self.list_candidates(run_id)
-        evaluations = self.list_evaluations_for_candidates(candidate.id for candidate in candidates)
+    def compare_attempts(self, run_id: int) -> List[dict]:
+        attempts = self.list_attempts(run_id)
+        evaluations = self.list_evaluations_for_attempts(attempt.id for attempt in attempts)
         failures: dict[int, int] = {}
         passes: dict[int, int] = {}
         for evaluation in evaluations:
-            candidate_id = int(evaluation["candidate_id"])
+            attempt_id = int(evaluation["attempt_id"])
             if evaluation["status"] == "passed":
-                passes[candidate_id] = passes.get(candidate_id, 0) + 1
-            else:
-                failures[candidate_id] = failures.get(candidate_id, 0) + 1
+                passes[attempt_id] = passes.get(attempt_id, 0) + 1
+            elif evaluation["status"] == "failed":
+                failures[attempt_id] = failures.get(attempt_id, 0) + 1
         ranked = sorted(
-            candidates,
-            key=lambda candidate: (
-                failures.get(candidate.id, 0),
-                -passes.get(candidate.id, 0),
-                candidate.id,
+            attempts,
+            key=lambda attempt: (
+                failures.get(attempt.id, 0),
+                -passes.get(attempt.id, 0),
+                attempt.id,
             ),
         )
         return [
             {
-                **candidate.__dict__,
-                "passing_evaluations": passes.get(candidate.id, 0),
-                "failing_evaluations": failures.get(candidate.id, 0),
+                **attempt.__dict__,
+                "passing_evaluations": passes.get(attempt.id, 0),
+                "failing_evaluations": failures.get(attempt.id, 0),
             }
-            for candidate in ranked
+            for attempt in ranked
         ]
 
     def propose_issue(
@@ -445,15 +452,15 @@ class Registry:
         priority: str = "",
         evidence: str = "",
         source_run_ids: str = "",
-        source_candidate_ids: str = "",
+        source_attempt_ids: str = "",
     ) -> int:
         cursor = self.connection.execute(
             """
             INSERT INTO issue_proposals(
-                title, body, labels, priority, evidence, source_run_ids, source_candidate_ids, created_at
+                title, body, labels, priority, evidence, source_run_ids, source_attempt_ids, created_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (title, body, labels, priority, evidence, source_run_ids, source_candidate_ids, utc_now()),
+            (title, body, labels, priority, evidence, source_run_ids, source_attempt_ids, utc_now()),
         )
         self.connection.commit()
         return int(cursor.lastrowid)

@@ -34,6 +34,6 @@ Future ClimbHill implementation work should add tests for:
 - Policy path matching and protected-surface checks.
 - SQLite registry migrations and data integrity.
 - MCP tool request and response schemas.
-- CLI init, inspect, align, report, and reflect commands.
+- CLI init, prepare, report, and reflect commands.
 - Markdown report generation.
-- Historical sampling and candidate comparison logic.
+- Historical sampling and attempt comparison logic.

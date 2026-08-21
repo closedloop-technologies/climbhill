@@ -12,7 +12,7 @@ export interface RepositoryIdentity {
 export interface BudgetPolicy {
   maxApiCostUsd: number;
   maxWallTimeSeconds: number;
-  maxCandidateConcurrency: number;
+  maxAttemptConcurrency: number;
   maxResearchConcurrency: number;
 }
 
@@ -100,14 +100,14 @@ export interface RunRecord {
   controlCommit: string;
   researchSnapshotCommit?: string;
   parentRun?: string;
-  parentCandidate?: string;
+  parentAttempt?: string;
   inputs: Record<string, unknown>;
   outputs: string[];
   models: string[];
   prompts: string[];
   toolCalls: Array<Record<string, unknown>>;
   costs: { apiUsd: number; wallTimeSeconds: number };
-  candidates: string[];
+  attempts: string[];
   evaluations: string[];
   decisions: string[];
   reflections: string[];

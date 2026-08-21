@@ -29,9 +29,9 @@
     ],
     "websiteURL": "https://climbhill.ai",
     "defaultPrompt": [
-      "Inspect this repository for ClimbHill alignment.",
-      "Create a bounded candidate improvement run.",
-      "Compare recorded candidates and generate a report."
+      "Assess this repository for ClimbHill execution readiness.",
+      "Create a bounded improvement Run with multiple Attempts.",
+      "Compare recorded Attempts and generate a report."
     ],
     "brandColor": "#1F7A5A"
   }

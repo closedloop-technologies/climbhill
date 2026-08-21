@@ -51,7 +51,7 @@ function DeriveSource(content: string, resource_id: string, locator_guidance: st
     Extract named entities, dates, definitions, directly stated facts, attributed claims,
     opinions, explanations, terminology, procedures, prerequisites, ordered steps,
     relationships, comparisons, assumptions, causal claims, recommendations, practices,
-    tradeoffs, limitations, research gaps, follow-up questions, and synthesis candidates.
+    tradeoffs, limitations, research gaps, follow-up questions, and proposed syntheses.
 
     Do not reconcile entities or claims across sources. Do not invent evidence. Every
     observation must use an exact locator supported by the content. Relationship observations

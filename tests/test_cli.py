@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from climbhill.alignment import inspect_repo
+from climbhill.preparedness import inspect_preparedness
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from climbhill import cli
@@ -139,7 +139,7 @@ def test_ensure_output_dir_creates_directories(tmp_path: Path, monkeypatch, mode
     assert output_dir.is_dir()
 
 
-def test_init_creates_alignment_files_and_registry(tmp_path: Path):
+def test_init_creates_repository_support_files_and_registry(tmp_path: Path):
     result = cli.main(["init", "--repo", str(tmp_path)])
 
     assert result == 0
@@ -150,7 +150,7 @@ def test_init_creates_alignment_files_and_registry(tmp_path: Path):
     assert (tmp_path / ".github" / "pull_request_template.md").exists()
     assert (tmp_path / "resources" / "postmortems").is_dir()
 
-    report = inspect_repo(tmp_path)
+    report = inspect_preparedness(tmp_path)
     assert "goal.md" in report.present
     assert ".climbhill/policy.yaml" in report.present
 
@@ -170,7 +170,7 @@ def test_policy_check_classifies_allowed_denied_and_approval_paths(tmp_path: Pat
 
 def test_policy_check_accepts_patch_files(tmp_path: Path):
     cli.main(["init", "--repo", str(tmp_path)])
-    patch = tmp_path / "candidate.patch"
+    patch = tmp_path / "attempt.patch"
     patch.write_text(
         "\n".join(
             [
@@ -202,13 +202,13 @@ def test_registry_and_report_flow(tmp_path: Path):
                 "registry",
                 "--repo",
                 str(tmp_path),
-                "register-candidate",
+                "register-attempt",
                 "--run-id",
                 "1",
                 "--summary",
                 "Documented setup",
                 "--branch",
-                "climbhill/run-1/candidate-1",
+                "climbhill/run-1/attempt-1",
             ]
         )
         == 0
@@ -220,7 +220,7 @@ def test_registry_and_report_flow(tmp_path: Path):
                 "--repo",
                 str(tmp_path),
                 "record-evaluation",
-                "--candidate-id",
+                "--attempt-id",
                 "1",
                 "--type",
                 "test",
@@ -253,7 +253,7 @@ def test_run_compare_cost_lineage_decision_and_reflect_flow(tmp_path: Path):
                 str(tmp_path),
                 "--goal",
                 "Improve policy docs",
-                "--candidates",
+                "--attempts",
                 "2",
             ]
         )
@@ -266,7 +266,7 @@ def test_run_compare_cost_lineage_decision_and_reflect_flow(tmp_path: Path):
                 "--repo",
                 str(tmp_path),
                 "record-evaluation",
-                "--candidate-id",
+                "--attempt-id",
                 "1",
                 "--type",
                 "test",
@@ -285,7 +285,7 @@ def test_run_compare_cost_lineage_decision_and_reflect_flow(tmp_path: Path):
                 "--repo",
                 str(tmp_path),
                 "record-evaluation",
-                "--candidate-id",
+                "--attempt-id",
                 "2",
                 "--type",
                 "test",
@@ -325,11 +325,11 @@ def test_run_compare_cost_lineage_decision_and_reflect_flow(tmp_path: Path):
                 "--repo",
                 str(tmp_path),
                 "record-lineage",
-                "--candidate-id",
+                "--attempt-id",
                 "2",
                 "--relationship",
                 "inspired_by",
-                "--related-candidate-id",
+                "--related-attempt-id",
                 "1",
                 "--note",
                 "Kept docs idea but fixed test gap.",
@@ -345,12 +345,12 @@ def test_run_compare_cost_lineage_decision_and_reflect_flow(tmp_path: Path):
                 str(tmp_path),
                 "--run-id",
                 "1",
-                "--candidate-id",
+                "--attempt-id",
                 "2",
                 "--type",
                 "promote",
                 "--rationale",
-                "Only passing candidate.",
+                "Only passing attempt.",
                 "--actor",
                 "maintainer",
             ]
@@ -367,16 +367,16 @@ def test_run_compare_cost_lineage_decision_and_reflect_flow(tmp_path: Path):
     assert issue_files
     report = (tmp_path / ".climbhill" / "reports" / "run-1.md").read_text(encoding="utf-8")
     assert "## Costs" in report
-    assert "## Candidate Lineage" in report
+    assert "## Attempt Lineage" in report
     assert "## Human Decisions" in report
-    assert "Candidate 2" in report
+    assert "Attempt 2" in report
 
 
 def test_resource_add_and_search(tmp_path: Path):
     path = add_resource(
         tmp_path,
         "Useful Failure Pattern",
-        summary="Candidates repeatedly forgot policy checks before editing tests.",
+        summary="Attempts repeatedly forgot policy checks before editing tests.",
         source="run report",
         author="Maintainer",
         date="2026-07-08",
@@ -399,15 +399,15 @@ def test_registry_records_decisions_and_issue_proposals(tmp_path: Path):
     registry = Registry(tmp_path / ".climbhill" / "registry.local.sqlite")
     try:
         run_id = registry.create_run("Improve safety docs", tmp_path)
-        candidate_id = registry.register_candidate(run_id, "Add policy examples")
+        attempt_id = registry.register_attempt(run_id, "Add policy examples")
         lineage_id = registry.record_lineage(
-            candidate_id,
+            attempt_id,
             "inspired_by",
-            note="Based on a prior failed candidate.",
+            note="Based on a prior failed attempt.",
         )
         cost_id = registry.record_cost(
             run_id=run_id,
-            candidate_id=candidate_id,
+            attempt_id=attempt_id,
             agent="codex",
             model="gpt-5",
             estimated_usd=0.01,
@@ -415,7 +415,7 @@ def test_registry_records_decisions_and_issue_proposals(tmp_path: Path):
         decision_id = registry.record_decision(
             run_id,
             "reject",
-            candidate_id=candidate_id,
+            attempt_id=attempt_id,
             rationale="Needs stronger tests.",
             actor="maintainer",
         )
@@ -424,9 +424,9 @@ def test_registry_records_decisions_and_issue_proposals(tmp_path: Path):
             "Policy matching needs more edge-case coverage.",
             labels="testing,policy",
             priority="high",
-            evidence="candidate failed due to missing path coverage",
+            evidence="attempt failed due to missing path coverage",
             source_run_ids=str(run_id),
-            source_candidate_ids=str(candidate_id),
+            source_attempt_ids=str(attempt_id),
         )
     finally:
         registry.close()
@@ -446,8 +446,7 @@ def test_mcp_tool_surface_when_sdk_is_available():
         tools = await server.mcp.list_tools()
         names = {tool.name for tool in tools}
         required = {
-            "climbhill.repo.inspect",
-            "climbhill.repo.align",
+            "climbhill.repo.prepare",
             "climbhill.policy.read",
             "climbhill.policy.check_patch",
             "climbhill.resources.search",
@@ -455,11 +454,11 @@ def test_mcp_tool_surface_when_sdk_is_available():
             "climbhill.runs.create",
             "climbhill.runs.get",
             "climbhill.runs.list",
-            "climbhill.candidates.register",
-            "climbhill.candidates.attach_patch",
-            "climbhill.candidates.evaluate",
-            "climbhill.candidates.compare",
-            "climbhill.candidates.record_lineage",
+            "climbhill.attempts.register",
+            "climbhill.attempts.attach_patch",
+            "climbhill.attempts.evaluate",
+            "climbhill.attempts.compare",
+            "climbhill.attempts.record_lineage",
             "climbhill.costs.record",
             "climbhill.history.sample",
             "climbhill.reports.generate",
@@ -467,8 +466,8 @@ def test_mcp_tool_surface_when_sdk_is_available():
             "climbhill.issues.propose",
         }
         assert required <= names
-        _, structured = await server.mcp.call_tool("climbhill.repo.inspect", {"repo": "."})
-        assert structured["result"]["aligned"] is True
+        _, structured = await server.mcp.call_tool("climbhill.repo.prepare", {"repo": "."})
+        assert structured["result"]["prepared"] is True
 
     anyio.run(check_tools)
 

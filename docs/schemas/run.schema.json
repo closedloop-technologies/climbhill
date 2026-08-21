@@ -15,7 +15,7 @@
     "controlCommit": { "type": "string" },
     "researchSnapshotCommit": { "type": "string" },
     "parentRun": { "type": "string" },
-    "parentCandidate": { "type": "string" },
+    "parentAttempt": { "type": "string" },
     "inputs": { "type": "object" },
     "outputs": { "type": "array" },
     "costs": {

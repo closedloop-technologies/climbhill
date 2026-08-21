@@ -21,18 +21,18 @@ Use this skill to ground code changes in `resources/` entries and cited prior wo
 3. Summarize the resources that affect the planned edit.
 4. If a useful source is missing, add it through the resource ingestion workflow before relying on it.
 5. Implement changes that are traceable to the selected resources.
-6. Record resource paths in the candidate summary or report.
+6. Record resource paths in the attempt summary or report.
 
 ## Outputs
 
 - Resource list
 - Trust notes
 - Implementation plan
-- Candidate summary with resource references
+- Attempt summary with resource references
 
 ## Rubric
 
 - Important claims are grounded in recorded resources.
 - Untrusted resources are treated cautiously.
 - New resources include source, summary, tags, trust level, and reason added.
-- The candidate report explains how resources influenced the change.
+- The attempt report explains how resources influenced the change.
