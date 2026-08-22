@@ -6,6 +6,9 @@ docs, runnable scripts, requirements, and tests live here and are registered in
 
 ## Current Skills
 
+- `reasoning` - evidence-oriented reasoning primitives and reusable workflows for
+  resolving uncertainty with experiments, evidence review, discovery, smoke
+  tests, value-path design, and falsification.
 - `deep-research-api-calls` - provider call patterns, API-key expectations,
   cost controls, and 1Password environment guidance.
 - `deep-research-okf-normalize` - convert a deep research output into an Open
