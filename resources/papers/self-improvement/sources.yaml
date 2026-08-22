@@ -1,0 +1,58 @@
+version: 1
+retrieved: 2026-08-22
+papers:
+  - arxiv: "2608.18066"
+    slug: fragility
+    title: "On the Fragility of Self-Improving Agents: Variance, Task Order, and Underspecification"
+    tier: foundation
+    pdf: "https://arxiv.org/pdf/2608.18066"
+  - arxiv: "2606.19980"
+    slug: enpire
+    title: "ENPIRE: Agentic Robot Policy Self-Improvement in the Real World"
+    tier: foundation
+    pdf: "https://arxiv.org/pdf/2606.19980"
+  - arxiv: "2608.16590"
+    slug: zetta
+    title: "Zetta ζ: An Efficient Closed-Loop Embodied Harness for Self-Evolving Physical Intelligence"
+    tier: foundation
+    pdf: "https://arxiv.org/pdf/2608.16590"
+  - arxiv: "2607.07663"
+    slug: recursive-self-improvement
+    title: "Recursive Self-Improvement in AI: From Bounded Self-Refinement to Autonomous Research Loops"
+    tier: essential
+    pdf: "https://arxiv.org/pdf/2607.07663"
+  - arxiv: "2608.16859"
+    slug: harnesseval-w
+    title: "HarnessEval-W: Agentifying the Evaluation of Visual Worlds"
+    tier: architecture
+    pdf: "https://arxiv.org/pdf/2608.16859"
+  - arxiv: "2608.17588"
+    slug: truss
+    title: "TRUSS: Towards Task-Reliable and User-Safe Automated Agent Skill Generation"
+    tier: architecture
+    pdf: "https://arxiv.org/pdf/2608.17588"
+  - arxiv: "2607.01942"
+    slug: atomic-task-graph
+    title: "Atomic Task Graph: A Unified Framework for Agentic Planning and Execution"
+    tier: architecture
+    pdf: "https://arxiv.org/pdf/2607.01942"
+  - arxiv: "2608.16889"
+    slug: baton
+    title: "Don't Drop the BATON: Long-Horizon Robot Manipulation via Agentic Subtask Exploration and Transition-aware Memory"
+    tier: architecture
+    pdf: "https://arxiv.org/pdf/2608.16889"
+  - arxiv: "2608.16055"
+    slug: governance-boundary
+    title: "Governance at the Boundary: How Agent Decomposition Degrades Policy Compliance"
+    tier: multi-agent
+    pdf: "https://arxiv.org/pdf/2608.16055"
+  - arxiv: "2608.16246"
+    slug: composkill
+    title: "CompoSkill: Compositional Skill Chain Attacks from Individually Scanner-Passing LLM Agent Skills"
+    tier: multi-agent
+    pdf: "https://arxiv.org/pdf/2608.16246"
+  - arxiv: "2608.16071"
+    slug: skill2query
+    title: "Skill2Query: Exploiting Skill Structure to Generate Pseudo-Queries for Agent Skill Retrieval"
+    tier: multi-agent
+    pdf: "https://arxiv.org/pdf/2608.16071"
