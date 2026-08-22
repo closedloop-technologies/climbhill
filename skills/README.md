@@ -6,3 +6,6 @@ Plugin package.
 
 The benchmark discovers runnable scripts from `.agents/skills`; this directory
 is packaged for the Codex Plugin.
+
+Instruction-only workflow skills, including `notagenius` and `reasoning`, are
+mirrored here even when they have no benchmark command.

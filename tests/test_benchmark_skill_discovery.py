@@ -68,6 +68,14 @@ def test_unknown_skill_does_not_get_implicit_benchmark_fallback():
         get_skill_command_info("new-unregistered-skill")
 
 
+def test_notagenius_is_registered_as_documentation_only():
+    command_info = get_skill_command_info("notagenius")
+
+    assert command_info["documentation_only"] is True
+    assert command_info["command"] == ""
+    assert command_info["supports_query"] is False
+
+
 def test_you_and_gemini_commands_are_registered_for_under_one_dollar_defaults():
     you_command = get_skill_command_info("deep-research-you")["command"]
     gemini_command = get_skill_command_info("deep-research-gemini")["command"]

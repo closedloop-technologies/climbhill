@@ -6,6 +6,9 @@ docs, runnable scripts, requirements, and tests live here and are registered in
 
 ## Current Skills
 
+- `notagenius` - portable idea-to-validated-service methodology plus a ClimbHill
+  execution adapter for JTBD discovery, evidence, bets, experiments, service
+  economics, outcome measurement, and falsification.
 - `reasoning` - evidence-oriented reasoning primitives and reusable workflows for
   resolving uncertainty with experiments, evidence review, discovery, smoke
   tests, value-path design, and falsification.
@@ -42,3 +45,6 @@ tree so benchmark and fan-out commands use the supported agent skill paths.
    dependencies.
 5. Keep benchmark prompts and runtime defaults below the documented `$1` per
    call budget.
+
+Instruction-only skills without a runnable provider command are registered as
+documentation-only and receive a validation-focused tox environment.

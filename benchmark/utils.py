@@ -11,6 +11,11 @@ PREFERRED_MAIN_SCRIPTS = {
 }
 
 SKILL_COMMAND_INFO = {
+    "notagenius": {
+        "command": "",
+        "supports_query": False,
+        "documentation_only": True,
+    },
     "deep-research-exa": {
         "command": "python {script} search {question} --num-results 5 --highlights",
         "supports_query": True,
@@ -184,7 +189,8 @@ def get_skill_command_info(skill_name: str) -> Dict[str, str]:
     Get the command-line interface information for a specific skill.
     
     Returns:
-        Dictionary with command template and parameter mappings
+        Dictionary with command template and parameter mappings. Instruction-only
+        skills return an empty command and ``documentation_only=True``.
     """
     if skill_name not in SKILL_COMMAND_INFO:
         raise KeyError(f"No benchmark command registered for skill: {skill_name}")
